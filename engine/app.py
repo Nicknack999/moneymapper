@@ -8,6 +8,10 @@ from full_model import run_full_model
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/")
+def home():
+    return "MoneyMapper API is running 🚀"
+
 
 @app.route("/student-loan", methods=["POST"])
 def student_loan():
