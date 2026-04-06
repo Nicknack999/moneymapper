@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-from engine.student_loan import calculate_loan
-from engine.forecast import run_forecast
-from engine.full_model import run_full_model
+from student_loan import calculate_loan
+from forecast import run_forecast
+from full_model import run_full_model
 
 app = Flask(__name__)
 CORS(app)
