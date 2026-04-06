@@ -1,8 +1,8 @@
 # engine/full_model.py
 
-from engine.student_loan import calculate_loan, generate_salary_curve
-from engine.forecast import run_forecast
-from engine.break_even import find_break_even_overpay
+from student_loan import calculate_loan, generate_salary_curve
+from forecast import run_forecast
+from break_even import find_break_even_overpay
 
 
 # --------------------------------------------------

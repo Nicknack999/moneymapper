@@ -1,4 +1,4 @@
-from engine.student_loan import annual_loan_repayment, apply_loan_year
+from student_loan import annual_loan_repayment, apply_loan_year
 
 
 def run_forecast(data):
