@@ -101,13 +101,13 @@ export default function StudentLoanTool() {
   // -----------------------------
 // MAX ADVANTAGE
 // -----------------------------
-let maxAdvantage = null;
+let maxAdvantage = 0;
 let maxAdvantageAge = null;
 
 for (let i = 0; i < ages.length; i++) {
   const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
 
-  if (maxAdvantage === null || Math.abs(gap) > Math.abs(maxAdvantage)) {
+  if (Math.abs(gap) > Math.abs(maxAdvantage)) {
     maxAdvantage = gap;
     maxAdvantageAge = ages[i];
   }
@@ -260,11 +260,23 @@ for (let i = 0; i < ages.length; i++) {
                 ? "#fef3c7"
                 : "#f3f4f6"
           }}>
-            <strong>✅ Recommendation: {recommendation}</strong>
+            <div>
+            <strong>💡 What this suggests</strong>
+            <div style={{ marginTop: "6px" }}>
+              {recommendation === "Invest instead of overpaying" &&
+                "Based on your inputs, investing appears to lead to better long-term outcomes than overpaying your loan."}
+
+              {recommendation === "Overpay your loan" &&
+                "Based on your inputs, overpaying your loan appears to lead to better overall outcomes than investing."}
+
+              {recommendation === "Either option is broadly similar" &&
+                "Based on your inputs, both options lead to broadly similar outcomes."}
+            </div>
+          </div>
 
             {decisionStrength === "strong" && (
               <div style={{ marginTop: 6, color: "#059669" }}>
-                Strong decision under current assumptions
+                This result is strong under the current assumptions
               </div>
             )}
 
@@ -341,8 +353,8 @@ for (let i = 0; i < ages.length; i++) {
           }}>
             <strong>⚠️ Important context</strong>
             <div style={{ marginTop: "4px" }}>
-              We built this tool to help our own family understand student loan decisions, especially when our daughter considered going to university. 
-              We hope you find it useful, but please note it is designed to guide thinking and does not constitute financial advice.
+              We built this tool to help our own family understand student loan decisions. 
+              It's designed to guide thinking and explore scenarios, not to provide financial advice.
             </div>
           </div>
 
