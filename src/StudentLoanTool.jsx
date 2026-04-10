@@ -112,6 +112,21 @@ for (let i = 0; i < ages.length; i++) {
     maxAdvantageAge = ages[i];
   }
 }
+
+// -----------------------------
+// MEANINGFUL GAP
+// -----------------------------
+let meaningfulAge = null;
+const threshold = 10000;
+
+for (let i = 0; i < ages.length; i++) {
+  const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
+
+  if (Math.abs(gap) >= threshold) {
+    meaningfulAge = ages[i];
+    break;
+  }
+}
   // -----------------------------
   // DECISION
   // -----------------------------
@@ -171,6 +186,9 @@ for (let i = 0; i < ages.length; i++) {
   let insightRepayment = "";
   let insightTrigger = "";
   let insightCrossover = "";
+  let insightMeaningful = "";
+  let insightAcceleration = "";
+  let insightSensitivity = "";
 
   if (wealthDiff !== null) {
     insightOutcome =
@@ -193,6 +211,25 @@ for (let i = 0; i < ages.length; i++) {
     insightCrossover = `You start to come out ahead from around age ${crossoverAge}`;
   }
 
+  if (meaningfulAge) {
+  insightMeaningful = `The difference becomes meaningful (around £10k) by age ${meaningfulAge}`;
+}
+
+// acceleration (simple but effective)
+if (crossoverAge && maxAdvantageAge) {
+  const years = maxAdvantageAge - crossoverAge;
+
+  if (years > 10) {
+    insightAcceleration = "The financial gap builds gradually over time, with most of the benefit occurring later in life";
+  } else {
+    insightAcceleration = "The financial difference emerges relatively quickly after the crossover point";
+  }
+}
+
+// sensitivity (upgrade your flip logic)
+if (flipRate) {
+  insightSensitivity = `This result depends on investment returns of around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
+}
   // -----------------------------
   // UI
   // -----------------------------
@@ -323,6 +360,10 @@ for (let i = 0; i < ages.length; i++) {
               {insightOutcome && <li>{insightOutcome}</li>}
               {insightRepayment && <li>{insightRepayment}</li>}
               {insightCrossover && <li>{insightCrossover}</li>}
+              {insightMeaningful && <li>{insightMeaningful}</li>}
+              {insightMax && <li>{insightMax}</li>}
+              {insightAcceleration && <li>{insightAcceleration}</li>}
+              {insightSensitivity && <li>{insightSensitivity}</li>}
               {insightTrigger && <li>{insightTrigger}</li>}
             </ul>
           </div>
