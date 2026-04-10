@@ -170,15 +170,21 @@ export default function StudentLoanTool() {
       <h2>🎓 Student Loan</h2>
 
       {/* INPUTS */}
-      <div style={{ display: "flex", gap: "15px" }}>
-        <div>
+      <div className="input-row">
+        <div className="input-group">
           <label>Salary (£)</label>
-          <input value={salary} onChange={e => setSalary(Number(e.target.value))} />
+          <input
+            value={salary}
+            onChange={(e) => setSalary(e.target.value)}
+          />
         </div>
 
-        <div>
+        <div className="input-group">
           <label>Loan Balance (£)</label>
-          <input value={balance} onChange={e => setBalance(Number(e.target.value))} />
+          <input
+            value={balance}
+            onChange={(e) => setBalance(e.target.value)}
+          />
         </div>
       </div>
 

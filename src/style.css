@@ -294,3 +294,28 @@ code {
     border-right-color: var(--border);
   }
 }
+/* =========================
+   FORM LAYOUT (MoneyMapper)
+   ========================= */
+
+.input-row {
+  display: flex;
+  gap: 16px;
+}
+
+.input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .input-row {
+    flex-direction: column;
+  }
+}
