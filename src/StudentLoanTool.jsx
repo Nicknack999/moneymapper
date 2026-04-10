@@ -278,7 +278,23 @@ export default function StudentLoanTool() {
               )}
             </div>
           </div>
-
+              {/* 👇 ADD IT HERE */}
+<div style={{
+  marginTop: "16px",
+  padding: "10px",
+  fontSize: "13px",
+  color: "#555",
+  background: "#f8fafc",
+  borderRadius: "8px",
+  border: "1px solid #e5e7eb"
+}}>
+  <strong>Assumptions behind this result</strong>
+  <ul style={{ marginTop: "6px", paddingLeft: "18px" }}>
+    <li>Investment return: {returnRate.toFixed(1)}%</li>
+    <li>Loan interest: {loanInterest}%</li>
+    <li>Write-off period: {writeOffYears} years</li>
+  </ul>
+</div>
         </div>
       )}
 
