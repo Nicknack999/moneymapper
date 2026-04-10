@@ -175,7 +175,7 @@ export default function StudentLoanTool() {
           <label>Salary (£)</label>
           <input
             value={salary}
-            onChange={(e) => setSalary(e.target.value)}
+            onChange={(e) => setSalary(Number(e.target.value))}
           />
         </div>
 
@@ -183,7 +183,7 @@ export default function StudentLoanTool() {
           <label>Loan Balance (£)</label>
           <input
             value={balance}
-            onChange={(e) => setBalance(e.target.value)}
+            onChange={(e) => setBalance(Number(e.target.value))}
           />
         </div>
       </div>
@@ -236,103 +236,87 @@ export default function StudentLoanTool() {
         </p>
       )}
 
-      {/* RECOMMENDATION */}
-      {/* RECOMMENDATION */}
-{result && (
-  <div style={{ marginTop: "20px" }}>
-    
-    {/* Main recommendation */}
-    <div style={{
-      padding: "15px",
-      background: "#ecfdf5",
-      borderRadius: "10px"
-    }}>
-      <strong>✅ Recommendation: {recommendation}</strong>
-      <ul style={{ marginTop: "8px" }}>
-        {recommendationWhy.map((w, i) => <li key={i}>{w}</li>)}
-      </ul>
-    </div>
+      {/* RESULTS */}
+      {result && (
+        <div style={{ marginTop: "20px" }}>
 
-    {/* KEY INSIGHTS */}
-    <div style={{
-      marginTop: "12px",
-      padding: "12px",
-      background: "#f5f9ff",
-      borderLeft: "4px solid #4CAF50",
-      borderRadius: "10px"
-    }}>
-      <strong>📊 Key insights</strong>
+          {/* Recommendation */}
+          <div style={{ padding: "15px", background: "#ecfdf5", borderRadius: "10px" }}>
+            <strong>✅ Recommendation: {recommendation}</strong>
+            <ul style={{ marginTop: "8px" }}>
+              {recommendationWhy.map((w, i) => <li key={i}>{w}</li>)}
+            </ul>
+          </div>
 
-      <ul style={{ marginTop: "6px", fontSize: "14px", paddingLeft: "18px" }}>
-        <li>Investing leads to higher long-term wealth</li>
-        <li>Compounding outweighs loan interest over time</li>
-        <li>The financial gap widens significantly later in life</li>
-      </ul>
-    </div>
+          {/* Chart */}
+          {chartData.length > 0 && (
+            <div style={{ marginTop: "20px" }}>
+              <strong style={{ display: "block", marginBottom: "6px" }}>
+                How this plays out over time
+              </strong>
 
-    {/* WHY */}
-    <div style={{
-      marginTop: "12px",
-      padding: "12px",
-      background: loanWrittenOff ? "#fff7ed" : "#eef2ff",
-      borderRadius: "10px",
-      border: "1px solid #ddd"
-    }}>
-      <strong>💡 Why this happens</strong>
+              <ResponsiveContainer width="100%" height={320}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="age" />
+                  <YAxis tickFormatter={formatAxis} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <ReferenceLine y={0} stroke="#999" />
+                  <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
+                  <Line dataKey="gap" stroke="#dc2626" strokeWidth={2} dot={false} name="Difference" />
+                  <Line dataKey="invest_net_worth" stroke="#16a34a" name="Invest" />
+                  <Line dataKey="overpay_net_worth" stroke="#2563eb" name="Overpay" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
-      <div style={{ marginTop: "6px", fontSize: "14px" }}>
-        {loanWrittenOff ? (
-          <>
-            You’re unlikely to fully repay your loan, so extra payments don’t reduce what you repay overall.
-            <br /><br />
-            Investing instead allows your money to grow.
-          </>
-        ) : (
-          <>
-            You’re on track to repay your loan in full.
-            <br /><br />
-            Investing gives your money time to grow — leading to better outcomes.
-          </>
-        )}
-      </div>
-    </div>
+          {/* Insights */}
+          <div style={{ marginTop: "12px", padding: "12px", background: "#f5f9ff", borderLeft: "4px solid #4CAF50", borderRadius: "10px" }}>
+            <strong>📊 Key insights</strong>
+            <ul style={{ marginTop: "6px", fontSize: "14px", paddingLeft: "18px" }}>
+              <li>
+                Investing leaves you {formatCurrency(Math.abs(wealthDiff))} better off by retirement
+              </li>
+              <li>Compounding outweighs loan interest over time</li>
+              <li>The financial gap widens significantly later in life</li>
+            </ul>
+          </div>
 
-    {/* ✅ DISCLAIMER (correct place) */}
-    <div style={{
-      marginTop: "12px",
-      padding: "10px",
-      fontSize: "12px",
-      color: "#555",
-      background: "#f9fafb",
-      borderRadius: "8px",
-      border: "1px solid #e5e7eb"
-    }}>
-      <strong>⚠️ Important</strong>
-      <div style={{ marginTop: "4px" }}>
-        We built this tool to help our own family understand student loan decisions. It's designed to guide thinking, not replace financial advice
-      </div>
-    </div>
+          {/* Why */}
+          <div style={{ marginTop: "12px", padding: "12px", background: loanWrittenOff ? "#fff7ed" : "#eef2ff", borderRadius: "10px", border: "1px solid #ddd" }}>
+            <strong>💡 Why this happens</strong>
+            <div style={{ marginTop: "6px", fontSize: "14px" }}>
+              {loanWrittenOff ? (
+                <>
+                  You’re unlikely to fully repay your loan, so extra payments don’t reduce what you repay overall.
+                  <br /><br />
+                  Investing instead allows your money to grow.
+                </>
+              ) : (
+                <>
+                  You’re on track to repay your loan in full.
+                  <br /><br />
+                  Investing gives your money time to grow — leading to better outcomes.
+                </>
+              )}
+            </div>
+          </div>
 
-  </div>
-)}
+        </div>
+      )}
 
-      {/* CHART */}
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="age" />
-          <YAxis tickFormatter={formatAxis} />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <ReferenceLine y={0} stroke="#999" />
-
-          <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
-
-          <Line dataKey="gap" stroke="#dc2626" strokeWidth={2} dot={false} name="Difference" />
-          <Line dataKey="invest_net_worth" stroke="#16a34a" name="Invest" />
-          <Line dataKey="overpay_net_worth" stroke="#2563eb" name="Overpay" />
-        </LineChart>
-      </ResponsiveContainer>
+      {/* Disclaimer */}
+      {result && (
+        <div style={{ marginTop: "30px", padding: "10px", fontSize: "12px", color: "#555", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+          <strong>⚠️ Important</strong>
+          <div style={{ marginTop: "4px" }}>
+            We built this tool to help our own family understand student loan decisions. 
+            It's designed to guide thinking, not replace financial advice.
+          </div>
+        </div>
+      )}
 
     </div>
   );
