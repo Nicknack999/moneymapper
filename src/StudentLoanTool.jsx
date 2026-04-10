@@ -228,7 +228,7 @@ if (crossoverAge && maxAdvantageAge) {
       ? "and the advantage builds gradually over time"
       : "and the advantage builds relatively quickly";
 
-  insightJourney = `${earlyLeader}, before the outcomes converge around age ${crossoverAge}, ${speed}. Most of the benefit occurs later due to compounding`;
+  insightJourney = `${earlyLeader}, before the outcomes converge around age ${crossoverAge}, ${speed}. `;
 }
 
   if (flipRate) {
