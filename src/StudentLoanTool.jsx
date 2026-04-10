@@ -237,6 +237,7 @@ export default function StudentLoanTool() {
       )}
 
       {/* RECOMMENDATION */}
+      {/* RECOMMENDATION */}
 {result && (
   <div style={{ marginTop: "20px" }}>
     
@@ -252,7 +253,7 @@ export default function StudentLoanTool() {
       </ul>
     </div>
 
-    {/* 👇 NEW: KEY INSIGHTS */}
+    {/* KEY INSIGHTS */}
     <div style={{
       marginTop: "12px",
       padding: "12px",
@@ -296,22 +297,7 @@ export default function StudentLoanTool() {
       </div>
     </div>
 
-  </div>
-)}
-
-{result && (
-  <div style={{ marginTop: "20px" }}>
-    
-    {/* Recommendation */}
-    <div>...</div>
-
-    {/* Key insights */}
-    <div>...</div>
-
-    {/* Why */}
-    <div>...</div>
-
-    {/* 👇 ADD DISCLAIMER HERE */}
+    {/* ✅ DISCLAIMER (correct place) */}
     <div style={{
       marginTop: "12px",
       padding: "10px",
@@ -323,7 +309,7 @@ export default function StudentLoanTool() {
     }}>
       <strong>⚠️ Important</strong>
       <div style={{ marginTop: "4px" }}>
-        We built this tool to help our own family understand student loan decisions… It’s designed to guide thinking, not replace financial advice
+        We built this tool to help our own family understand student loan decisions. It's designed to guide thinking, not replace financial advice
       </div>
     </div>
 
