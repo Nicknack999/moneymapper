@@ -299,6 +299,37 @@ export default function StudentLoanTool() {
   </div>
 )}
 
+{result && (
+  <div style={{ marginTop: "20px" }}>
+    
+    {/* Recommendation */}
+    <div>...</div>
+
+    {/* Key insights */}
+    <div>...</div>
+
+    {/* Why */}
+    <div>...</div>
+
+    {/* 👇 ADD DISCLAIMER HERE */}
+    <div style={{
+      marginTop: "12px",
+      padding: "10px",
+      fontSize: "12px",
+      color: "#555",
+      background: "#f9fafb",
+      borderRadius: "8px",
+      border: "1px solid #e5e7eb"
+    }}>
+      <strong>⚠️ Important</strong>
+      <div style={{ marginTop: "4px" }}>
+        We built this tool to help our own family understand student loan decisions… It’s designed to guide thinking, not replace financial advice
+      </div>
+    </div>
+
+  </div>
+)}
+
       {/* CHART */}
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={chartData}>
