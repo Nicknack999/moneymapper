@@ -29,6 +29,9 @@ export default function StudentLoanTool() {
   const currentAge = 30;
   const retirementAge = 60;
 
+  // -----------------------------
+  // FETCH
+  // -----------------------------
   const fetchModel = async (overpayValue, overrideReturnRate = null) => {
     const res = await fetch("https://moneymapper-backend-018g.onrender.com/full-model", {
       method: "POST",
@@ -64,7 +67,7 @@ export default function StudentLoanTool() {
     if (result) {
       setLoading(true);
       const data = await fetchModel(
-        selectedOverpay,
+        setter === setSelectedOverpay ? value : selectedOverpay,
         setter === setReturnRate ? value : null
       );
       setResult(data);
@@ -73,26 +76,45 @@ export default function StudentLoanTool() {
     }
   };
 
+  // -----------------------------
+  // DATA
+  // -----------------------------
   const ages = result?.curves?.ages || [];
-  const investNetWorth = result?.curves?.invest_net_worth || [];
-  const overpayNetWorth = result?.curves?.overpay_net_worth || [];
+  const invest = result?.curves?.invest_net_worth || [];
+  const overpay = result?.curves?.overpay_net_worth || [];
 
   const wealthDiff = result?.insights?.wealth_difference ?? null;
   const breakEvenSalary = result?.insights?.break_even_salary;
   const loanWrittenOff = result?.insights?.loan_written_off;
 
   // -----------------------------
-  // FIND CROSSOVER AGE
+  // CROSSOVER
   // -----------------------------
+  
   let crossoverAge = null;
-
   for (let i = 0; i < ages.length; i++) {
-    if ((investNetWorth[i] ?? 0) > (overpayNetWorth[i] ?? 0)) {
+    if ((invest[i] ?? 0) > (overpay[i] ?? 0)) {
       crossoverAge = ages[i];
       break;
     }
   }
+  // -----------------------------
+// MAX ADVANTAGE
+// -----------------------------
+let maxAdvantage = null;
+let maxAdvantageAge = null;
 
+for (let i = 0; i < ages.length; i++) {
+  const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
+
+  if (maxAdvantage === null || Math.abs(gap) > Math.abs(maxAdvantage)) {
+    maxAdvantage = gap;
+    maxAdvantageAge = ages[i];
+  }
+}
+  // -----------------------------
+  // DECISION
+  // -----------------------------
   let recommendation = "";
   let decisionStrength = "neutral";
 
@@ -109,38 +131,41 @@ export default function StudentLoanTool() {
     }
   }
 
+  // -----------------------------
+  // CHART DATA
+  // -----------------------------
   const chartData = ages.map((age, i) => ({
     age,
-    invest_net_worth: investNetWorth[i] ?? 0,
-    overpay_net_worth: overpayNetWorth[i] ?? 0,
-    gap: (investNetWorth[i] ?? 0) - (overpayNetWorth[i] ?? 0)
+    invest: invest[i] ?? 0,
+    overpay: overpay[i] ?? 0,
+    gap: (invest[i] ?? 0) - (overpay[i] ?? 0)
   }));
 
+  // -----------------------------
+  // FORMAT
+  // -----------------------------
   const formatCurrency = (v) =>
     v !== null && v !== undefined
       ? `£${Math.round(v).toLocaleString()}`
       : "-";
 
-  const formatAxis = (v) =>
-    `£${(v / 1000).toFixed(0)}k`;
+  const formatAxis = (v) => `£${(v / 1000).toFixed(0)}k`;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload) return null;
 
     return (
-      <div style={{ background: "#fff", border: "1px solid #ddd", padding: "10px", borderRadius: "8px" }}>
+      <div style={{ background: "#fff", padding: 10, border: "1px solid #ddd", borderRadius: 8 }}>
         <strong>Age {label}</strong>
         {payload.map((p, i) => (
-          <div key={i}>
-            {p.name}: {formatCurrency(p.value)}
-          </div>
+          <div key={i}>{p.name}: {formatCurrency(p.value)}</div>
         ))}
       </div>
     );
   };
 
   // -----------------------------
-  // DYNAMIC INSIGHTS
+  // INSIGHTS
   // -----------------------------
   let insightOutcome = "";
   let insightRepayment = "";
@@ -148,9 +173,10 @@ export default function StudentLoanTool() {
   let insightCrossover = "";
 
   if (wealthDiff !== null) {
-    insightOutcome = wealthDiff < 0
-      ? `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`
-      : `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
+    insightOutcome =
+      wealthDiff < 0
+        ? `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`
+        : `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
   }
 
   if (loanWrittenOff === true) {
@@ -167,54 +193,66 @@ export default function StudentLoanTool() {
     insightCrossover = `You start to come out ahead from around age ${crossoverAge}`;
   }
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
-    <div style={{ padding: "20px", maxWidth: "1100px", margin: "auto" }}>
+    <div style={{ padding: 20, maxWidth: 1100, margin: "auto" }}>
 
       <h2>🎓 Student Loan</h2>
 
-      {/* Inputs */}
+      {/* INPUTS */}
       <div>
         <label>Salary (£)</label>
         <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
+
         <label>Loan Balance (£)</label>
         <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
       </div>
 
-      {/* Scenario Controls */}
-      <div style={{ marginTop: "20px", padding: "12px", border: "1px solid #eee", borderRadius: "8px" }}>
+      {/* CONTROLS */}
+      <div style={{ marginTop: 20, padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
         <strong>Adjust your scenario</strong>
 
         <div>Investment return: {returnRate.toFixed(1)}%</div>
         <input type="range" min="0" max="10" step="0.1"
           value={returnRate}
-          onChange={(e) => updateAndRun(setReturnRate, Number(e.target.value))} />
+          onChange={(e) => updateAndRun(setReturnRate, Number(e.target.value))}
+        />
+
+        <div>Overpayment: £{selectedOverpay}/month</div>
+        <input type="range" min="0" max="500" step="10"
+          value={selectedOverpay}
+          onChange={(e) => updateAndRun(setSelectedOverpay, Number(e.target.value))}
+        />
 
         <div>Loan interest: {loanInterest}%</div>
         <input type="range" min="0" max="10" step="0.1"
           value={loanInterest}
-          onChange={(e) => updateAndRun(setLoanInterest, Number(e.target.value))} />
+          onChange={(e) => updateAndRun(setLoanInterest, Number(e.target.value))}
+        />
 
         <div>Write-off period: {writeOffYears} years</div>
         <input type="range" min="20" max="40" step="1"
           value={writeOffYears}
-          onChange={(e) => updateAndRun(setWriteOffYears, Number(e.target.value))} />
+          onChange={(e) => updateAndRun(setWriteOffYears, Number(e.target.value))}
+        />
       </div>
 
-      <button onClick={runModel}>Run Model</button>
+      <button onClick={runModel} style={{ marginTop: 10 }}>
+        Run Model
+      </button>
 
-      {/* Overpay visibility */}
-      <p style={{ marginTop: "10px" }}>
-        You are currently overpaying <strong>£{selectedOverpay}/month</strong>
-      </p>
+      {loading && <p>Calculating...</p>}
 
-      {/* Results */}
+      {/* RESULTS */}
       {result && (
-        <div style={{ marginTop: "20px" }}>
+        <div style={{ marginTop: 20 }}>
 
-          {/* Recommendation */}
+          {/* RECOMMENDATION */}
           <div style={{
-            padding: "15px",
-            borderRadius: "10px",
+            padding: 15,
+            borderRadius: 10,
             background:
               decisionStrength === "strong"
                 ? "#ecfdf5"
@@ -225,54 +263,87 @@ export default function StudentLoanTool() {
             <strong>✅ Recommendation: {recommendation}</strong>
 
             {decisionStrength === "strong" && (
-              <div style={{ marginTop: "6px", color: "#059669" }}>
+              <div style={{ marginTop: 6, color: "#059669" }}>
                 Strong decision under current assumptions
               </div>
             )}
 
             {decisionStrength === "sensitive" && flipRate && (
-              <div style={{ marginTop: "6px", color: "#b45309" }}>
+              <div style={{ marginTop: 6, color: "#b45309" }}>
                 ⚠️ Could change if returns fall below {flipRate.toFixed(1)}%
               </div>
             )}
           </div>
 
-          {/* Chart */}
-          {chartData.length > 0 && (
-            <div style={{ marginTop: "20px" }}>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="age" />
-                  <YAxis tickFormatter={formatAxis} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <ReferenceLine y={0} stroke="#999" />
-                  <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
-                  <Line dataKey="gap" stroke="#dc2626" name="Difference" />
-                  <Line dataKey="invest_net_worth" stroke="#16a34a" name="Invest" />
-                  <Line dataKey="overpay_net_worth" stroke="#2563eb" name="Overpay" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+          {/* CHART */}
+          <div style={{ marginTop: 20 }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="age" />
+                <YAxis tickFormatter={formatAxis} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
 
-          {/* Insights */}
+                {crossoverAge && (
+                  <ReferenceLine x={crossoverAge} stroke="purple" label="Crossover" />
+                )}
+
+                <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
+                <Line dataKey="gap" stroke="#dc2626" name="Difference" />
+                <Line dataKey="invest" stroke="#16a34a" name="Invest" />
+                <Line dataKey="overpay" stroke="#2563eb" name="Overpay" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* INSIGHTS */}
           <div style={{
-            marginTop: "12px",
-            padding: "12px",
+            marginTop: 12,
+            padding: 12,
             background: "#f5f9ff",
             borderLeft: "4px solid #4CAF50",
-            borderRadius: "10px"
+            borderRadius: 10
           }}>
             <strong>📊 Key insights</strong>
 
-            <ul style={{ marginTop: "6px", paddingLeft: "18px" }}>
+            <ul style={{ marginTop: 6, paddingLeft: 18 }}>
               {insightOutcome && <li>{insightOutcome}</li>}
               {insightRepayment && <li>{insightRepayment}</li>}
               {insightCrossover && <li>{insightCrossover}</li>}
               {insightTrigger && <li>{insightTrigger}</li>}
             </ul>
+          </div>
+
+          {/* WHY */}
+          <div style={{
+            marginTop: 12,
+            padding: 12,
+            background: loanWrittenOff ? "#fff7ed" : "#eef2ff",
+            borderRadius: 10,
+            border: "1px solid #ddd"
+          }}>
+            <strong>💡 Why this happens</strong>
+            <div style={{ marginTop: 6 }}>
+              {loanWrittenOff
+                ? "Your loan is unlikely to be fully repaid, so overpaying does not reduce total repayments significantly."
+                : "You are likely to repay your loan in full, but investment growth can still outpace the interest cost."}
+            </div>
+          </div>
+          <div style={{
+            marginTop: "16px",
+            padding: "10px",
+            fontSize: "12px",
+            color: "#555",
+            background: "#f9fafb",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb"
+          }}>
+            <strong>⚠️ Important context</strong>
+            <div style={{ marginTop: "4px" }}>
+              We built this tool to help our own family understand student loan decisions, especially when our daughter considered going to university. 
+              We hope you find it useful, but please note it is designed to guide thinking and does not constitute financial advice.
+            </div>
           </div>
 
         </div>
