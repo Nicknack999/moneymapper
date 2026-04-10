@@ -237,41 +237,67 @@ export default function StudentLoanTool() {
       )}
 
       {/* RECOMMENDATION */}
-      {result && (
-        <div style={{ marginTop: "20px", padding: "15px", background: "#ecfdf5", borderRadius: "10px" }}>
-          <strong>✅ Recommendation: {recommendation}</strong>
-          <ul>
-            {recommendationWhy.map((w, i) => <li key={i}>{w}</li>)}
-          </ul>
-        </div>
-      )}
+{result && (
+  <div style={{ marginTop: "20px" }}>
+    
+    {/* Main recommendation */}
+    <div style={{
+      padding: "15px",
+      background: "#ecfdf5",
+      borderRadius: "10px"
+    }}>
+      <strong>✅ Recommendation: {recommendation}</strong>
+      <ul style={{ marginTop: "8px" }}>
+        {recommendationWhy.map((w, i) => <li key={i}>{w}</li>)}
+      </ul>
+    </div>
 
-      {/* WHY */}
-      <div style={{
-        marginTop: "12px",
-        padding: "12px",
-        background: loanWrittenOff ? "#fff7ed" : "#eef2ff",
-        borderRadius: "10px",
-        border: "1px solid #ddd"
-      }}>
-        <strong>💡 Why this happens</strong>
+    {/* 👇 NEW: KEY INSIGHTS */}
+    <div style={{
+      marginTop: "12px",
+      padding: "12px",
+      background: "#f5f9ff",
+      borderLeft: "4px solid #4CAF50",
+      borderRadius: "10px"
+    }}>
+      <strong>📊 Key insights</strong>
 
-        <div style={{ marginTop: "6px", fontSize: "14px" }}>
-          {loanWrittenOff ? (
-            <>
-              You’re unlikely to fully repay your loan, so extra payments don’t reduce what you repay overall.
-              <br /><br />
-              Investing instead allows your money to grow.
-            </>
-          ) : (
-            <>
-              You’re on track to repay your loan in full.
-              <br /><br />
-              Investing gives your money time to grow — leading to better outcomes.
-            </>
-          )}
-        </div>
+      <ul style={{ marginTop: "6px", fontSize: "14px", paddingLeft: "18px" }}>
+        <li>Investing leads to higher long-term wealth</li>
+        <li>Compounding outweighs loan interest over time</li>
+        <li>The financial gap widens significantly later in life</li>
+      </ul>
+    </div>
+
+    {/* WHY */}
+    <div style={{
+      marginTop: "12px",
+      padding: "12px",
+      background: loanWrittenOff ? "#fff7ed" : "#eef2ff",
+      borderRadius: "10px",
+      border: "1px solid #ddd"
+    }}>
+      <strong>💡 Why this happens</strong>
+
+      <div style={{ marginTop: "6px", fontSize: "14px" }}>
+        {loanWrittenOff ? (
+          <>
+            You’re unlikely to fully repay your loan, so extra payments don’t reduce what you repay overall.
+            <br /><br />
+            Investing instead allows your money to grow.
+          </>
+        ) : (
+          <>
+            You’re on track to repay your loan in full.
+            <br /><br />
+            Investing gives your money time to grow — leading to better outcomes.
+          </>
+        )}
       </div>
+    </div>
+
+  </div>
+)}
 
       {/* CHART */}
       <ResponsiveContainer width="100%" height={320}>
