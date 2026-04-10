@@ -1,6 +1,4 @@
 import { useState } from "react";
-import MortgageTool from "./MortgageTool";
-import CarTool from "./CarTool";
 import StudentLoanTool from "./StudentLoanTool";
 
 export default function App() {
@@ -22,10 +20,32 @@ export default function App() {
       </p>
 
       {/* NAV */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        <button onClick={() => setTool("mortgage")}>🏠 Mortgage</button>
-        <button onClick={() => setTool("car")}>🚗 Car</button>
-        <button onClick={() => setTool("loan")}>🎓 Student Loan</button>
+      <div className="tool-selector">
+        <button
+          className={`tool ${tool === "loan" ? "active" : ""}`}
+          onClick={() => setTool("loan")}
+        >
+          🎓 Student Loan
+          <small>Invest vs overpay</small>
+        </button>
+
+        <button className="tool coming-soon">
+          🏠 Mortgage
+          <small>Overpay vs invest</small>
+          <span>Coming next</span>
+        </button>
+
+        <button className="tool coming-soon">
+          🚗 Car Finance
+          <small>Loan vs cash decision</small>
+          <span>Coming next</span>
+        </button>
+
+        <button className="tool coming-soon">
+          🧓 Retirement
+          <small>Can I retire early?</small>
+          <span>Coming next</span>
+        </button>
       </div>
 
       {/* CONTENT */}
@@ -36,8 +56,6 @@ export default function App() {
           borderRadius: 10,
         }}
       >
-        {tool === "mortgage" && <MortgageTool />}
-        {tool === "car" && <CarTool />}
         {tool === "loan" && <StudentLoanTool />}
       </div>
     </div>
