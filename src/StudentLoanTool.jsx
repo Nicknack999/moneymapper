@@ -101,13 +101,16 @@ export default function StudentLoanTool() {
   // -----------------------------
 // MAX ADVANTAGE
 // -----------------------------
-let maxAdvantage = 0;
+// -----------------------------
+// MAX ADVANTAGE
+// -----------------------------
+let maxAdvantage = null;
 let maxAdvantageAge = null;
 
 for (let i = 0; i < ages.length; i++) {
   const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
 
-  if (Math.abs(gap) > Math.abs(maxAdvantage)) {
+  if (maxAdvantage === null || Math.abs(gap) > Math.abs(maxAdvantage)) {
     maxAdvantage = gap;
     maxAdvantageAge = ages[i];
   }
@@ -189,6 +192,14 @@ for (let i = 0; i < ages.length; i++) {
   let insightMeaningful = "";
   let insightAcceleration = "";
   let insightSensitivity = "";
+  let insightMax = "";
+
+  if (maxAdvantageAge !== null) {
+    insightMax =
+      maxAdvantage < 0
+        ? `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from investing at around age ${maxAdvantageAge}`
+        : `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from overpaying at around age ${maxAdvantageAge}`;
+  }
 
   if (wealthDiff !== null) {
     insightOutcome =
@@ -335,7 +346,11 @@ if (flipRate) {
                 <Legend />
 
                 {crossoverAge && (
-                  <ReferenceLine x={crossoverAge} stroke="purple" label="Crossover" />
+                  <ReferenceLine
+                    x={crossoverAge}
+                    stroke="purple"
+                    label={{ value: "Crossover", position: "top" }}
+                  />
                 )}
 
                 <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
