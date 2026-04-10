@@ -81,8 +81,19 @@ export default function StudentLoanTool() {
   const breakEvenSalary = result?.insights?.break_even_salary;
   const loanWrittenOff = result?.insights?.loan_written_off;
 
+  // -----------------------------
+  // FIND CROSSOVER AGE
+  // -----------------------------
+  let crossoverAge = null;
+
+  for (let i = 0; i < ages.length; i++) {
+    if ((investNetWorth[i] ?? 0) > (overpayNetWorth[i] ?? 0)) {
+      crossoverAge = ages[i];
+      break;
+    }
+  }
+
   let recommendation = "";
-  let recommendationWhy = [];
   let decisionStrength = "neutral";
 
   if (wealthDiff !== null) {
@@ -128,10 +139,13 @@ export default function StudentLoanTool() {
     );
   };
 
-  // Dynamic insights
+  // -----------------------------
+  // DYNAMIC INSIGHTS
+  // -----------------------------
   let insightOutcome = "";
   let insightRepayment = "";
   let insightTrigger = "";
+  let insightCrossover = "";
 
   if (wealthDiff !== null) {
     insightOutcome = wealthDiff < 0
@@ -147,6 +161,10 @@ export default function StudentLoanTool() {
 
   if (breakEvenSalary) {
     insightTrigger = `If your salary reached around £${Math.round(breakEvenSalary).toLocaleString()}, this decision could change`;
+  }
+
+  if (crossoverAge) {
+    insightCrossover = `You start to come out ahead from around age ${crossoverAge}`;
   }
 
   return (
@@ -189,37 +207,73 @@ export default function StudentLoanTool() {
         You are currently overpaying <strong>£{selectedOverpay}/month</strong>
       </p>
 
-      {/* Flip feedback */}
-      {flipRate && (
-        <p style={{ color: "#9333ea" }}>
-          ⚠️ Decision flips below {flipRate.toFixed(1)}% return
-        </p>
-      )}
-
       {/* Results */}
       {result && (
-        <div>
+        <div style={{ marginTop: "20px" }}>
 
-          <h3>{recommendation}</h3>
+          {/* Recommendation */}
+          <div style={{
+            padding: "15px",
+            borderRadius: "10px",
+            background:
+              decisionStrength === "strong"
+                ? "#ecfdf5"
+                : decisionStrength === "sensitive"
+                ? "#fef3c7"
+                : "#f3f4f6"
+          }}>
+            <strong>✅ Recommendation: {recommendation}</strong>
 
+            {decisionStrength === "strong" && (
+              <div style={{ marginTop: "6px", color: "#059669" }}>
+                Strong decision under current assumptions
+              </div>
+            )}
+
+            {decisionStrength === "sensitive" && flipRate && (
+              <div style={{ marginTop: "6px", color: "#b45309" }}>
+                ⚠️ Could change if returns fall below {flipRate.toFixed(1)}%
+              </div>
+            )}
+          </div>
+
+          {/* Chart */}
           {chartData.length > 0 && (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="age" />
-                <YAxis tickFormatter={formatAxis} />
-                <Tooltip content={<CustomTooltip />} />
-                <Line dataKey="gap" stroke="#dc2626" />
-                <Line dataKey="invest_net_worth" stroke="#16a34a" />
-                <Line dataKey="overpay_net_worth" stroke="#2563eb" />
-              </LineChart>
-            </ResponsiveContainer>
+            <div style={{ marginTop: "20px" }}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="age" />
+                  <YAxis tickFormatter={formatAxis} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <ReferenceLine y={0} stroke="#999" />
+                  <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
+                  <Line dataKey="gap" stroke="#dc2626" name="Difference" />
+                  <Line dataKey="invest_net_worth" stroke="#16a34a" name="Invest" />
+                  <Line dataKey="overpay_net_worth" stroke="#2563eb" name="Overpay" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           )}
 
-          <ul>
-            {insightOutcome && <li>{insightOutcome}</li>}
-            {insightRepayment && <li>{insightRepayment}</li>}
-            {insightTrigger && <li>{insightTrigger}</li>}
-          </ul>
+          {/* Insights */}
+          <div style={{
+            marginTop: "12px",
+            padding: "12px",
+            background: "#f5f9ff",
+            borderLeft: "4px solid #4CAF50",
+            borderRadius: "10px"
+          }}>
+            <strong>📊 Key insights</strong>
+
+            <ul style={{ marginTop: "6px", paddingLeft: "18px" }}>
+              {insightOutcome && <li>{insightOutcome}</li>}
+              {insightRepayment && <li>{insightRepayment}</li>}
+              {insightCrossover && <li>{insightCrossover}</li>}
+              {insightTrigger && <li>{insightTrigger}</li>}
+            </ul>
+          </div>
 
         </div>
       )}
