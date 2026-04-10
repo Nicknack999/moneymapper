@@ -164,6 +164,31 @@ export default function StudentLoanTool() {
     );
   };
 
+  // -----------------------------
+  // DYNAMIC INSIGHTS
+  // -----------------------------
+  let insightOutcome = "";
+  let insightRepayment = "";
+  let insightTrigger = "";
+
+  if (wealthDiff !== null) {
+    if (wealthDiff < 0) {
+      insightOutcome = `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`;
+    } else {
+      insightOutcome = `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
+    }
+  }
+
+  if (loanWrittenOff === true) {
+    insightRepayment = "Your loan is likely to be written off before full repayment";
+  } else if (loanWrittenOff === false) {
+    insightRepayment = "You are likely to repay your loan in full";
+  }
+
+  if (breakEvenSalary) {
+    insightTrigger = `If your salary reached around £${Math.round(breakEvenSalary).toLocaleString()}, this decision could change`;
+  }
+
   return (
     <div style={{ padding: "20px", maxWidth: "1100px", margin: "auto" }}>
 
@@ -173,18 +198,12 @@ export default function StudentLoanTool() {
       <div className="input-row">
         <div className="input-group">
           <label>Salary (£)</label>
-          <input
-            value={salary}
-            onChange={(e) => setSalary(Number(e.target.value))}
-          />
+          <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
         </div>
 
         <div className="input-group">
           <label>Loan Balance (£)</label>
-          <input
-            value={balance}
-            onChange={(e) => setBalance(Number(e.target.value))}
-          />
+          <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
         </div>
       </div>
 
@@ -193,48 +212,6 @@ export default function StudentLoanTool() {
       </button>
 
       {loading && <p style={{ marginTop: "10px" }}>Calculating...</p>}
-
-      {/* SLIDER */}
-      <div style={{ marginTop: "20px", padding: "12px", border: "1px solid #eee", borderRadius: "8px" }}>
-        <label>Investment Return: <strong>{returnRate.toFixed(1)}%</strong></label>
-
-        <input
-          type="range"
-          min="0"
-          max="10"
-          step="0.1"
-          value={returnRate}
-          onChange={(e) => updateAndRun(setReturnRate, Number(e.target.value))}
-          style={{ width: "100%" }}
-        />
-
-        {flipRate !== null ? (
-          <p style={{ color: "#9333ea" }}>
-            💡 If returns fall below <strong>{flipRate.toFixed(1)}%</strong>, the decision changes
-          </p>
-        ) : result && (
-          <p style={{ color: "#059669" }}>
-            💡 Investing remains better even with much lower returns — this is a strong decision
-          </p>
-        )}
-      </div>
-
-      {/* ASSUMPTIONS */}
-      <div style={{ marginTop: "20px", fontSize: "14px", color: "#555" }}>
-        <strong>Assumptions</strong>
-        <ul>
-          <li>Investment return: {returnRate.toFixed(1)}%</li>
-          <li>Loan interest: {loanInterest}%</li>
-          <li>Write-off period: {writeOffYears} years</li>
-        </ul>
-      </div>
-
-      {/* BREAK EVEN */}
-      {breakEvenOverpay !== null && (
-        <p style={{ color: "#666" }}>
-          Break-even overpay ≈ <strong>£{breakEvenOverpay}/mo</strong>
-        </p>
-      )}
 
       {/* RESULTS */}
       {result && (
@@ -254,7 +231,6 @@ export default function StudentLoanTool() {
               <strong style={{ display: "block", marginBottom: "6px" }}>
                 How this plays out over time
               </strong>
-
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -276,10 +252,9 @@ export default function StudentLoanTool() {
           <div style={{ marginTop: "12px", padding: "12px", background: "#f5f9ff", borderLeft: "4px solid #4CAF50", borderRadius: "10px" }}>
             <strong>📊 Key insights</strong>
             <ul style={{ marginTop: "6px", fontSize: "14px", paddingLeft: "18px" }}>
-              <li>
-                Investing leaves you {formatCurrency(Math.abs(wealthDiff))} better off by retirement
-              </li>
-              <li>Compounding outweighs loan interest over time</li>
+              {insightOutcome && <li>{insightOutcome}</li>}
+              {insightRepayment && <li>{insightRepayment}</li>}
+              {insightTrigger && <li>{insightTrigger}</li>}
               <li>The financial gap widens significantly later in life</li>
             </ul>
           </div>
