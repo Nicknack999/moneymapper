@@ -29,9 +29,6 @@ export default function StudentLoanTool() {
   const currentAge = 30;
   const retirementAge = 60;
 
-  // -----------------------------
-  // FETCH
-  // -----------------------------
   const fetchModel = async (overpayValue, overrideReturnRate = null) => {
     const res = await fetch("https://moneymapper-backend-018g.onrender.com/full-model", {
       method: "POST",
@@ -76,53 +73,31 @@ export default function StudentLoanTool() {
     }
   };
 
-  // -----------------------------
-  // DATA
-  // -----------------------------
   const ages = result?.curves?.ages || [];
   const investNetWorth = result?.curves?.invest_net_worth || [];
   const overpayNetWorth = result?.curves?.overpay_net_worth || [];
 
   const wealthDiff = result?.insights?.wealth_difference ?? null;
-  const breakEvenOverpay = result?.insights?.break_even_overpay;
   const breakEvenSalary = result?.insights?.break_even_salary;
   const loanWrittenOff = result?.insights?.loan_written_off;
 
-  // -----------------------------
-  // DECISION LOGIC
-  // -----------------------------
   let recommendation = "";
   let recommendationWhy = [];
+  let decisionStrength = "neutral";
 
   if (wealthDiff !== null) {
     if (Math.abs(wealthDiff) < 5000) {
       recommendation = "Either option is broadly similar";
-      recommendationWhy = [
-        "The difference is small under current assumptions",
-        "Small changes could shift the outcome",
-        flipRate ? `Decision flips around ${flipRate.toFixed(1)}% returns` : "Stable outcome"
-      ];
+      decisionStrength = "neutral";
     } else if (wealthDiff < 0) {
       recommendation = "Invest instead of overpaying";
-      recommendationWhy = [
-        "Higher long-term wealth",
-        "Compounding returns outweigh interest savings",
-        flipRate
-          ? `Only flips below ~${flipRate.toFixed(1)}% returns`
-          : "Decision remains strong even at lower returns"
-      ];
+      decisionStrength = flipRate ? "sensitive" : "strong";
     } else {
       recommendation = "Overpay your loan";
-      recommendationWhy = [
-        "Interest savings outweigh investment returns",
-        "Loan cost is higher than expected returns"
-      ];
+      decisionStrength = "strong";
     }
   }
 
-  // -----------------------------
-  // CHART DATA
-  // -----------------------------
   const chartData = ages.map((age, i) => ({
     age,
     invest_net_worth: investNetWorth[i] ?? 0,
@@ -130,9 +105,6 @@ export default function StudentLoanTool() {
     gap: (investNetWorth[i] ?? 0) - (overpayNetWorth[i] ?? 0)
   }));
 
-  // -----------------------------
-  // FORMAT
-  // -----------------------------
   const formatCurrency = (v) =>
     v !== null && v !== undefined
       ? `£${Math.round(v).toLocaleString()}`
@@ -141,19 +113,11 @@ export default function StudentLoanTool() {
   const formatAxis = (v) =>
     `£${(v / 1000).toFixed(0)}k`;
 
-  // -----------------------------
-  // TOOLTIP
-  // -----------------------------
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload) return null;
 
     return (
-      <div style={{
-        background: "#fff",
-        border: "1px solid #ddd",
-        padding: "10px",
-        borderRadius: "8px"
-      }}>
+      <div style={{ background: "#fff", border: "1px solid #ddd", padding: "10px", borderRadius: "8px" }}>
         <strong>Age {label}</strong>
         {payload.map((p, i) => (
           <div key={i}>
@@ -164,19 +128,15 @@ export default function StudentLoanTool() {
     );
   };
 
-  // -----------------------------
-  // DYNAMIC INSIGHTS
-  // -----------------------------
+  // Dynamic insights
   let insightOutcome = "";
   let insightRepayment = "";
   let insightTrigger = "";
 
   if (wealthDiff !== null) {
-    if (wealthDiff < 0) {
-      insightOutcome = `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`;
-    } else {
-      insightOutcome = `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
-    }
+    insightOutcome = wealthDiff < 0
+      ? `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`
+      : `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
   }
 
   if (loanWrittenOff === true) {
@@ -194,118 +154,73 @@ export default function StudentLoanTool() {
 
       <h2>🎓 Student Loan</h2>
 
-      {/* INPUTS */}
-      <div className="input-row">
-        <div className="input-group">
-          <label>Salary (£)</label>
-          <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
-        </div>
-
-        <div className="input-group">
-          <label>Loan Balance (£)</label>
-          <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
-        </div>
+      {/* Inputs */}
+      <div>
+        <label>Salary (£)</label>
+        <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
+        <label>Loan Balance (£)</label>
+        <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
       </div>
 
-      <button onClick={runModel} style={{ marginTop: "10px" }}>
-        Run Model
-      </button>
+      {/* Scenario Controls */}
+      <div style={{ marginTop: "20px", padding: "12px", border: "1px solid #eee", borderRadius: "8px" }}>
+        <strong>Adjust your scenario</strong>
 
-      {loading && <p style={{ marginTop: "10px" }}>Calculating...</p>}
+        <div>Investment return: {returnRate.toFixed(1)}%</div>
+        <input type="range" min="0" max="10" step="0.1"
+          value={returnRate}
+          onChange={(e) => updateAndRun(setReturnRate, Number(e.target.value))} />
 
-      {/* RESULTS */}
-      {result && (
-        <div style={{ marginTop: "20px" }}>
+        <div>Loan interest: {loanInterest}%</div>
+        <input type="range" min="0" max="10" step="0.1"
+          value={loanInterest}
+          onChange={(e) => updateAndRun(setLoanInterest, Number(e.target.value))} />
 
-          {/* Recommendation */}
-          <div style={{ padding: "15px", background: "#ecfdf5", borderRadius: "10px" }}>
-            <strong>✅ Recommendation: {recommendation}</strong>
-            <ul style={{ marginTop: "8px" }}>
-              {recommendationWhy.map((w, i) => <li key={i}>{w}</li>)}
-            </ul>
-          </div>
+        <div>Write-off period: {writeOffYears} years</div>
+        <input type="range" min="20" max="40" step="1"
+          value={writeOffYears}
+          onChange={(e) => updateAndRun(setWriteOffYears, Number(e.target.value))} />
+      </div>
 
-          {/* Chart */}
-          {chartData.length > 0 && (
-            <div style={{ marginTop: "20px" }}>
-              <strong style={{ display: "block", marginBottom: "6px" }}>
-                How this plays out over time
-              </strong>
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="age" />
-                  <YAxis tickFormatter={formatAxis} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <ReferenceLine y={0} stroke="#999" />
-                  <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
-                  <Line dataKey="gap" stroke="#dc2626" strokeWidth={2} dot={false} name="Difference" />
-                  <Line dataKey="invest_net_worth" stroke="#16a34a" name="Invest" />
-                  <Line dataKey="overpay_net_worth" stroke="#2563eb" name="Overpay" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
+      <button onClick={runModel}>Run Model</button>
 
-          {/* Insights */}
-          <div style={{ marginTop: "12px", padding: "12px", background: "#f5f9ff", borderLeft: "4px solid #4CAF50", borderRadius: "10px" }}>
-            <strong>📊 Key insights</strong>
-            <ul style={{ marginTop: "6px", fontSize: "14px", paddingLeft: "18px" }}>
-              {insightOutcome && <li>{insightOutcome}</li>}
-              {insightRepayment && <li>{insightRepayment}</li>}
-              {insightTrigger && <li>{insightTrigger}</li>}
-              <li>The financial gap widens significantly later in life</li>
-            </ul>
-          </div>
+      {/* Overpay visibility */}
+      <p style={{ marginTop: "10px" }}>
+        You are currently overpaying <strong>£{selectedOverpay}/month</strong>
+      </p>
 
-          {/* Why */}
-          <div style={{ marginTop: "12px", padding: "12px", background: loanWrittenOff ? "#fff7ed" : "#eef2ff", borderRadius: "10px", border: "1px solid #ddd" }}>
-            <strong>💡 Why this happens</strong>
-            <div style={{ marginTop: "6px", fontSize: "14px" }}>
-              {loanWrittenOff ? (
-                <>
-                  You’re unlikely to fully repay your loan, so extra payments don’t reduce what you repay overall.
-                  <br /><br />
-                  Investing instead allows your money to grow.
-                </>
-              ) : (
-                <>
-                  You’re on track to repay your loan in full.
-                  <br /><br />
-                  Investing gives your money time to grow — leading to better outcomes.
-                </>
-              )}
-            </div>
-          </div>
-              {/* 👇 ADD IT HERE */}
-<div style={{
-  marginTop: "16px",
-  padding: "10px",
-  fontSize: "13px",
-  color: "#555",
-  background: "#f8fafc",
-  borderRadius: "8px",
-  border: "1px solid #e5e7eb"
-}}>
-  <strong>Assumptions behind this result</strong>
-  <ul style={{ marginTop: "6px", paddingLeft: "18px" }}>
-    <li>Investment return: {returnRate.toFixed(1)}%</li>
-    <li>Loan interest: {loanInterest}%</li>
-    <li>Write-off period: {writeOffYears} years</li>
-  </ul>
-</div>
-        </div>
+      {/* Flip feedback */}
+      {flipRate && (
+        <p style={{ color: "#9333ea" }}>
+          ⚠️ Decision flips below {flipRate.toFixed(1)}% return
+        </p>
       )}
 
-      {/* Disclaimer */}
+      {/* Results */}
       {result && (
-        <div style={{ marginTop: "30px", padding: "10px", fontSize: "12px", color: "#555", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-          <strong>⚠️ Important</strong>
-          <div style={{ marginTop: "4px" }}>
-            We built this tool to help our own family understand student loan decisions. 
-            It's designed to guide thinking, not replace financial advice.
-          </div>
+        <div>
+
+          <h3>{recommendation}</h3>
+
+          {chartData.length > 0 && (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData}>
+                <XAxis dataKey="age" />
+                <YAxis tickFormatter={formatAxis} />
+                <Tooltip content={<CustomTooltip />} />
+                <Line dataKey="gap" stroke="#dc2626" />
+                <Line dataKey="invest_net_worth" stroke="#16a34a" />
+                <Line dataKey="overpay_net_worth" stroke="#2563eb" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+
+          <ul>
+            {insightOutcome && <li>{insightOutcome}</li>}
+            {insightRepayment && <li>{insightRepayment}</li>}
+            {insightTrigger && <li>{insightTrigger}</li>}
+          </ul>
+
         </div>
       )}
 
