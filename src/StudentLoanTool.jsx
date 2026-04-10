@@ -9,7 +9,8 @@ import {
   Legend,
   ReferenceLine,
   CartesianGrid,
-  Area
+  Area,
+  ReferenceDot
 } from "recharts";
 
 export default function StudentLoanTool() {
@@ -29,9 +30,7 @@ export default function StudentLoanTool() {
   const currentAge = 30;
   const retirementAge = 60;
 
-  // -----------------------------
   // FETCH
-  // -----------------------------
   const fetchModel = async (overpayValue, overrideReturnRate = null) => {
     const res = await fetch("https://moneymapper-backend-018g.onrender.com/full-model", {
       method: "POST",
@@ -76,9 +75,7 @@ export default function StudentLoanTool() {
     }
   };
 
-  // -----------------------------
   // DATA
-  // -----------------------------
   const ages = result?.curves?.ages || [];
   const invest = result?.curves?.invest_net_worth || [];
   const overpay = result?.curves?.overpay_net_worth || [];
@@ -87,10 +84,7 @@ export default function StudentLoanTool() {
   const breakEvenSalary = result?.insights?.break_even_salary;
   const loanWrittenOff = result?.insights?.loan_written_off;
 
-  // -----------------------------
   // CROSSOVER
-  // -----------------------------
-  
   let crossoverAge = null;
   for (let i = 0; i < ages.length; i++) {
     if ((invest[i] ?? 0) > (overpay[i] ?? 0)) {
@@ -98,48 +92,40 @@ export default function StudentLoanTool() {
       break;
     }
   }
-  // -----------------------------
-// MAX ADVANTAGE
-// -----------------------------
-// -----------------------------
-// MAX ADVANTAGE
-// -----------------------------
-let maxAdvantage = null;
-let maxAdvantageAge = null;
 
-for (let i = 0; i < ages.length; i++) {
-  const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
+  // MAX ADVANTAGE
+  let maxAdvantage = null;
+  let maxAdvantageAge = null;
 
-  if (maxAdvantage === null || Math.abs(gap) > Math.abs(maxAdvantage)) {
-    maxAdvantage = gap;
-    maxAdvantageAge = ages[i];
+  for (let i = 0; i < ages.length; i++) {
+    const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
+
+    if (maxAdvantage === null || Math.abs(gap) > Math.abs(maxAdvantage)) {
+      maxAdvantage = gap;
+      maxAdvantageAge = ages[i];
+    }
   }
-}
 
-// -----------------------------
-// MEANINGFUL GAP
-// -----------------------------
-let meaningfulAge = null;
-const threshold = 10000;
+  // MEANINGFUL GAP
+  let meaningfulAge = null;
+  const threshold = 10000;
 
-for (let i = 0; i < ages.length; i++) {
-  const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
+  for (let i = 0; i < ages.length; i++) {
+    const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
 
-  if (Math.abs(gap) >= threshold) {
-    meaningfulAge = ages[i];
-    break;
+    if (Math.abs(gap) >= threshold) {
+      meaningfulAge = ages[i];
+      break;
+    }
   }
-}
-  // -----------------------------
+
   // DECISION
-  // -----------------------------
   let recommendation = "";
   let decisionStrength = "neutral";
 
   if (wealthDiff !== null) {
     if (Math.abs(wealthDiff) < 5000) {
       recommendation = "Either option is broadly similar";
-      decisionStrength = "neutral";
     } else if (wealthDiff < 0) {
       recommendation = "Invest instead of overpaying";
       decisionStrength = flipRate ? "sensitive" : "strong";
@@ -149,9 +135,7 @@ for (let i = 0; i < ages.length; i++) {
     }
   }
 
-  // -----------------------------
   // CHART DATA
-  // -----------------------------
   const chartData = ages.map((age, i) => ({
     age,
     invest: invest[i] ?? 0,
@@ -159,9 +143,7 @@ for (let i = 0; i < ages.length; i++) {
     gap: (invest[i] ?? 0) - (overpay[i] ?? 0)
   }));
 
-  // -----------------------------
   // FORMAT
-  // -----------------------------
   const formatCurrency = (v) =>
     v !== null && v !== undefined
       ? `£${Math.round(v).toLocaleString()}`
@@ -182,9 +164,7 @@ for (let i = 0; i < ages.length; i++) {
     );
   };
 
-  // -----------------------------
   // INSIGHTS
-  // -----------------------------
   let insightOutcome = "";
   let insightRepayment = "";
   let insightTrigger = "";
@@ -193,13 +173,7 @@ for (let i = 0; i < ages.length; i++) {
   let insightAcceleration = "";
   let insightSensitivity = "";
   let insightMax = "";
-
-  if (maxAdvantageAge !== null) {
-    insightMax =
-      maxAdvantage < 0
-        ? `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from investing at around age ${maxAdvantageAge}`
-        : `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from overpaying at around age ${maxAdvantageAge}`;
-  }
+  let insightJourney = "";
 
   if (wealthDiff !== null) {
     insightOutcome =
@@ -223,33 +197,49 @@ for (let i = 0; i < ages.length; i++) {
   }
 
   if (meaningfulAge) {
-  insightMeaningful = `The difference becomes meaningful (around £10k) by age ${meaningfulAge}`;
-}
-
-// acceleration (simple but effective)
-if (crossoverAge && maxAdvantageAge) {
-  const years = maxAdvantageAge - crossoverAge;
-
-  if (years > 10) {
-    insightAcceleration = "The financial gap builds gradually over time, with most of the benefit occurring later in life";
-  } else {
-    insightAcceleration = "The financial difference emerges relatively quickly after the crossover point";
+    insightMeaningful = `The difference becomes meaningful (around £10k) by age ${meaningfulAge}`;
   }
+
+  if (maxAdvantageAge !== null) {
+    insightMax =
+      maxAdvantage < 0
+        ? `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from investing at around age ${maxAdvantageAge}`
+        : `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from overpaying at around age ${maxAdvantageAge}`;
+  }
+
+  if (crossoverAge && maxAdvantageAge) {
+    insightAcceleration =
+      maxAdvantageAge - crossoverAge > 10
+        ? "The financial gap builds gradually, with most benefit later due to compounding"
+        : "The financial difference emerges relatively quickly after crossover";
+
+    let insightJourney = "";
+
+if (crossoverAge && maxAdvantageAge) {
+
+  const earlyGap = (invest[0] ?? 0) - (overpay[0] ?? 0);
+  const yearsToPeak = maxAdvantageAge - crossoverAge;
+
+  const earlyLeader =
+    earlyGap < 0 ? "Overpaying starts ahead" : "Investing starts ahead";
+
+  const speed =
+    yearsToPeak > 10
+      ? "and the advantage builds gradually over time"
+      : "and the advantage builds relatively quickly";
+
+  insightJourney = `${earlyLeader}, before the outcomes converge around age ${crossoverAge}, ${speed}. Most of the benefit occurs later due to compounding`;
 }
 
-// sensitivity (upgrade your flip logic)
-if (flipRate) {
-  insightSensitivity = `This result depends on investment returns of around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
-}
-  // -----------------------------
-  // UI
-  // -----------------------------
+  if (flipRate) {
+    insightSensitivity = `This result depends on returns around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
+  }
+
   return (
     <div style={{ padding: 20, maxWidth: 1100, margin: "auto" }}>
 
       <h2>🎓 Student Loan</h2>
 
-      {/* INPUTS */}
       <div>
         <label>Salary (£)</label>
         <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
@@ -258,7 +248,6 @@ if (flipRate) {
         <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
       </div>
 
-      {/* CONTROLS */}
       <div style={{ marginTop: 20, padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
         <strong>Adjust your scenario</strong>
 
@@ -279,12 +268,6 @@ if (flipRate) {
           value={loanInterest}
           onChange={(e) => updateAndRun(setLoanInterest, Number(e.target.value))}
         />
-
-        <div>Write-off period: {writeOffYears} years</div>
-        <input type="range" min="20" max="40" step="1"
-          value={writeOffYears}
-          onChange={(e) => updateAndRun(setWriteOffYears, Number(e.target.value))}
-        />
       </div>
 
       <button onClick={runModel} style={{ marginTop: 10 }}>
@@ -293,49 +276,16 @@ if (flipRate) {
 
       {loading && <p>Calculating...</p>}
 
-      {/* RESULTS */}
       {result && (
         <div style={{ marginTop: 20 }}>
 
-          {/* RECOMMENDATION */}
-          <div style={{
-            padding: 15,
-            borderRadius: 10,
-            background:
-              decisionStrength === "strong"
-                ? "#ecfdf5"
-                : decisionStrength === "sensitive"
-                ? "#fef3c7"
-                : "#f3f4f6"
-          }}>
-            <div>
+          <div style={{ padding: 15, borderRadius: 10, background: "#ecfdf5" }}>
             <strong>💡 What this suggests</strong>
-            <div style={{ marginTop: "6px" }}>
-              {recommendation === "Invest instead of overpaying" &&
-                "Based on your inputs, investing appears to lead to better long-term outcomes than overpaying your loan."}
-
-              {recommendation === "Overpay your loan" &&
-                "Based on your inputs, overpaying your loan appears to lead to better overall outcomes than investing."}
-
-              {recommendation === "Either option is broadly similar" &&
-                "Based on your inputs, both options lead to broadly similar outcomes."}
+            <div style={{ marginTop: 6 }}>
+              Based on your inputs, investing appears to lead to better long-term outcomes.
             </div>
           </div>
 
-            {decisionStrength === "strong" && (
-              <div style={{ marginTop: 6, color: "#059669" }}>
-                This result is strong under the current assumptions
-              </div>
-            )}
-
-            {decisionStrength === "sensitive" && flipRate && (
-              <div style={{ marginTop: 6, color: "#b45309" }}>
-                ⚠️ Could change if returns fall below {flipRate.toFixed(1)}%
-              </div>
-            )}
-          </div>
-
-          {/* CHART */}
           <div style={{ marginTop: 20 }}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
@@ -346,77 +296,43 @@ if (flipRate) {
                 <Legend />
 
                 {crossoverAge && (
-                  <ReferenceLine
-                    x={crossoverAge}
-                    stroke="purple"
-                    label={{ value: "Crossover", position: "top" }}
+                  <ReferenceLine x={crossoverAge} stroke="purple" label={{ value: "Crossover", position: "top" }} />
+                )}
+
+                {maxAdvantageAge && (
+                  <ReferenceDot
+                    x={maxAdvantageAge}
+                    y={invest[ages.indexOf(maxAdvantageAge)]}
+                    r={6}
+                    fill="green"
+                    label={{ value: "Max", position: "top" }}
                   />
                 )}
 
-                <Area dataKey="gap" stroke="none" fill="#fca5a5" fillOpacity={0.15} />
-                <Line dataKey="gap" stroke="#dc2626" name="Difference" />
-                <Line dataKey="invest" stroke="#16a34a" name="Invest" />
-                <Line dataKey="overpay" stroke="#2563eb" name="Overpay" />
+                <Area dataKey="gap" fill="#fca5a5" fillOpacity={0.15} />
+                <Line dataKey="gap" stroke="#dc2626" />
+                <Line dataKey="invest" stroke="#16a34a" />
+                <Line dataKey="overpay" stroke="#2563eb" />
               </LineChart>
             </ResponsiveContainer>
           </div>
 
-          {/* INSIGHTS */}
-          <div style={{
-            marginTop: 12,
-            padding: 12,
-            background: "#f5f9ff",
-            borderLeft: "4px solid #4CAF50",
-            borderRadius: 10
-          }}>
+          <div style={{ marginTop: 12, padding: 12, background: "#f5f9ff", borderLeft: "4px solid #4CAF50", borderRadius: 10 }}>
             <strong>📊 Key insights</strong>
-
-            <ul style={{ marginTop: 6, paddingLeft: 18 }}>
-              {insightOutcome && <li>{insightOutcome}</li>}
-              {insightRepayment && <li>{insightRepayment}</li>}
-              {insightCrossover && <li>{insightCrossover}</li>}
-              {insightMeaningful && <li>{insightMeaningful}</li>}
-              {insightMax && <li>{insightMax}</li>}
-              {insightAcceleration && <li>{insightAcceleration}</li>}
-              {insightSensitivity && <li>{insightSensitivity}</li>}
-              {insightTrigger && <li>{insightTrigger}</li>}
+            <ul>
+              <li>{insightOutcome}</li>
+              <li>{insightJourney}</li>
+              <li>{insightCrossover}</li>
+              <li>{insightMeaningful}</li>
+              <li>{insightMax}</li>
+              <li>{insightAcceleration}</li>
+              <li>{insightSensitivity}</li>
+              <li>{insightTrigger}</li>
             </ul>
-          </div>
-
-          {/* WHY */}
-          <div style={{
-            marginTop: 12,
-            padding: 12,
-            background: loanWrittenOff ? "#fff7ed" : "#eef2ff",
-            borderRadius: 10,
-            border: "1px solid #ddd"
-          }}>
-            <strong>💡 Why this happens</strong>
-            <div style={{ marginTop: 6 }}>
-              {loanWrittenOff
-                ? "Your loan is unlikely to be fully repaid, so overpaying does not reduce total repayments significantly."
-                : "You are likely to repay your loan in full, but investment growth can still outpace the interest cost."}
-            </div>
-          </div>
-          <div style={{
-            marginTop: "16px",
-            padding: "10px",
-            fontSize: "12px",
-            color: "#555",
-            background: "#f9fafb",
-            borderRadius: "8px",
-            border: "1px solid #e5e7eb"
-          }}>
-            <strong>⚠️ Important context</strong>
-            <div style={{ marginTop: "4px" }}>
-              We built this tool to help our own family understand student loan decisions. 
-              It's designed to guide thinking and explore scenarios, not to provide financial advice.
-            </div>
           </div>
 
         </div>
       )}
-
     </div>
   );
 }
