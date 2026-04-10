@@ -55,6 +55,8 @@ export default function StudentLoanTool() {
   };
 
   const runModel = async () => {
+    if (currentAge >= retirementAge) return;
+
     setLoading(true);
     const data = await fetchModel(selectedOverpay);
     setResult(data);
@@ -88,6 +90,8 @@ export default function StudentLoanTool() {
   const breakEvenSalary = result?.insights?.break_even_salary;
   const loanWrittenOff = result?.insights?.loan_written_off;
 
+  const direction = wealthDiff < 0 ? "investing" : "overpaying";
+
   // -----------------------------
   // CROSSOVER
   // -----------------------------
@@ -120,12 +124,9 @@ export default function StudentLoanTool() {
   // MEANINGFUL GAP
   // -----------------------------
   let meaningfulAge = null;
-  const threshold = 10000;
-
   for (let i = 0; i < ages.length; i++) {
     const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
-
-    if (Math.abs(gap) >= threshold) {
+    if (Math.abs(gap) >= 10000) {
       meaningfulAge = ages[i];
       break;
     }
@@ -141,10 +142,10 @@ export default function StudentLoanTool() {
     if (Math.abs(wealthDiff) < 5000) {
       recommendation = "Either option is broadly similar";
     } else if (wealthDiff < 0) {
-      recommendation = "Invest instead of overpaying";
+      recommendation = "Investing appears more favourable";
       decisionStrength = flipRate ? "sensitive" : "strong";
     } else {
-      recommendation = "Overpay your loan";
+      recommendation = "Overpaying appears more favourable";
       decisionStrength = "strong";
     }
   }
@@ -183,72 +184,39 @@ export default function StudentLoanTool() {
   };
 
   // -----------------------------
-  // INSIGHTS
+  // INSIGHTS (CLEAN + HUMAN)
   // -----------------------------
   let insightOutcome = "";
-  let insightRepayment = "";
-  let insightTrigger = "";
-  let insightCrossover = "";
-  let insightMeaningful = "";
-  let insightAcceleration = "";
-  let insightSensitivity = "";
-  let insightMax = "";
   let insightJourney = "";
+  let insightMeaningful = "";
+  let insightMax = "";
+  let insightSensitivity = "";
+  let insightTrigger = "";
 
   if (wealthDiff !== null) {
-    insightOutcome =
-      wealthDiff < 0
-        ? `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`
-        : `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
+    insightOutcome = `By age ${retirementAge}, ${direction} could leave you about ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
   }
 
-  if (loanWrittenOff === true) {
-    insightRepayment = "Your loan is likely to be written off before full repayment";
-  } else if (loanWrittenOff === false) {
-    insightRepayment = "You are likely to repay your loan in full";
-  }
-
-  if (breakEvenSalary) {
-    insightTrigger = `If your salary reached around £${Math.round(breakEvenSalary).toLocaleString()}, this decision could change`;
-  }
-
-  if (crossoverAge) {
-    insightCrossover = `You start to come out ahead from around age ${crossoverAge}`;
+  if (crossoverAge && crossoverAge > currentAge + 2) {
+    insightJourney = `Overpaying puts you slightly ahead early on, but ${direction} overtakes around age ${crossoverAge}`;
+  } else if (crossoverAge) {
+    insightJourney = `${direction} is ahead almost immediately and continues to pull away over time`;
   }
 
   if (meaningfulAge) {
-    insightMeaningful = `The difference becomes meaningful (around £10k) by age ${meaningfulAge}`;
+    insightMeaningful = `The difference becomes noticeable (around £10k) by age ${meaningfulAge}`;
   }
 
   if (maxAdvantageAge !== null) {
-    insightMax =
-      maxAdvantage < 0
-        ? `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from investing at around age ${maxAdvantageAge}`
-        : `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from overpaying at around age ${maxAdvantageAge}`;
-  }
-
-  if (crossoverAge && maxAdvantageAge) {
-    const earlyGap = (invest[0] ?? 0) - (overpay[0] ?? 0);
-    const yearsToPeak = maxAdvantageAge - crossoverAge;
-
-    const earlyLeader =
-      earlyGap < 0 ? "Overpaying starts ahead" : "Investing starts ahead";
-
-    const speed =
-      yearsToPeak > 10
-        ? "and the advantage builds gradually over time"
-        : "and the advantage builds relatively quickly";
-
-    insightJourney = `${earlyLeader}, before the outcomes converge around age ${crossoverAge}, ${speed}. Most of the benefit occurs later due to compounding.`;
-
-    insightAcceleration =
-      yearsToPeak > 10
-        ? "The financial gap builds gradually, with most benefit later due to compounding"
-        : "The financial difference emerges relatively quickly after crossover";
+    insightMax = `The largest gap occurs around age ${maxAdvantageAge}, where ${direction} is ahead by about ${formatCurrency(Math.abs(maxAdvantage))}`;
   }
 
   if (flipRate) {
-    insightSensitivity = `This result depends on returns around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
+    insightSensitivity = `This outcome depends on returns around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the result`;
+  }
+
+  if (breakEvenSalary) {
+    insightTrigger = `If your salary reached around £${Math.round(breakEvenSalary).toLocaleString()}, this outcome could change`;
   }
 
   // -----------------------------
@@ -259,6 +227,7 @@ export default function StudentLoanTool() {
 
       <h2>🎓 Student Loan</h2>
 
+      {/* INPUTS */}
       <div>
         <label>Salary (£)</label>
         <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
@@ -272,12 +241,14 @@ export default function StudentLoanTool() {
         <strong>Adjust your scenario</strong>
 
         <div>Current age: {currentAge}</div>
-        <input type="range" min="18" max="55" value={currentAge}
+        <input type="range" min="18" max="55"
+          value={currentAge}
           onChange={(e) => updateAndRun(setCurrentAge, Number(e.target.value))}
         />
 
         <div>Retirement age: {retirementAge}</div>
-        <input type="range" min="50" max="70" value={retirementAge}
+        <input type="range" min="50" max="70"
+          value={retirementAge}
           onChange={(e) => updateAndRun(setRetirementAge, Number(e.target.value))}
         />
 
@@ -314,6 +285,7 @@ export default function StudentLoanTool() {
 
       {loading && <p>Calculating...</p>}
 
+      {/* RESULTS */}
       {result && (
         <div style={{ marginTop: 20 }}>
 
@@ -321,14 +293,7 @@ export default function StudentLoanTool() {
           <div style={{ padding: 15, borderRadius: 10, background: "#ecfdf5" }}>
             <strong>💡 What this suggests</strong>
             <div style={{ marginTop: 6 }}>
-              {recommendation === "Invest instead of overpaying" &&
-                "Based on your inputs, investing appears to lead to better long-term outcomes."}
-
-              {recommendation === "Overpay your loan" &&
-                "Based on your inputs, overpaying appears to lead to better overall outcomes."}
-
-              {recommendation === "Either option is broadly similar" &&
-                "Based on your inputs, both options lead to broadly similar outcomes."}
+              Based on your inputs, {direction} appears to lead to better long-term outcomes.
             </div>
           </div>
 
@@ -362,10 +327,8 @@ export default function StudentLoanTool() {
             <ul>
               {insightOutcome && <li>{insightOutcome}</li>}
               {insightJourney && <li>{insightJourney}</li>}
-              {insightCrossover && <li>{insightCrossover}</li>}
               {insightMeaningful && <li>{insightMeaningful}</li>}
               {insightMax && <li>{insightMax}</li>}
-              {insightAcceleration && <li>{insightAcceleration}</li>}
               {insightSensitivity && <li>{insightSensitivity}</li>}
               {insightTrigger && <li>{insightTrigger}</li>}
             </ul>
@@ -406,6 +369,7 @@ export default function StudentLoanTool() {
 
         </div>
       )}
+
     </div>
   );
 }
