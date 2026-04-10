@@ -80,6 +80,23 @@ export default function StudentLoanTool() {
   };
 
   // -----------------------------
+  // REPAYMENT LOGIC (NEW 🔥)
+  // -----------------------------
+  const threshold = 27295;
+  const repaymentRate = 0.09;
+
+  const annualRepayment = Math.max(0, (salary - threshold) * repaymentRate);
+  const monthlyRepayment = annualRepayment / 12;
+
+  const estimatedYearsToRepay =
+    annualRepayment > 0 ? balance / annualRepayment : null;
+
+  const targetYears = 10;
+  const requiredAnnual = balance / targetYears;
+  const requiredMonthly = requiredAnnual / 12;
+  const requiredSalary = requiredAnnual / repaymentRate + threshold;
+
+  // -----------------------------
   // DATA
   // -----------------------------
   const ages = result?.curves?.ages || [];
@@ -93,25 +110,19 @@ export default function StudentLoanTool() {
   const direction = wealthDiff < 0 ? "investing" : "overpaying";
 
   // -----------------------------
-  // CROSSOVER
+  // CROSSOVER / MAX / MEANINGFUL
   // -----------------------------
   let crossoverAge = null;
-  for (let i = 0; i < ages.length; i++) {
-    if ((invest[i] ?? 0) > (overpay[i] ?? 0)) {
-      crossoverAge = ages[i];
-      break;
-    }
-  }
-
-  // -----------------------------
-  // MAX ADVANTAGE
-  // -----------------------------
+  let meaningfulAge = null;
   let maxAdvantage = null;
   let maxAdvantageAge = null;
   let maxIndex = null;
 
   for (let i = 0; i < ages.length; i++) {
     const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
+
+    if (!crossoverAge && gap > 0) crossoverAge = ages[i];
+    if (!meaningfulAge && Math.abs(gap) >= 10000) meaningfulAge = ages[i];
 
     if (maxAdvantage === null || Math.abs(gap) > Math.abs(maxAdvantage)) {
       maxAdvantage = gap;
@@ -121,70 +132,7 @@ export default function StudentLoanTool() {
   }
 
   // -----------------------------
-  // MEANINGFUL GAP
-  // -----------------------------
-  let meaningfulAge = null;
-  for (let i = 0; i < ages.length; i++) {
-    const gap = (invest[i] ?? 0) - (overpay[i] ?? 0);
-    if (Math.abs(gap) >= 10000) {
-      meaningfulAge = ages[i];
-      break;
-    }
-  }
-
-  // -----------------------------
-  // DECISION
-  // -----------------------------
-  let recommendation = "";
-  let decisionStrength = "neutral";
-
-  if (wealthDiff !== null) {
-    if (Math.abs(wealthDiff) < 5000) {
-      recommendation = "Either option is broadly similar";
-    } else if (wealthDiff < 0) {
-      recommendation = "Investing appears more favourable";
-      decisionStrength = flipRate ? "sensitive" : "strong";
-    } else {
-      recommendation = "Overpaying appears more favourable";
-      decisionStrength = "strong";
-    }
-  }
-
-  // -----------------------------
-  // CHART DATA
-  // -----------------------------
-  const chartData = ages.map((age, i) => ({
-    age,
-    invest: invest[i] ?? 0,
-    overpay: overpay[i] ?? 0,
-    gap: (invest[i] ?? 0) - (overpay[i] ?? 0)
-  }));
-
-  // -----------------------------
-  // FORMAT
-  // -----------------------------
-  const formatCurrency = (v) =>
-    v !== null && v !== undefined
-      ? `£${Math.round(v).toLocaleString()}`
-      : "-";
-
-  const formatAxis = (v) => `£${(v / 1000).toFixed(0)}k`;
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload) return null;
-
-    return (
-      <div style={{ background: "#fff", padding: 10, border: "1px solid #ddd", borderRadius: 8 }}>
-        <strong>Age {label}</strong>
-        {payload.map((p, i) => (
-          <div key={i}>{p.name}: {formatCurrency(p.value)}</div>
-        ))}
-      </div>
-    );
-  };
-
-  // -----------------------------
-  // INSIGHTS (CLEAN + HUMAN)
+  // INSIGHTS (CLEAN)
   // -----------------------------
   let insightOutcome = "";
   let insightJourney = "";
@@ -194,7 +142,7 @@ export default function StudentLoanTool() {
   let insightTrigger = "";
 
   if (wealthDiff !== null) {
-    insightOutcome = `By age ${retirementAge}, ${direction} could leave you about ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
+    insightOutcome = `By age ${retirementAge}, ${direction} could leave you about £${Math.abs(wealthDiff).toLocaleString()} better off overall`;
   }
 
   if (crossoverAge && crossoverAge > currentAge + 2) {
@@ -208,7 +156,7 @@ export default function StudentLoanTool() {
   }
 
   if (maxAdvantageAge !== null) {
-    insightMax = `The largest gap occurs around age ${maxAdvantageAge}, where ${direction} is ahead by about ${formatCurrency(Math.abs(maxAdvantage))}`;
+    insightMax = `The largest gap occurs around age ${maxAdvantageAge}, where ${direction} is ahead by about £${Math.abs(maxAdvantage).toLocaleString()}`;
   }
 
   if (flipRate) {
@@ -227,7 +175,6 @@ export default function StudentLoanTool() {
 
       <h2>🎓 Student Loan</h2>
 
-      {/* INPUTS */}
       <div>
         <label>Salary (£)</label>
         <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
@@ -285,12 +232,44 @@ export default function StudentLoanTool() {
 
       {loading && <p>Calculating...</p>}
 
-      {/* RESULTS */}
       {result && (
         <div style={{ marginTop: 20 }}>
 
+          {/* 🔥 NEW REPAYMENT BLOCK */}
+          <div style={{
+            marginTop: 20,
+            padding: 12,
+            background: "#f0fdf4",
+            borderRadius: 10,
+            border: "1px solid #bbf7d0"
+          }}>
+            <strong>🧾 Your repayment picture</strong>
+
+            <ul style={{ marginTop: 8, paddingLeft: 18 }}>
+              <li>You start repaying above £27,295</li>
+
+              <li>
+                At your current salary (£{salary.toLocaleString()}), you repay about £{Math.round(monthlyRepayment)}/month
+              </li>
+
+              <li>
+                {loanWrittenOff
+                  ? "Your loan is likely to be written off before being fully repaid"
+                  : "You are likely to repay your loan in full over time"}
+              </li>
+
+              <li>
+                To clear your loan in ~10 years, you'd need to repay about £{Math.round(requiredMonthly)}/month
+              </li>
+
+              <li>
+                That typically requires earnings of around £{Math.round(requiredSalary).toLocaleString()}
+              </li>
+            </ul>
+          </div>
+
           {/* RECOMMENDATION */}
-          <div style={{ padding: 15, borderRadius: 10, background: "#ecfdf5" }}>
+          <div style={{ marginTop: 20, padding: 15, borderRadius: 10, background: "#ecfdf5" }}>
             <strong>💡 What this suggests</strong>
             <div style={{ marginTop: 6 }}>
               Based on your inputs, {direction} appears to lead to better long-term outcomes.
@@ -303,8 +282,8 @@ export default function StudentLoanTool() {
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="age" />
-                <YAxis tickFormatter={formatAxis} />
-                <Tooltip content={<CustomTooltip />} />
+                <YAxis tickFormatter={(v) => `£${(v / 1000).toFixed(0)}k`} />
+                <Tooltip />
                 <Legend />
 
                 {crossoverAge && <ReferenceLine x={crossoverAge} stroke="purple" />}
@@ -369,7 +348,6 @@ export default function StudentLoanTool() {
 
         </div>
       )}
-
     </div>
   );
 }
