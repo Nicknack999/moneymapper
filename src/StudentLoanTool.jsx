@@ -21,16 +21,18 @@ export default function StudentLoanTool() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const [currentAge, setCurrentAge] = useState(30);
+  const [retirementAge, setRetirementAge] = useState(60);
+
   const [returnRate, setReturnRate] = useState(5);
   const [loanInterest, setLoanInterest] = useState(6);
   const [writeOffYears, setWriteOffYears] = useState(30);
 
   const [flipRate, setFlipRate] = useState(null);
 
-  const currentAge = 30;
-  const retirementAge = 60;
-
+  // -----------------------------
   // FETCH
+  // -----------------------------
   const fetchModel = async (overpayValue, overrideReturnRate = null) => {
     const res = await fetch("https://moneymapper-backend-018g.onrender.com/full-model", {
       method: "POST",
@@ -63,7 +65,7 @@ export default function StudentLoanTool() {
   const updateAndRun = async (setter, value) => {
     setter(value);
 
-    if (result) {
+    if (result && currentAge < retirementAge) {
       setLoading(true);
       const data = await fetchModel(
         setter === setSelectedOverpay ? value : selectedOverpay,
@@ -75,7 +77,9 @@ export default function StudentLoanTool() {
     }
   };
 
+  // -----------------------------
   // DATA
+  // -----------------------------
   const ages = result?.curves?.ages || [];
   const invest = result?.curves?.invest_net_worth || [];
   const overpay = result?.curves?.overpay_net_worth || [];
@@ -84,7 +88,9 @@ export default function StudentLoanTool() {
   const breakEvenSalary = result?.insights?.break_even_salary;
   const loanWrittenOff = result?.insights?.loan_written_off;
 
+  // -----------------------------
   // CROSSOVER
+  // -----------------------------
   let crossoverAge = null;
   for (let i = 0; i < ages.length; i++) {
     if ((invest[i] ?? 0) > (overpay[i] ?? 0)) {
@@ -93,7 +99,9 @@ export default function StudentLoanTool() {
     }
   }
 
+  // -----------------------------
   // MAX ADVANTAGE
+  // -----------------------------
   let maxAdvantage = null;
   let maxAdvantageAge = null;
   let maxIndex = null;
@@ -108,7 +116,9 @@ export default function StudentLoanTool() {
     }
   }
 
+  // -----------------------------
   // MEANINGFUL GAP
+  // -----------------------------
   let meaningfulAge = null;
   const threshold = 10000;
 
@@ -121,7 +131,9 @@ export default function StudentLoanTool() {
     }
   }
 
+  // -----------------------------
   // DECISION
+  // -----------------------------
   let recommendation = "";
   let decisionStrength = "neutral";
 
@@ -137,7 +149,9 @@ export default function StudentLoanTool() {
     }
   }
 
+  // -----------------------------
   // CHART DATA
+  // -----------------------------
   const chartData = ages.map((age, i) => ({
     age,
     invest: invest[i] ?? 0,
@@ -145,7 +159,9 @@ export default function StudentLoanTool() {
     gap: (invest[i] ?? 0) - (overpay[i] ?? 0)
   }));
 
+  // -----------------------------
   // FORMAT
+  // -----------------------------
   const formatCurrency = (v) =>
     v !== null && v !== undefined
       ? `£${Math.round(v).toLocaleString()}`
@@ -166,7 +182,9 @@ export default function StudentLoanTool() {
     );
   };
 
+  // -----------------------------
   // INSIGHTS
+  // -----------------------------
   let insightOutcome = "";
   let insightRepayment = "";
   let insightTrigger = "";
@@ -233,6 +251,9 @@ export default function StudentLoanTool() {
     insightSensitivity = `This result depends on returns around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
   }
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
     <div style={{ padding: 20, maxWidth: 1100, margin: "auto" }}>
 
@@ -246,8 +267,23 @@ export default function StudentLoanTool() {
         <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
       </div>
 
+      {/* CONTROLS */}
       <div style={{ marginTop: 20, padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
         <strong>Adjust your scenario</strong>
+
+        <div>Current age: {currentAge}</div>
+        <input type="range" min="18" max="55" value={currentAge}
+          onChange={(e) => updateAndRun(setCurrentAge, Number(e.target.value))}
+        />
+
+        <div>Retirement age: {retirementAge}</div>
+        <input type="range" min="50" max="70" value={retirementAge}
+          onChange={(e) => updateAndRun(setRetirementAge, Number(e.target.value))}
+        />
+
+        {currentAge >= retirementAge && (
+          <p style={{ color: "red" }}>Retirement age must be higher than current age</p>
+        )}
 
         <div>Investment return: {returnRate.toFixed(1)}%</div>
         <input type="range" min="0" max="10" step="0.1"
@@ -266,6 +302,10 @@ export default function StudentLoanTool() {
           value={loanInterest}
           onChange={(e) => updateAndRun(setLoanInterest, Number(e.target.value))}
         />
+
+        <div style={{ marginTop: 10, fontSize: 13, color: "#666" }}>
+          <strong>Assumptions:</strong> Age {currentAge} → {retirementAge} • Return {returnRate.toFixed(1)}% • Loan {loanInterest}%
+        </div>
       </div>
 
       <button onClick={runModel} style={{ marginTop: 10 }}>
@@ -277,13 +317,22 @@ export default function StudentLoanTool() {
       {result && (
         <div style={{ marginTop: 20 }}>
 
+          {/* RECOMMENDATION */}
           <div style={{ padding: 15, borderRadius: 10, background: "#ecfdf5" }}>
             <strong>💡 What this suggests</strong>
             <div style={{ marginTop: 6 }}>
-              Based on your inputs, investing appears to lead to better long-term outcomes.
+              {recommendation === "Invest instead of overpaying" &&
+                "Based on your inputs, investing appears to lead to better long-term outcomes."}
+
+              {recommendation === "Overpay your loan" &&
+                "Based on your inputs, overpaying appears to lead to better overall outcomes."}
+
+              {recommendation === "Either option is broadly similar" &&
+                "Based on your inputs, both options lead to broadly similar outcomes."}
             </div>
           </div>
 
+          {/* CHART */}
           <div style={{ marginTop: 20 }}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
@@ -293,18 +342,10 @@ export default function StudentLoanTool() {
                 <Tooltip content={<CustomTooltip />} />
                 <Legend />
 
-                {crossoverAge && (
-                  <ReferenceLine x={crossoverAge} stroke="purple" label={{ value: "Crossover", position: "top" }} />
-                )}
-
+                {crossoverAge && <ReferenceLine x={crossoverAge} stroke="purple" />}
+                {meaningfulAge && <ReferenceLine x={meaningfulAge} stroke="#f59e0b" />}
                 {maxIndex !== null && (
-                  <ReferenceDot
-                    x={ages[maxIndex]}
-                    y={invest[maxIndex]}
-                    r={6}
-                    fill="green"
-                    label={{ value: "Max", position: "top" }}
-                  />
+                  <ReferenceDot x={ages[maxIndex]} y={invest[maxIndex]} r={6} fill="green" />
                 )}
 
                 <Area dataKey="gap" fill="#fca5a5" fillOpacity={0.15} />
@@ -315,6 +356,7 @@ export default function StudentLoanTool() {
             </ResponsiveContainer>
           </div>
 
+          {/* INSIGHTS */}
           <div style={{ marginTop: 12, padding: 12, background: "#f5f9ff", borderLeft: "4px solid #4CAF50", borderRadius: 10 }}>
             <strong>📊 Key insights</strong>
             <ul>
@@ -327,6 +369,39 @@ export default function StudentLoanTool() {
               {insightSensitivity && <li>{insightSensitivity}</li>}
               {insightTrigger && <li>{insightTrigger}</li>}
             </ul>
+          </div>
+
+          {/* WHY */}
+          <div style={{
+            marginTop: 12,
+            padding: 12,
+            background: loanWrittenOff ? "#fff7ed" : "#eef2ff",
+            borderRadius: 10,
+            border: "1px solid #ddd"
+          }}>
+            <strong>💡 Why this happens</strong>
+            <div style={{ marginTop: 6 }}>
+              {loanWrittenOff
+                ? "Your loan is unlikely to be fully repaid, so overpaying does not reduce total repayments significantly."
+                : "You are likely to repay your loan in full, but investment growth can still outpace the interest cost."}
+            </div>
+          </div>
+
+          {/* DISCLAIMER */}
+          <div style={{
+            marginTop: 16,
+            padding: 10,
+            fontSize: 12,
+            color: "#555",
+            background: "#f9fafb",
+            borderRadius: 8,
+            border: "1px solid #e5e7eb"
+          }}>
+            <strong>⚠️ Important context</strong>
+            <div style={{ marginTop: 4 }}>
+              We built this tool to help our own family understand student loan decisions. 
+              It’s designed to guide thinking and explore scenarios, not to provide financial advice.
+            </div>
           </div>
 
         </div>
