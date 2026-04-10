@@ -165,56 +165,49 @@ export default function StudentLoanTool() {
   };
 
   // INSIGHTS
-  let insightOutcome = "";
-  let insightRepayment = "";
-  let insightTrigger = "";
-  let insightCrossover = "";
-  let insightMeaningful = "";
-  let insightAcceleration = "";
-  let insightSensitivity = "";
-  let insightMax = "";
-  let insightJourney = "";
+let insightOutcome = "";
+let insightRepayment = "";
+let insightTrigger = "";
+let insightCrossover = "";
+let insightMeaningful = "";
+let insightAcceleration = "";
+let insightSensitivity = "";
+let insightMax = "";
+let insightJourney = "";
 
-  if (wealthDiff !== null) {
-    insightOutcome =
-      wealthDiff < 0
-        ? `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`
-        : `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
-  }
+if (wealthDiff !== null) {
+  insightOutcome =
+    wealthDiff < 0
+      ? `Investing leaves you ${formatCurrency(Math.abs(wealthDiff))} better off by retirement`
+      : `Overpaying leaves you ${formatCurrency(Math.abs(wealthDiff))} better off overall`;
+}
 
-  if (loanWrittenOff === true) {
-    insightRepayment = "Your loan is likely to be written off before full repayment";
-  } else if (loanWrittenOff === false) {
-    insightRepayment = "You are likely to repay your loan in full";
-  }
+if (loanWrittenOff === true) {
+  insightRepayment = "Your loan is likely to be written off before full repayment";
+} else if (loanWrittenOff === false) {
+  insightRepayment = "You are likely to repay your loan in full";
+}
 
-  if (breakEvenSalary) {
-    insightTrigger = `If your salary reached around £${Math.round(breakEvenSalary).toLocaleString()}, this decision could change`;
-  }
+if (breakEvenSalary) {
+  insightTrigger = `If your salary reached around £${Math.round(breakEvenSalary).toLocaleString()}, this decision could change`;
+}
 
-  if (crossoverAge) {
-    insightCrossover = `You start to come out ahead from around age ${crossoverAge}`;
-  }
+if (crossoverAge) {
+  insightCrossover = `You start to come out ahead from around age ${crossoverAge}`;
+}
 
-  if (meaningfulAge) {
-    insightMeaningful = `The difference becomes meaningful (around £10k) by age ${meaningfulAge}`;
-  }
+if (meaningfulAge) {
+  insightMeaningful = `The difference becomes meaningful (around £10k) by age ${meaningfulAge}`;
+}
 
-  if (maxAdvantageAge !== null) {
-    insightMax =
-      maxAdvantage < 0
-        ? `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from investing at around age ${maxAdvantageAge}`
-        : `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from overpaying at around age ${maxAdvantageAge}`;
-  }
+if (maxAdvantageAge !== null) {
+  insightMax =
+    maxAdvantage < 0
+      ? `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from investing at around age ${maxAdvantageAge}`
+      : `Maximum advantage is ${formatCurrency(Math.abs(maxAdvantage))} from overpaying at around age ${maxAdvantageAge}`;
+}
 
-  if (crossoverAge && maxAdvantageAge) {
-    insightAcceleration =
-      maxAdvantageAge - crossoverAge > 10
-        ? "The financial gap builds gradually, with most benefit later due to compounding"
-        : "The financial difference emerges relatively quickly after crossover";
-
-    let insightJourney = "";
-
+// ✅ JOURNEY + ACCELERATION (FIXED)
 if (crossoverAge && maxAdvantageAge) {
 
   const earlyGap = (invest[0] ?? 0) - (overpay[0] ?? 0);
@@ -228,111 +221,15 @@ if (crossoverAge && maxAdvantageAge) {
       ? "and the advantage builds gradually over time"
       : "and the advantage builds relatively quickly";
 
-  insightJourney = `${earlyLeader}, before the outcomes converge around age ${crossoverAge}, ${speed}. `;
+  insightJourney = `${earlyLeader}, before the outcomes converge around age ${crossoverAge}, ${speed}. Most of the benefit occurs later due to compounding.`;
+
+  insightAcceleration =
+    yearsToPeak > 10
+      ? "The financial gap builds gradually, with most benefit later due to compounding"
+      : "The financial difference emerges relatively quickly after crossover";
 }
 
-  if (flipRate) {
-    insightSensitivity = `This result depends on returns around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
-  }
-
-  return (
-    <div style={{ padding: 20, maxWidth: 1100, margin: "auto" }}>
-
-      <h2>🎓 Student Loan</h2>
-
-      <div>
-        <label>Salary (£)</label>
-        <input value={salary} onChange={(e) => setSalary(Number(e.target.value))} />
-
-        <label>Loan Balance (£)</label>
-        <input value={balance} onChange={(e) => setBalance(Number(e.target.value))} />
-      </div>
-
-      <div style={{ marginTop: 20, padding: 12, border: "1px solid #eee", borderRadius: 8 }}>
-        <strong>Adjust your scenario</strong>
-
-        <div>Investment return: {returnRate.toFixed(1)}%</div>
-        <input type="range" min="0" max="10" step="0.1"
-          value={returnRate}
-          onChange={(e) => updateAndRun(setReturnRate, Number(e.target.value))}
-        />
-
-        <div>Overpayment: £{selectedOverpay}/month</div>
-        <input type="range" min="0" max="500" step="10"
-          value={selectedOverpay}
-          onChange={(e) => updateAndRun(setSelectedOverpay, Number(e.target.value))}
-        />
-
-        <div>Loan interest: {loanInterest}%</div>
-        <input type="range" min="0" max="10" step="0.1"
-          value={loanInterest}
-          onChange={(e) => updateAndRun(setLoanInterest, Number(e.target.value))}
-        />
-      </div>
-
-      <button onClick={runModel} style={{ marginTop: 10 }}>
-        Run Model
-      </button>
-
-      {loading && <p>Calculating...</p>}
-
-      {result && (
-        <div style={{ marginTop: 20 }}>
-
-          <div style={{ padding: 15, borderRadius: 10, background: "#ecfdf5" }}>
-            <strong>💡 What this suggests</strong>
-            <div style={{ marginTop: 6 }}>
-              Based on your inputs, investing appears to lead to better long-term outcomes.
-            </div>
-          </div>
-
-          <div style={{ marginTop: 20 }}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="age" />
-                <YAxis tickFormatter={formatAxis} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-
-                {crossoverAge && (
-                  <ReferenceLine x={crossoverAge} stroke="purple" label={{ value: "Crossover", position: "top" }} />
-                )}
-
-                {maxAdvantageAge && (
-                  <ReferenceDot
-                    x={maxAdvantageAge}
-                    y={invest[ages.indexOf(maxAdvantageAge)]}
-                    r={6}
-                    fill="green"
-                    label={{ value: "Max", position: "top" }}
-                  />
-                )}
-
-                <Area dataKey="gap" fill="#fca5a5" fillOpacity={0.15} />
-                <Line dataKey="gap" stroke="#dc2626" />
-                <Line dataKey="invest" stroke="#16a34a" />
-                <Line dataKey="overpay" stroke="#2563eb" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div style={{ marginTop: 12, padding: 12, background: "#f5f9ff", borderLeft: "4px solid #4CAF50", borderRadius: 10 }}>
-            <strong>📊 Key insights</strong>
-            <ul>
-              <li>{insightOutcome}</li>
-              <li>{insightJourney}</li>
-              <li>{insightCrossover}</li>
-              <li>{insightMeaningful}</li>
-              <li>{insightMax}</li>
-              <li>{insightAcceleration}</li>
-              <li>{insightSensitivity}</li>
-              <li>{insightTrigger}</li>
-            </ul>
-          </div>
-
-        </div>
-      )}
-    </div>
-  );
+// ✅ SENSITIVITY
+if (flipRate) {
+  insightSensitivity = `This result depends on returns around ${returnRate.toFixed(1)}%. Lower returns (below ~${flipRate.toFixed(1)}%) could change the outcome`;
 }
