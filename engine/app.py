@@ -21,7 +21,7 @@ CORS(
 # -----------------------------
 @app.route("/")
 def home():
-    return "MoneyMapper API is running 🚀"
+    return "MoneyMapper API v1 🚀"
 
 
 # -----------------------------
