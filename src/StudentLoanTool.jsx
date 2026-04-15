@@ -69,6 +69,47 @@ const fetchModel = async (overpayValue, overrideReturnRate = null) => {
 };
 
   // -----------------------------
+// RUN MODEL
+// -----------------------------
+const runModel = async () => {
+  if (currentAge >= retirementAge) return;
+
+  setLoading(true);
+
+  const data = await fetchModel(selectedOverpay);
+
+  if (data) {
+    setResult(data);
+    setFlipRate(data.flip_return_rate ?? null);
+  }
+
+  setLoading(false);
+};
+
+// -----------------------------
+// UPDATE + RUN
+// -----------------------------
+const updateAndRun = async (setter, value) => {
+  setter(value);
+
+  if (result && currentAge < retirementAge) {
+    setLoading(true);
+
+    const data = await fetchModel(
+      setter === setSelectedOverpay ? value : selectedOverpay,
+      setter === setReturnRate ? value : null
+    );
+
+    if (data) {
+      setResult(data);
+      setFlipRate(data.flip_return_rate ?? null);
+    }
+
+    setLoading(false);
+  }
+};
+
+  // -----------------------------
   // REPAYMENT LOGIC (NEW 🔥)
   // -----------------------------
   const threshold = 27295;
