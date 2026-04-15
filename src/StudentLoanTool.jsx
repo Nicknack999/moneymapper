@@ -198,6 +198,16 @@ const updateAndRun = async (setter, value) => {
   }
 
   // -----------------------------
+// CHART DATA (FIXED)
+// -----------------------------
+const chartData = (ages || []).map((age, i) => ({
+  age,
+  invest: invest[i] ?? 0,
+  overpay: overpay[i] ?? 0,
+  gap: (invest[i] ?? 0) - (overpay[i] ?? 0)
+}));
+
+  // -----------------------------
   // UI
   // -----------------------------
   return (
