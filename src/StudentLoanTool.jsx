@@ -33,8 +33,13 @@ export default function StudentLoanTool() {
   // -----------------------------
   // FETCH
   // -----------------------------
-  const fetchModel = async (overpayValue, overrideReturnRate = null) => {
-    const res = await fetch("https://moneymapper-backend-018g.onrender.com/full-model", {
+  const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://moneymapper-backend-018g.onrender.com";
+
+const fetchModel = async (overpayValue, overrideReturnRate = null) => {
+  try {
+    const res = await fetch(`${API_URL}/full-model`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -51,33 +56,17 @@ export default function StudentLoanTool() {
       })
     });
 
-    return res.json();
-  };
-
-  const runModel = async () => {
-    if (currentAge >= retirementAge) return;
-
-    setLoading(true);
-    const data = await fetchModel(selectedOverpay);
-    setResult(data);
-    setFlipRate(data.flip_return_rate ?? null);
-    setLoading(false);
-  };
-
-  const updateAndRun = async (setter, value) => {
-    setter(value);
-
-    if (result && currentAge < retirementAge) {
-      setLoading(true);
-      const data = await fetchModel(
-        setter === setSelectedOverpay ? value : selectedOverpay,
-        setter === setReturnRate ? value : null
-      );
-      setResult(data);
-      setFlipRate(data.flip_return_rate ?? null);
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error(`API error: ${res.status}`);
     }
-  };
+
+    return await res.json();
+
+  } catch (err) {
+    console.error("❌ Fetch failed:", err);
+    return null;
+  }
+};
 
   // -----------------------------
   // REPAYMENT LOGIC (NEW 🔥)
