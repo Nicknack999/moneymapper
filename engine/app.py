@@ -49,7 +49,7 @@ def forecast():
         return jsonify({"error": "Failed to run forecast"}), 500
 
 
-@app.route("https://moneymapper-backend-018g.onrender.com/full-model", methods=["POST"])
+@app.route("/full-model", methods=["POST"])
 def full_model():
     try:
         data = request.get_json(force=True)
