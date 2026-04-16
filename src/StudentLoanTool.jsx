@@ -7,7 +7,8 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend
+  Legend,
+  ReferenceDot
 } from "recharts";
 
 export default function StudentLoanTool() {
@@ -19,53 +20,45 @@ export default function StudentLoanTool() {
   // STATE
   // ---------------------------------
   const [tab, setTab] = useState("summary");
-  const [visualMode, setVisualMode] = useState("simple");
-
   const [salary, setSalary] = useState(40000);
   const [balance, setBalance] = useState(50000);
   const [overpay, setOverpay] = useState(100);
-
   const [currentAge, setCurrentAge] = useState(30);
   const [comparisonYears, setComparisonYears] =
     useState(30);
-
   const [returnRate, setReturnRate] =
     useState(5);
-
   const [loanInterest, setLoanInterest] =
     useState(6);
-
   const [plan, setPlan] = useState("plan2");
-
   const [loading, setLoading] =
     useState(false);
-
   const [result, setResult] =
     useState(null);
 
   // ---------------------------------
-  // PLAN DATA (2026)
+  // PLAN RULES (2026)
   // ---------------------------------
   const plans = {
     plan1: {
       name: "Plan 1",
       threshold: 26065,
-      writeOffYears: 25
+      years: 25
     },
     plan2: {
       name: "Plan 2",
       threshold: 27295,
-      writeOffYears: 30
+      years: 30
     },
     plan5: {
       name: "Plan 5",
       threshold: 25000,
-      writeOffYears: 40
+      years: 40
     },
     pg: {
       name: "Postgraduate",
       threshold: 21000,
-      writeOffYears: 30
+      years: 30
     }
   };
 
@@ -80,11 +73,42 @@ export default function StudentLoanTool() {
   const moneyK = (v) =>
     `£${Math.round(v / 1000)}k`;
 
-  const threshold =
-    selectedPlan.threshold;
+  const card = {
+    background: "white",
+    borderRadius: 18,
+    padding: 18,
+    border:
+      "1px solid #e5e7eb",
+    boxShadow:
+      "0 8px 20px rgba(15,23,42,0.05)"
+  };
+
+  const input = {
+    width: "100%",
+    padding: 10,
+    borderRadius: 10,
+    border:
+      "1px solid #d1d5db",
+    marginTop: 6
+  };
+
+  const pill = (active) => ({
+    padding:
+      "10px 14px",
+    borderRadius: 999,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 600,
+    background: active
+      ? "#10b981"
+      : "#e5e7eb",
+    color: active
+      ? "white"
+      : "#0f172a"
+  });
 
   // ---------------------------------
-  // FETCH
+  // MODEL CALL
   // ---------------------------------
   const runModel = async () => {
     setLoading(true);
@@ -112,7 +136,7 @@ export default function StudentLoanTool() {
             loan_interest:
               loanInterest / 100,
             write_off_years:
-              selectedPlan.writeOffYears,
+              selectedPlan.years,
             model_opportunity_cost: true
           })
         }
@@ -130,40 +154,33 @@ export default function StudentLoanTool() {
   };
 
   // ---------------------------------
-  // SIMPLE CALCS
+  // SIMPLE FRONTEND CALCS
   // ---------------------------------
+  const threshold =
+    selectedPlan.threshold;
+
   const monthlyRepayment =
     Math.max(
       0,
       (salary - threshold) * 0.09
     ) / 12;
 
-  const estimatedYears =
+  const yearsToRepay =
     monthlyRepayment > 0
       ? balance /
         (monthlyRepayment * 12)
       : null;
 
-  const payoffAge =
-    estimatedYears
-      ? Math.round(
-          currentAge +
-            estimatedYears
-        )
-      : null;
-
-  const repayWithinWindow =
-    estimatedYears &&
-    estimatedYears <=
-      selectedPlan.writeOffYears;
-
-  const requiredAnnual =
-    balance /
-    selectedPlan.writeOffYears;
+  const repayLikely =
+    yearsToRepay &&
+    yearsToRepay <=
+      selectedPlan.years;
 
   const requiredSalary =
     threshold +
-    requiredAnnual / 0.09;
+    balance /
+      selectedPlan.years /
+      0.09;
 
   // ---------------------------------
   // MODEL DATA
@@ -186,14 +203,10 @@ export default function StudentLoanTool() {
 
   const direction =
     wealthDiff === null
-      ? "Either option"
+      ? "Either route"
       : wealthDiff < 0
       ? "Investing"
       : "Overpaying";
-
-  const loanWrittenOff =
-    result?.insights
-      ?.loan_written_off;
 
   const chartData = ages.map(
     (age, i) => ({
@@ -206,77 +219,25 @@ export default function StudentLoanTool() {
     })
   );
 
-  // ---------------------------------
-  // CHART MILESTONES
-  // ---------------------------------
-  let crossoverAge = null;
-
-  for (
-    let i = 0;
-    i < ages.length;
-    i++
-  ) {
-    if (
-      (invest[i] ?? 0) >
-      (overpayCurve[i] ??
-        0)
-    ) {
-      crossoverAge =
-        ages[i];
-      break;
-    }
-  }
+  const lastIndex =
+    ages.length - 1;
 
   const finalAge =
-    ages[
-      ages.length - 1
-    ];
+    ages[lastIndex];
 
-  const finalGap =
-    wealthDiff !== null
-      ? Math.abs(
-          wealthDiff
-        )
-      : null;
+  const investEnd =
+    invest[lastIndex] ??
+    0;
 
-  // ---------------------------------
-  // STYLES
-  // ---------------------------------
-  const card = {
-    background: "white",
-    borderRadius: 16,
-    padding: 18,
-    border:
-      "1px solid #e5e7eb",
-    boxShadow:
-      "0 8px 20px rgba(15,23,42,0.05)"
-  };
+  const overpayEnd =
+    overpayCurve[lastIndex] ??
+    0;
 
-  const input = {
-    width: "100%",
-    padding: 10,
-    borderRadius: 10,
-    border:
-      "1px solid #d1d5db",
-    marginTop: 6
-  };
-
-  const button = (
-    active = false
-  ) => ({
-    padding:
-      "10px 14px",
-    borderRadius: 10,
-    border: "none",
-    cursor: "pointer",
-    fontWeight: 600,
-    background: active
-      ? "#10b981"
-      : "#e5e7eb",
-    color: active
-      ? "white"
-      : "#0f172a"
-  });
+  const winner =
+    investEnd >
+    overpayEnd
+      ? "invest"
+      : "overpay";
 
   // ---------------------------------
   // UI
@@ -292,9 +253,7 @@ export default function StudentLoanTool() {
       <div style={card}>
         <h2
           style={{
-            margin: 0,
-            color:
-              "#0f172a"
+            margin: 0
           }}
         >
           Student Loan:
@@ -303,9 +262,9 @@ export default function StudentLoanTool() {
 
         <p
           style={{
-            marginTop: 8,
             color:
               "#475569",
+            marginTop: 8,
             lineHeight: 1.6
           }}
         >
@@ -338,7 +297,7 @@ export default function StudentLoanTool() {
         >
           <div>
             <label>
-              Loan plan
+              Loan Plan
             </label>
             <select
               value={
@@ -400,7 +359,7 @@ export default function StudentLoanTool() {
 
           <div>
             <label>
-              Loan balance (£)
+              Balance (£)
             </label>
             <input
               type="number"
@@ -426,7 +385,8 @@ export default function StudentLoanTool() {
 
           <div>
             <label>
-              Monthly overpayment (£)
+              Overpay /
+              month (£)
             </label>
             <input
               type="number"
@@ -452,7 +412,7 @@ export default function StudentLoanTool() {
 
           <div>
             <label>
-              Current age
+              Current Age
             </label>
             <input
               type="number"
@@ -478,7 +438,8 @@ export default function StudentLoanTool() {
 
           <div>
             <label>
-              Comparison period (years)
+              Compare For
+              (years)
             </label>
             <input
               type="number"
@@ -501,59 +462,52 @@ export default function StudentLoanTool() {
               }
             />
           </div>
+        </div>
 
-          <div>
-            <label>
-              Investment return (%)
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              value={
-                returnRate
-              }
-              onChange={(
-                e
-              ) =>
-                setReturnRate(
-                  Number(
-                    e
-                      .target
-                      .value
-                  )
-                )
-              }
-              style={
-                input
-              }
-            />
-          </div>
+        {/* PLAN SNAPSHOT */}
+        <div
+          style={{
+            marginTop: 16,
+            padding: 14,
+            background:
+              "#f8fafc",
+            borderRadius: 12
+          }}
+        >
+          <strong>
+            {selectedPlan.name} assumptions
+          </strong>
 
-          <div>
-            <label>
-              Loan interest (%)
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              value={
-                loanInterest
-              }
-              onChange={(
-                e
-              ) =>
-                setLoanInterest(
-                  Number(
-                    e
-                      .target
-                      .value
-                  )
-                )
-              }
-              style={
-                input
-              }
-            />
+          <div
+            style={{
+              marginTop: 8,
+              color:
+                "#475569",
+              lineHeight: 1.8
+            }}
+          >
+            • Repayments
+            start above{" "}
+            {money(
+              threshold
+            )}
+            <br />
+            • 9% of
+            income above
+            threshold
+            <br />
+            • Typical
+            write-off
+            after{" "}
+            {
+              selectedPlan.years
+            }{" "}
+            years
+            <br />
+            • Interest
+            assumption:
+            {loanInterest}
+            %
           </div>
         </div>
 
@@ -578,7 +532,7 @@ export default function StudentLoanTool() {
           }}
         >
           {loading
-            ? "Calculating..."
+            ? "Comparing..."
             : "Run Comparison"}
         </button>
       </div>
@@ -598,7 +552,7 @@ export default function StudentLoanTool() {
             }}
           >
             <button
-              style={button(
+              style={pill(
                 tab ===
                   "summary"
               )}
@@ -612,21 +566,21 @@ export default function StudentLoanTool() {
             </button>
 
             <button
-              style={button(
+              style={pill(
                 tab ===
-                  "visual"
+                  "journey"
               )}
               onClick={() =>
                 setTab(
-                  "visual"
+                  "journey"
                 )
               }
             >
-              Visual Breakdown
+              Journey
             </button>
 
             <button
-              style={button(
+              style={pill(
                 tab ===
                   "method"
               )}
@@ -636,21 +590,7 @@ export default function StudentLoanTool() {
                 )
               }
             >
-              How We Estimated This
-            </button>
-
-            <button
-              style={button(
-                tab ===
-                  "details"
-              )}
-              onClick={() =>
-                setTab(
-                  "details"
-                )
-              }
-            >
-              Details
+              Method
             </button>
           </div>
 
@@ -664,23 +604,77 @@ export default function StudentLoanTool() {
               }}
             >
               <h3>
+                🧾 Your
+                repayment
+                picture
+              </h3>
+
+              <ul>
+                <li>
+                  You begin
+                  repayments
+                  above{" "}
+                  {money(
+                    threshold
+                  )}
+                </li>
+
+                <li>
+                  Current
+                  repayments:
+                  around{" "}
+                  {money(
+                    monthlyRepayment
+                  )}
+                  /month
+                </li>
+
+                <li>
+                  {repayLikely
+                    ? "At a similar income, repayment may happen before write-off."
+                    : "At a similar income, full repayment may be unlikely before write-off."}
+                </li>
+
+                <li>
+                  Illustrative
+                  salary to
+                  clear
+                  within{" "}
+                  {
+                    selectedPlan.years
+                  }{" "}
+                  years:{" "}
+                  {money(
+                    requiredSalary
+                  )}
+                </li>
+              </ul>
+
+              <hr />
+
+              <h3>
                 💡 What
                 this
                 suggests
               </h3>
 
               <p>
-                {direction} appears
-                stronger in
-                this
-                scenario.
+                <strong>
+                  {
+                    direction
+                  }
+                </strong>{" "}
+                appears
+                stronger
+                based on
+                these
+                assumptions.
               </p>
 
               {wealthDiff !==
                 null && (
                 <p>
                   Estimated
-                  net worth
                   difference
                   after{" "}
                   {
@@ -701,117 +695,27 @@ export default function StudentLoanTool() {
 
               <h3>
                 🎯 When
-                Overpaying
-                Matters
+                overpaying
+                matters
               </h3>
 
               <p>
                 {salary <
                 requiredSalary *
-                  0.85
-                  ? "You appear below the zone where overpaying often has the biggest impact."
+                  0.9
+                  ? "You appear below the key zone where overpaying often has the biggest effect."
                   : salary <=
                     requiredSalary *
                       1.1
-                  ? "You appear near the key decision zone where comparing overpaying vs investing is especially worthwhile."
+                  ? "You appear near the key decision zone where comparing both routes is especially worthwhile."
                   : "You appear in a stronger repayment zone where overpaying can become more valuable."}
               </p>
-
-              <p>
-                Illustrative
-                salary to
-                repay
-                within{" "}
-                {
-                  selectedPlan.writeOffYears
-                }{" "}
-                years:{" "}
-                <strong>
-                  {money(
-                    requiredSalary
-                  )}
-                </strong>
-              </p>
-
-              <hr />
-
-              <h3>
-                🧾 Your
-                repayment
-                picture
-              </h3>
-
-              <ul>
-                <li>
-                  You begin
-                  repayments
-                  above{" "}
-                  {money(
-                    threshold
-                  )}
-                </li>
-
-                <li>
-                  At your
-                  salary,
-                  repayments
-                  are around{" "}
-                  {money(
-                    monthlyRepayment
-                  )}
-                  /month
-                </li>
-
-                {estimatedYears && (
-                  <li>
-                    If salary
-                    stayed
-                    similar,
-                    simple
-                    repayments
-                    alone
-                    could
-                    take
-                    around{" "}
-                    {Math.round(
-                      estimatedYears
-                    )}{" "}
-                    years
-                    (age{" "}
-                    {
-                      payoffAge
-                    }
-                    )
-                  </li>
-                )}
-
-                <li>
-                  {repayWithinWindow
-                    ? "This rough estimate suggests repayment could happen before write-off."
-                    : "This rough estimate suggests full repayment may be unlikely before write-off."}
-                </li>
-
-                {loanWrittenOff ===
-                  true && (
-                  <li>
-                    Your
-                    full
-                    model
-                    also
-                    suggests
-                    write-off
-                    may
-                    happen
-                    first.
-                  </li>
-                )}
-              </ul>
             </div>
           )}
 
-          {/* VISUAL */}
+          {/* JOURNEY */}
           {tab ===
-            "visual" && (
+            "journey" && (
             <div
               style={{
                 ...card,
@@ -819,198 +723,130 @@ export default function StudentLoanTool() {
               }}
             >
               <h3>
-                📈 Visual
-                Breakdown
+                🧭 Your
+                Money
+                Journey
               </h3>
 
-              <p>
-                What this
-                suggests:
-              </p>
-
-              <ul>
-                <li>
-                  Both
-                  options
-                  are
-                  often
-                  closer
-                  early on
-                </li>
-
-                <li>
-                  Overpaying
-                  can help
-                  sooner by
-                  reducing
-                  debt
-                </li>
-
-                <li>
-                  Investing
-                  may pull
-                  ahead
-                  later
-                  through
-                  long-term
-                  growth
-                </li>
-
-                {crossoverAge && (
-                  <li>
-                    Investing
-                    first
-                    moves
-                    ahead
-                    around
-                    age{" "}
-                    {
-                      crossoverAge
-                    }
-                  </li>
-                )}
-              </ul>
-
-              <div
+              <p
                 style={{
-                  display:
-                    "flex",
-                  gap: 10,
-                  marginTop: 12,
-                  flexWrap:
-                    "wrap"
+                  color:
+                    "#475569"
                 }}
               >
-                <button
-                  style={button(
-                    visualMode ===
-                      "simple"
-                  )}
-                  onClick={() =>
-                    setVisualMode(
-                      "simple"
-                    )
+                Two possible
+                routes from
+                where you
+                are today.
+              </p>
+
+              <ResponsiveContainer
+                width="100%"
+                height={360}
+              >
+                <LineChart
+                  data={
+                    chartData
                   }
                 >
-                  Simple
-                  View
-                </button>
+                  <CartesianGrid strokeDasharray="3 3" />
 
-                <button
-                  style={button(
-                    visualMode ===
-                      "chart"
-                  )}
-                  onClick={() =>
-                    setVisualMode(
-                      "chart"
-                    )
-                  }
-                >
-                  Chart
-                  View
-                </button>
-              </div>
+                  <XAxis dataKey="age" />
 
-              {visualMode ===
-              "simple" ? (
-                <div
-                  style={{
-                    marginTop: 16,
-                    lineHeight: 2
-                  }}
-                >
-                  <div>
-                    Age{" "}
-                    {
-                      currentAge +
-                      5
-                    }{" "}
-                    → Often
-                    still
-                    fairly
-                    close
-                  </div>
-
-                  {crossoverAge && (
-                    <div>
-                      Age{" "}
-                      {
-                        crossoverAge
-                      }{" "}
-                      →
-                      Investing
-                      moves
-                      ahead
-                    </div>
-                  )}
-
-                  {finalGap !==
-                    null && (
-                    <div>
-                      Age{" "}
-                      {
-                        finalAge
-                      }{" "}
-                      →{" "}
-                      {
-                        direction
-                      } ahead
-                      by{" "}
-                      {money(
-                        finalGap
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div
-                  style={{
-                    marginTop: 16
-                  }}
-                >
-                  <ResponsiveContainer
-                    width="100%"
-                    height={
-                      340
+                  <YAxis
+                    tickFormatter={
+                      moneyK
                     }
-                  >
-                    <LineChart
-                      data={
-                        chartData
-                      }
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="age" />
-                      <YAxis
-                        tickFormatter={
-                          moneyK
-                        }
-                      />
-                      <Tooltip />
-                      <Legend />
+                  />
 
-                      <Line
-                        dataKey="invest"
-                        stroke="#10b981"
-                        strokeWidth={
-                          3
-                        }
-                        name="Invest instead"
-                      />
+                  <Tooltip />
 
-                      <Line
-                        dataKey="overpay"
-                        stroke="#2563eb"
-                        strokeWidth={
-                          3
-                        }
-                        name="Overpay loan"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+                  <Legend />
+
+                  {/* Start Compass */}
+                  <ReferenceDot
+                    x={
+                      ages[0]
+                    }
+                    y={
+                      chartData[0]
+                        ?.invest ||
+                      0
+                    }
+                    r={8}
+                    fill="#0f172a"
+                    label={{
+                      value:
+                        "🧭",
+                      position:
+                        "top"
+                    }}
+                  />
+
+                  {/* Invest route */}
+                  <Line
+                    type="monotone"
+                    dataKey="invest"
+                    stroke="#10b981"
+                    strokeWidth={
+                      3
+                    }
+                    dot={
+                      false
+                    }
+                    name="Invest instead"
+                  />
+
+                  {/* Overpay route */}
+                  <Line
+                    type="monotone"
+                    dataKey="overpay"
+                    stroke="#2563eb"
+                    strokeWidth={
+                      3
+                    }
+                    dot={
+                      false
+                    }
+                    name="Overpay loan"
+                  />
+
+                  {/* Finish marker */}
+                  <ReferenceDot
+                    x={
+                      finalAge
+                    }
+                    y={
+                      winner ===
+                      "invest"
+                        ? investEnd
+                        : overpayEnd
+                    }
+                    r={9}
+                    fill="#f59e0b"
+                    label={{
+                      value:
+                        "◎",
+                      position:
+                        "top"
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+
+              <p
+                style={{
+                  marginTop: 12
+                }}
+              >
+                {direction} reaches
+                the
+                stronger
+                projected
+                finish in
+                this
+                scenario.
+              </p>
             </div>
           )}
 
@@ -1024,15 +860,13 @@ export default function StudentLoanTool() {
               }}
             >
               <h3>
-                How We
-                Estimated
-                This
+                How this
+                works
               </h3>
 
               <p>
                 We compare
-                two
-                scenarios:
+                two routes:
               </p>
 
               <p>
@@ -1044,14 +878,15 @@ export default function StudentLoanTool() {
               <p>
                 2. Invest
                 the same
-                money
+                monthly
+                amount
               </p>
 
               <p>
                 We then
-                model
-                future net
-                worth
+                estimate
+                long-term
+                outcomes
                 using your
                 inputs and
                 assumptions.
@@ -1060,57 +895,15 @@ export default function StudentLoanTool() {
               <p>
                 This tool
                 is for
+                educational
+                purposes
+                and
                 exploring
-                options,
-                not
+                scenarios.
+                It is not
                 personal
                 financial
                 advice.
-              </p>
-            </div>
-          )}
-
-          {/* DETAILS */}
-          {tab ===
-            "details" && (
-            <div
-              style={{
-                ...card,
-                marginTop: 16
-              }}
-            >
-              <h3>
-                Important
-                Context
-              </h3>
-
-              <p>
-                Student
-                loans
-                often
-                behave
-                differently
-                from
-                normal
-                debt.
-              </p>
-
-              <p>
-                Repayments
-                depend
-                largely on
-                earnings
-                above the
-                threshold.
-              </p>
-
-              <p>
-                Overpaying
-                helps in
-                some
-                scenarios,
-                but not
-                all.
               </p>
             </div>
           )}
