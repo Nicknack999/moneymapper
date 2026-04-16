@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -16,52 +16,34 @@ export default function StudentLoanTool() {
     "https://moneymapper-backend-018g.onrender.com";
 
   // ---------------------------------
-  // STATE
-  // ---------------------------------
-  const [tab, setTab] = useState("summary");
-  const [salary, setSalary] = useState(40000);
-  const [balance, setBalance] = useState(50000);
-  const [overpay, setOverpay] = useState(100);
-  const [currentAge, setCurrentAge] = useState(30);
-  const [comparisonYears, setComparisonYears] =
-    useState(30);
-  const [returnRate, setReturnRate] =
-    useState(5);
-  const [loanInterest, setLoanInterest] =
-    useState(6);
-  const [plan, setPlan] = useState("plan2");
-  const [loading, setLoading] =
-    useState(false);
-  const [result, setResult] =
-    useState(null);
-
-  // ---------------------------------
   // PLAN RULES (2026)
   // ---------------------------------
   const plans = {
     plan1: {
       name: "Plan 1",
       threshold: 26065,
-      years: 25
+      years: 25,
+      defaultStartAge: 22
     },
     plan2: {
       name: "Plan 2",
       threshold: 27295,
-      years: 30
+      years: 30,
+      defaultStartAge: 22
     },
     plan5: {
       name: "Plan 5",
       threshold: 25000,
-      years: 40
+      years: 40,
+      defaultStartAge: 22
     },
     pg: {
       name: "Postgraduate",
       threshold: 21000,
-      years: 30
+      years: 30,
+      defaultStartAge: 25
     }
   };
-
-  const selectedPlan = plans[plan];
 
   // ---------------------------------
   // HELPERS
@@ -72,6 +54,81 @@ export default function StudentLoanTool() {
   const moneyK = (v) =>
     `£${Math.round(v / 1000)}k`;
 
+  const getDefaultEndAge = (
+    planKey,
+    age
+  ) => {
+    const p = plans[planKey];
+
+    const naturalEndAge =
+      p.defaultStartAge + p.years;
+
+    return Math.max(
+      age + 1,
+      naturalEndAge
+    );
+  };
+
+  // ---------------------------------
+  // STATE
+  // ---------------------------------
+  const [tab, setTab] =
+    useState("summary");
+
+  const [salary, setSalary] =
+    useState(40000);
+
+  const [balance, setBalance] =
+    useState(50000);
+
+  const [overpay, setOverpay] =
+    useState(100);
+
+  const [currentAge, setCurrentAge] =
+    useState(30);
+
+  const [plan, setPlan] =
+    useState("plan2");
+
+  const [compareUntilAge, setCompareUntilAge] =
+    useState(52);
+
+  const [returnRate, setReturnRate] =
+    useState(5);
+
+  const [loanInterest, setLoanInterest] =
+    useState(6);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [result, setResult] =
+    useState(null);
+
+  const selectedPlan = plans[plan];
+
+  // ---------------------------------
+  // AUTO DEFAULT END AGE
+  // ---------------------------------
+  useEffect(() => {
+    setCompareUntilAge(
+      getDefaultEndAge(
+        plan,
+        currentAge
+      )
+    );
+  }, [plan, currentAge]);
+
+  const comparisonYears =
+    Math.max(
+      1,
+      compareUntilAge -
+        currentAge
+    );
+
+  // ---------------------------------
+  // UI STYLES
+  // ---------------------------------
   const card = {
     background: "white",
     borderRadius: 18,
@@ -126,8 +183,7 @@ export default function StudentLoanTool() {
             loan_balance: balance,
             current_age: currentAge,
             retirement_age:
-              currentAge +
-              comparisonYears,
+              compareUntilAge,
             monthly_savings: 200,
             overpay,
             return_rate:
@@ -229,11 +285,7 @@ export default function StudentLoanTool() {
     >
       {/* HEADER */}
       <div style={card}>
-        <h2
-          style={{
-            margin: 0
-          }}
-        >
+        <h2 style={{ margin: 0 }}>
           Student Loan:
           Should I Overpay?
         </h2>
@@ -375,16 +427,15 @@ export default function StudentLoanTool() {
 
           <div>
             <label>
-              Compare For
-              (years)
+              Compare Until Age
             </label>
             <input
               type="number"
               value={
-                comparisonYears
+                compareUntilAge
               }
               onChange={(e) =>
-                setComparisonYears(
+                setCompareUntilAge(
                   Number(
                     e.target.value
                   )
@@ -392,6 +443,17 @@ export default function StudentLoanTool() {
               }
               style={input}
             />
+            <div
+              style={{
+                fontSize: 12,
+                color:
+                  "#64748b",
+                marginTop: 4
+              }}
+            >
+              {comparisonYears} year
+              comparison
+            </div>
           </div>
 
           <div>
@@ -431,7 +493,7 @@ export default function StudentLoanTool() {
           </div>
         </div>
 
-        {/* PLAN SNAPSHOT */}
+        {/* SNAPSHOT */}
         <div
           style={{
             marginTop: 16,
@@ -469,6 +531,15 @@ export default function StudentLoanTool() {
             }{" "}
             years
             <br />
+            • Loan may end
+            around age{" "}
+            {
+              getDefaultEndAge(
+                plan,
+                currentAge
+              )
+            }
+            <br />
             • Interest
             assumption:{" "}
             {loanInterest}%
@@ -502,7 +573,6 @@ export default function StudentLoanTool() {
       {/* RESULTS */}
       {result && (
         <>
-          {/* TABS */}
           <div
             style={{
               display:
@@ -597,6 +667,15 @@ export default function StudentLoanTool() {
                 </li>
 
                 <li>
+                  Comparison
+                  runs until
+                  around age{" "}
+                  {
+                    compareUntilAge
+                  }
+                </li>
+
+                <li>
                   Illustrative
                   salary to
                   clear within{" "}
@@ -635,11 +714,11 @@ export default function StudentLoanTool() {
                 <p>
                   Estimated
                   difference
-                  after{" "}
+                  by age{" "}
                   {
-                    comparisonYears
-                  }{" "}
-                  years:{" "}
+                    compareUntilAge
+                  }
+                  :{" "}
                   <strong>
                     {money(
                       Math.abs(
@@ -805,12 +884,15 @@ export default function StudentLoanTool() {
               </p>
 
               <p>
-                We estimate
-                long-term
-                outcomes
-                using your
-                inputs and
-                assumptions.
+                The default
+                comparison
+                end age is
+                based on a
+                typical loan
+                timeline for
+                your plan.
+                You can edit
+                it anytime.
               </p>
 
               <p>
