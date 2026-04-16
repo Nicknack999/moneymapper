@@ -59,7 +59,6 @@ export default function StudentLoanTool() {
     currentAge
   ) => {
     const p = plans[planKey];
-
     const naturalEndAge =
       p.defaultStartAge + p.years;
 
@@ -74,11 +73,10 @@ export default function StudentLoanTool() {
     age,
     direction
   ) => {
-    const amount =
-      Math.abs(diff);
+    const amount = Math.abs(diff);
 
     if (amount < 1000) {
-      return `By age ${age}, both options are projected to finish very similarly (${money(
+      return `By age ${age}, both routes are projected to finish very similarly (${money(
         amount
       )} apart).`;
     }
@@ -98,7 +96,7 @@ export default function StudentLoanTool() {
       )} better off.`;
     }
 
-    return `By age ${age}, outcomes are estimated to be similar.`;
+    return `By age ${age}, outcomes are projected to be similar.`;
   };
 
   // ---------------------------------
@@ -307,8 +305,7 @@ export default function StudentLoanTool() {
       invest:
         invest[i] ?? 0,
       overpay:
-        overpayCurve[i] ??
-        0
+        overpayCurve[i] ?? 0
     })
   );
 
@@ -329,8 +326,7 @@ export default function StudentLoanTool() {
             margin: 0
           }}
         >
-          Student Loan:
-          Should I Overpay?
+          Wayli Student Loan Tool
         </h2>
 
         <p
@@ -341,14 +337,13 @@ export default function StudentLoanTool() {
             lineHeight: 1.6
           }}
         >
-          Compare
-          overpaying your
-          loan with
-          investing the
-          same money.
-          Built for UK
-          student loan
-          plans.
+          Should you overpay
+          your student loan
+          or invest instead?
+          Wayli helps you
+          compare both routes
+          using UK student
+          loan assumptions.
         </p>
       </div>
 
@@ -456,9 +451,7 @@ export default function StudentLoanTool() {
             </label>
             <input
               type="number"
-              value={
-                currentAge
-              }
+              value={currentAge}
               onChange={(e) =>
                 setCurrentAge(
                   Number(
@@ -499,8 +492,7 @@ export default function StudentLoanTool() {
               {
                 comparisonYears
               }{" "}
-              year
-              comparison
+              year comparison
             </div>
           </div>
 
@@ -510,9 +502,7 @@ export default function StudentLoanTool() {
             </label>
             <input
               type="number"
-              value={
-                returnRate
-              }
+              value={returnRate}
               onChange={(e) =>
                 setReturnRate(
                   Number(
@@ -530,9 +520,7 @@ export default function StudentLoanTool() {
             </label>
             <input
               type="number"
-              value={
-                loanInterest
-              }
+              value={loanInterest}
               onChange={(e) =>
                 setLoanInterest(
                   Number(
@@ -586,8 +574,7 @@ export default function StudentLoanTool() {
             }{" "}
             years
             <br />
-            • Typical
-            repayments may
+            • Repayments may
             begin around age{" "}
             {
               selectedPlan.defaultStartAge
@@ -631,14 +618,13 @@ export default function StudentLoanTool() {
         >
           {loading
             ? "Comparing..."
-            : "Run Comparison"}
+            : "Compare My Options"}
         </button>
       </div>
 
       {/* RESULTS */}
       {result && (
         <>
-          {/* TABS */}
           <div
             style={{
               display:
@@ -674,7 +660,7 @@ export default function StudentLoanTool() {
                 )
               }
             >
-              Journey
+              Comparison Chart
             </button>
 
             <button
@@ -688,7 +674,7 @@ export default function StudentLoanTool() {
                 )
               }
             >
-              Method
+              How It Works
             </button>
           </div>
 
@@ -728,7 +714,7 @@ export default function StudentLoanTool() {
 
                 <li>
                   {repayLikely
-                    ? "At a similar income, repayment may happen before write-off."
+                    ? "At a similar income, full repayment may happen before write-off."
                     : "At a similar income, full repayment may be unlikely before write-off."}
                 </li>
 
@@ -769,9 +755,8 @@ export default function StudentLoanTool() {
                   }
                 </strong>{" "}
                 appears
-                stronger
-                based on
-                these
+                stronger based
+                on these
                 assumptions.
               </p>
 
@@ -808,7 +793,7 @@ export default function StudentLoanTool() {
             </div>
           )}
 
-          {/* JOURNEY */}
+          {/* CHART */}
           {tab ===
             "journey" && (
             <div
@@ -829,16 +814,14 @@ export default function StudentLoanTool() {
                     "#475569"
                 }}
               >
-                This chart
-                compares your
-                estimated
+                This compares
+                your estimated
                 overall
                 financial
-                position
-                under each
-                route — not
-                remaining loan
-                balance.
+                position under
+                each route —
+                not remaining
+                loan balance.
               </p>
 
               <ResponsiveContainer
@@ -866,8 +849,7 @@ export default function StudentLoanTool() {
                     ) =>
                       `£${Math.round(
                         value
-                      ).toLocaleString()}`
-                    }
+                      ).toLocaleString()}`}
                   />
 
                   <Legend />
@@ -931,43 +913,46 @@ export default function StudentLoanTool() {
               </h3>
 
               <p>
-                We compare
-                two routes:
+                We compare two
+                routes:
               </p>
 
               <p>
-                1. Overpay
-                your loan
+                1. Overpay your
+                loan
               </p>
 
               <p>
-                2. Invest
-                the same
-                monthly
+                2. Invest the
+                same monthly
                 amount
               </p>
 
               <p>
-                The default
-                comparison
-                end age is
-                based on a
-                typical loan
+                The default end
+                age is based on
+                a typical loan
                 timeline for
-                your plan.
-                You can edit
-                it anytime.
+                your selected
+                plan. You can
+                edit it anytime.
+              </p>
+
+              <p>
+                Built by Wayli
+                to help you
+                explore money
+                decisions more
+                clearly.
               </p>
 
               <p>
                 This tool is
-                for
-                educational
+                for educational
                 purposes and
                 scenario
-                exploration.
-                It is not
-                personal
+                exploration. It
+                is not personal
                 financial
                 advice.
               </p>
