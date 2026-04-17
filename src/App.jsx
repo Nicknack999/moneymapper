@@ -100,11 +100,12 @@ export default function App() {
               lineHeight: 1.6
             }}
           >
-            Making informed decisions about finances. 
             Should I overpay my student loan or pay the minimum? 
             Should I overpay my mortgage or invest instead?
             Should I replace or repair my car? 
             How much do I need for retirement?
+            I made these tools for my own family
+            Hopefully, they can help you too
         
           </div>
 
