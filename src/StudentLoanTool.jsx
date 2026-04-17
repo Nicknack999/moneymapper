@@ -16,7 +16,7 @@ export default function StudentLoanTool() {
     "https://moneymapper-backend-018g.onrender.com";
 
   // ---------------------------------
-  // PLAN RULES (2026)
+  // UK PLAN RULES (2026)
   // ---------------------------------
   const plans = {
     plan1: {
@@ -54,108 +54,68 @@ export default function StudentLoanTool() {
   const moneyK = (v) =>
     `£${Math.round(v / 1000)}k`;
 
-  const getDefaultEndAge = (
-    planKey,
-    currentAge
-  ) => {
+  const getDefaultEndAge = (planKey, currentAge) => {
     const p = plans[planKey];
-    const naturalEndAge =
-      p.defaultStartAge + p.years;
-
-    return Math.max(
-      currentAge + 1,
-      naturalEndAge
-    );
+    return Math.max(currentAge + 1, p.defaultStartAge + p.years);
   };
 
-  const getDifferenceText = (
-    diff,
-    age,
-    direction
-  ) => {
+  const parseNum = (value, fallback = "") =>
+    value === "" ? "" : Number(value);
+
+  const getDifferenceText = (diff, age, direction) => {
     const amount = Math.abs(diff);
 
     if (amount < 1000) {
-      return `By age ${age}, both routes are projected to finish very similarly (${money(
+      return `By age ${age}, both routes finish broadly similarly (${money(
         amount
       )} apart).`;
     }
 
     if (direction === "Investing") {
-      return `By age ${age}, investing is estimated to leave you ${money(
+      return `By age ${age}, investing is projected to leave you ${money(
         amount
       )} better off.`;
     }
 
-    if (
-      direction ===
-      "Overpaying"
-    ) {
-      return `By age ${age}, overpaying is estimated to leave you ${money(
+    if (direction === "Overpaying") {
+      return `By age ${age}, overpaying is projected to leave you ${money(
         amount
       )} better off.`;
     }
 
-    return `By age ${age}, outcomes are projected to be similar.`;
+    return `By age ${age}, both routes look similar.`;
   };
 
   // ---------------------------------
   // STATE
   // ---------------------------------
-  const [tab, setTab] =
-    useState("summary");
+  const [tab, setTab] = useState("summary");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
 
-  const [salary, setSalary] =
-    useState(40000);
+  const [plan, setPlan] = useState("plan2");
+  const [salary, setSalary] = useState(40000);
+  const [balance, setBalance] = useState(50000);
+  const [overpay, setOverpay] = useState(100);
+  const [currentAge, setCurrentAge] = useState(30);
+  const [compareUntilAge, setCompareUntilAge] = useState(51);
+  const [returnRate, setReturnRate] = useState(5);
+  const [loanInterest, setLoanInterest] = useState(6);
 
-  const [balance, setBalance] =
-    useState(50000);
-
-  const [overpay, setOverpay] =
-    useState(100);
-
-  const [currentAge, setCurrentAge] =
-    useState(30);
-
-  const [plan, setPlan] =
-    useState("plan2");
-
-  const [compareUntilAge, setCompareUntilAge] =
-    useState(51);
-
-  const [returnRate, setReturnRate] =
-    useState(5);
-
-  const [loanInterest, setLoanInterest] =
-    useState(6);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [result, setResult] =
-    useState(null);
-
-  const selectedPlan =
-    plans[plan];
+  const selectedPlan = plans[plan];
 
   // ---------------------------------
-  // AUTO DEFAULT END AGE
+  // AUTO END AGE
   // ---------------------------------
   useEffect(() => {
-    setCompareUntilAge(
-      getDefaultEndAge(
-        plan,
-        currentAge
-      )
-    );
+    setCompareUntilAge(getDefaultEndAge(plan, Number(currentAge || 0)));
   }, [plan, currentAge]);
 
-  const comparisonYears =
-    Math.max(
-      1,
-      compareUntilAge -
-        currentAge
-    );
+  const comparisonYears = Math.max(
+    1,
+    Number(compareUntilAge || 0) - Number(currentAge || 0)
+  );
 
   // ---------------------------------
   // STYLES
@@ -163,134 +123,105 @@ export default function StudentLoanTool() {
   const card = {
     background: "white",
     borderRadius: 18,
-    padding: 18,
-    border:
-      "1px solid #e5e7eb",
-    boxShadow:
-      "0 8px 20px rgba(15,23,42,0.05)"
+    padding: 20,
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 10px 24px rgba(15,23,42,0.05)"
   };
 
   const input = {
     width: "100%",
-    padding: 10,
-    borderRadius: 10,
-    border:
-      "1px solid #d1d5db",
-    marginTop: 6
+    padding: 12,
+    borderRadius: 12,
+    border: "1px solid #d1d5db",
+    marginTop: 6,
+    fontSize: 16
+  };
+
+  const label = {
+    fontSize: 14,
+    fontWeight: 600,
+    color: "#0f172a"
   };
 
   const pill = (active) => ({
-    padding:
-      "10px 14px",
+    padding: "10px 14px",
     borderRadius: 999,
     border: "none",
     cursor: "pointer",
-    fontWeight: 600,
-    background: active
-      ? "#10b981"
-      : "#e5e7eb",
-    color: active
-      ? "white"
-      : "#0f172a"
+    fontWeight: 700,
+    background: active ? "#10b981" : "#e5e7eb",
+    color: active ? "white" : "#0f172a"
   });
+
+  // ---------------------------------
+  // FRONTEND CALCS
+  // ---------------------------------
+  const threshold = selectedPlan.threshold;
+
+  const monthlyRepayment =
+    Math.max(0, (Number(salary || 0) - threshold) * 0.09) / 12;
+
+  const yearsToRepay =
+    monthlyRepayment > 0
+      ? Number(balance || 0) / (monthlyRepayment * 12)
+      : null;
+
+  const repayLikely =
+    yearsToRepay && yearsToRepay <= selectedPlan.years;
+
+  const requiredSalary =
+    threshold +
+    Number(balance || 0) / selectedPlan.years / 0.09;
 
   // ---------------------------------
   // MODEL CALL
   // ---------------------------------
   const runModel = async () => {
     setLoading(true);
+    setError("");
+    setResult(null);
 
     try {
-      const res = await fetch(
-        `${API_URL}/full-model`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-          body: JSON.stringify({
-            salary,
-            loan_balance: balance,
-            current_age:
-              currentAge,
-            retirement_age:
-              compareUntilAge,
-            monthly_savings: 200,
-            overpay,
-            return_rate:
-              returnRate / 100,
-            loan_interest:
-              loanInterest / 100,
-            write_off_years:
-              selectedPlan.years,
-            model_opportunity_cost: true
-          })
-        }
-      );
+      const res = await fetch(`${API_URL}/full-model`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          salary: Number(salary || 0),
+          loan_balance: Number(balance || 0),
+          current_age: Number(currentAge || 0),
+          retirement_age: Number(compareUntilAge || 0),
+          monthly_savings: 200,
+          overpay: Number(overpay || 0),
+          return_rate: Number(returnRate || 0) / 100,
+          loan_interest: Number(loanInterest || 0) / 100,
+          write_off_years: selectedPlan.years,
+          model_opportunity_cost: true
+        })
+      });
 
-      const data =
-        await res.json();
+      if (!res.ok) {
+        throw new Error("Unable to compare options.");
+      }
 
+      const data = await res.json();
       setResult(data);
     } catch (err) {
-      console.error(err);
+      setError("We couldn't load your comparison right now.");
     }
 
     setLoading(false);
   };
 
   // ---------------------------------
-  // FRONTEND CALCS
+  // RESULT DATA
   // ---------------------------------
-  const threshold =
-    selectedPlan.threshold;
-
-  const monthlyRepayment =
-    Math.max(
-      0,
-      (salary - threshold) *
-        0.09
-    ) / 12;
-
-  const yearsToRepay =
-    monthlyRepayment > 0
-      ? balance /
-        (monthlyRepayment * 12)
-      : null;
-
-  const repayLikely =
-    yearsToRepay &&
-    yearsToRepay <=
-      selectedPlan.years;
-
-  const requiredSalary =
-    threshold +
-    balance /
-      selectedPlan.years /
-      0.09;
-
-  // ---------------------------------
-  // MODEL DATA
-  // ---------------------------------
-  const ages =
-    result?.curves?.ages ||
-    [];
-
-  const invest =
-    result?.curves
-      ?.invest_net_worth ||
-    [];
-
-  const overpayCurve =
-    result?.curves
-      ?.overpay_net_worth ||
-    [];
-
+  const ages = result?.curves?.ages || [];
+  const invest = result?.curves?.invest_net_worth || [];
+  const overpayCurve = result?.curves?.overpay_net_worth || [];
   const wealthDiff =
-    result?.insights
-      ?.wealth_difference ??
-    null;
+    result?.insights?.wealth_difference ?? null;
 
   const direction =
     wealthDiff === null
@@ -299,15 +230,11 @@ export default function StudentLoanTool() {
       ? "Investing"
       : "Overpaying";
 
-  const chartData = ages.map(
-    (age, i) => ({
-      age,
-      invest:
-        invest[i] ?? 0,
-      overpay:
-        overpayCurve[i] ?? 0
-    })
-  );
+  const chartData = ages.map((age, i) => ({
+    age,
+    invest: invest[i] ?? 0,
+    overpay: overpayCurve[i] ?? 0
+  }));
 
   // ---------------------------------
   // UI
@@ -316,167 +243,134 @@ export default function StudentLoanTool() {
     <div
       style={{
         maxWidth: 1100,
-        margin: "0 auto"
+        margin: "0 auto",
+        padding: 16,
+        background: "#f8fafc"
       }}
     >
-      {/* HEADER */}
+      {/* HERO */}
       <div style={card}>
-        <h2
+        <div
           style={{
-            margin: 0
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#10b981",
+            letterSpacing: 1,
+            textTransform: "uppercase"
           }}
         >
-          Wayli Student Loan Tool
-        </h2>
+          Wayli
+        </div>
+
+        <h1
+          style={{
+            marginTop: 8,
+            marginBottom: 10,
+            fontSize: 30
+          }}
+        >
+          Student Loan Overpay vs Invest
+        </h1>
 
         <p
           style={{
-            color:
-              "#475569",
-            marginTop: 8,
-            lineHeight: 1.6
+            color: "#475569",
+            lineHeight: 1.7,
+            margin: 0
           }}
         >
-          Should you overpay
-          your student loan
-          or invest instead?
-          Wayli helps you
-          compare both routes
-          using UK student
-          loan assumptions.
+          Compare whether overpaying your UK student
+          loan or investing the same money may leave
+          you better off.
         </p>
       </div>
 
       {/* INPUTS */}
-      <div
-        style={{
-          ...card,
-          marginTop: 18
-        }}
-      >
+      <div style={{ ...card, marginTop: 18 }}>
         <div
           style={{
-            display:
-              "grid",
+            display: "grid",
             gridTemplateColumns:
               "repeat(auto-fit,minmax(220px,1fr))",
-            gap: 14
+            gap: 16
           }}
         >
           <div>
-            <label>
-              Loan Plan
-            </label>
+            <label style={label}>Loan plan</label>
             <select
               value={plan}
-              onChange={(e) =>
-                setPlan(
-                  e.target.value
-                )
-              }
+              onChange={(e) => setPlan(e.target.value)}
               style={input}
             >
-              <option value="plan1">
-                Plan 1
-              </option>
-              <option value="plan2">
-                Plan 2
-              </option>
-              <option value="plan5">
-                Plan 5
-              </option>
-              <option value="pg">
-                Postgraduate
-              </option>
+              <option value="plan1">Plan 1</option>
+              <option value="plan2">Plan 2</option>
+              <option value="plan5">Plan 5</option>
+              <option value="pg">Postgraduate</option>
             </select>
           </div>
 
           <div>
-            <label>
-              Salary (£)
-            </label>
+            <label style={label}>Your salary (£)</label>
             <input
               type="number"
               value={salary}
               onChange={(e) =>
-                setSalary(
-                  Number(
-                    e.target.value
-                  )
-                )
+                setSalary(parseNum(e.target.value))
               }
               style={input}
             />
           </div>
 
           <div>
-            <label>
-              Balance (£)
+            <label style={label}>
+              Current loan balance (£)
             </label>
             <input
               type="number"
               value={balance}
               onChange={(e) =>
-                setBalance(
-                  Number(
-                    e.target.value
-                  )
-                )
+                setBalance(parseNum(e.target.value))
               }
               style={input}
             />
           </div>
 
           <div>
-            <label>
-              Overpay / month (£)
+            <label style={label}>
+              Extra overpayment / month (£)
             </label>
             <input
               type="number"
               value={overpay}
               onChange={(e) =>
-                setOverpay(
-                  Number(
-                    e.target.value
-                  )
-                )
+                setOverpay(parseNum(e.target.value))
               }
               style={input}
             />
           </div>
 
           <div>
-            <label>
-              Current Age
-            </label>
+            <label style={label}>Current age</label>
             <input
               type="number"
               value={currentAge}
               onChange={(e) =>
-                setCurrentAge(
-                  Number(
-                    e.target.value
-                  )
-                )
+                setCurrentAge(parseNum(e.target.value))
               }
               style={input}
             />
           </div>
 
           <div>
-            <label>
-              Compare Until Age
+            <label style={label}>
+              Compare until age
             </label>
             <input
               type="number"
-              value={
-                compareUntilAge
-              }
+              value={compareUntilAge}
               onChange={(e) =>
                 setCompareUntilAge(
-                  Number(
-                    e.target.value
-                  )
+                  parseNum(e.target.value)
                 )
               }
               style={input}
@@ -484,30 +378,24 @@ export default function StudentLoanTool() {
             <div
               style={{
                 fontSize: 12,
-                color:
-                  "#64748b",
+                color: "#64748b",
                 marginTop: 4
               }}
             >
-              {
-                comparisonYears
-              }{" "}
-              year comparison
+              {comparisonYears} year comparison
             </div>
           </div>
 
           <div>
-            <label>
-              Investment Return (%)
+            <label style={label}>
+              Investment return (%)
             </label>
             <input
               type="number"
               value={returnRate}
               onChange={(e) =>
                 setReturnRate(
-                  Number(
-                    e.target.value
-                  )
+                  parseNum(e.target.value)
                 )
               }
               style={input}
@@ -515,17 +403,15 @@ export default function StudentLoanTool() {
           </div>
 
           <div>
-            <label>
-              Loan Interest (%)
+            <label style={label}>
+              Loan interest (%)
             </label>
             <input
               type="number"
               value={loanInterest}
               onChange={(e) =>
                 setLoanInterest(
-                  Number(
-                    e.target.value
-                  )
+                  parseNum(e.target.value)
                 )
               }
               style={input}
@@ -533,93 +419,69 @@ export default function StudentLoanTool() {
           </div>
         </div>
 
-        {/* SNAPSHOT */}
+        {/* Snapshot */}
         <div
           style={{
-            marginTop: 16,
-            padding: 14,
-            background:
-              "#f8fafc",
-            borderRadius: 12
+            marginTop: 18,
+            padding: 16,
+            background: "#f8fafc",
+            borderRadius: 14
           }}
         >
-          <strong>
-            {
-              selectedPlan.name
-            }{" "}
-            assumptions
-          </strong>
+          <strong>{selectedPlan.name} assumptions</strong>
 
           <div
             style={{
               marginTop: 8,
-              color:
-                "#475569",
+              color: "#475569",
               lineHeight: 1.8
             }}
           >
-            • Repayments
-            start above{" "}
-            {money(
-              threshold
-            )}
+            • Repayments start above {money(threshold)}
             <br />
-            • 9% of income
-            above threshold
+            • 9% of income above threshold
             <br />
-            • Typical
-            write-off after{" "}
-            {
-              selectedPlan.years
-            }{" "}
-            years
+            • Typical write-off after{" "}
+            {selectedPlan.years} years
             <br />
-            • Repayments may
-            begin around age{" "}
-            {
-              selectedPlan.defaultStartAge
-            }
-            <br />
-            • Loan may end
-            around age{" "}
+            • Illustrative loan end age:{" "}
             {getDefaultEndAge(
               plan,
-              currentAge
+              Number(currentAge || 0)
             )}
-            <br />
-            • Interest
-            assumption:{" "}
-            {
-              loanInterest
-            }
-            %
           </div>
         </div>
 
         <button
-          onClick={
-            runModel
-          }
+          onClick={runModel}
           style={{
             marginTop: 18,
-            padding:
-              "14px 18px",
-            border:
-              "none",
-            borderRadius: 12,
-            background:
-              "#10b981",
-            color:
-              "white",
+            padding: "14px 18px",
+            border: "none",
+            borderRadius: 14,
+            background: "#10b981",
+            color: "white",
             fontWeight: 700,
-            cursor:
-              "pointer"
+            fontSize: 16,
+            cursor: "pointer",
+            width: "100%"
           }}
         >
           {loading
-            ? "Comparing..."
+            ? "Comparing options..."
             : "Compare My Options"}
         </button>
+
+        {error && (
+          <p
+            style={{
+              color: "#dc2626",
+              marginTop: 12
+            }}
+          >
+            {error}
+          </p>
+        )}
       </div>
 
       {/* RESULTS */}
@@ -627,141 +489,75 @@ export default function StudentLoanTool() {
         <>
           <div
             style={{
-              display:
-                "flex",
+              display: "flex",
               gap: 10,
-              flexWrap:
-                "wrap",
+              flexWrap: "wrap",
               marginTop: 18
             }}
           >
             <button
-              style={pill(
-                tab ===
-                  "summary"
-              )}
-              onClick={() =>
-                setTab(
-                  "summary"
-                )
-              }
+              style={pill(tab === "summary")}
+              onClick={() => setTab("summary")}
             >
               Summary
             </button>
 
             <button
-              style={pill(
-                tab ===
-                  "journey"
-              )}
-              onClick={() =>
-                setTab(
-                  "journey"
-                )
-              }
+              style={pill(tab === "chart")}
+              onClick={() => setTab("chart")}
             >
               Comparison Chart
             </button>
 
             <button
-              style={pill(
-                tab ===
-                  "method"
-              )}
-              onClick={() =>
-                setTab(
-                  "method"
-                )
-              }
+              style={pill(tab === "method")}
+              onClick={() => setTab("method")}
             >
               How It Works
             </button>
           </div>
 
           {/* SUMMARY */}
-          {tab ===
-            "summary" && (
-            <div
-              style={{
-                ...card,
-                marginTop: 16
-              }}
-            >
-              <h3>
-                Your repayment
-                picture
-              </h3>
+          {tab === "summary" && (
+            <div style={{ ...card, marginTop: 16 }}>
+              <h3>Your repayment picture</h3>
 
-              <ul>
+              <ul
+                style={{
+                  lineHeight: 1.8,
+                  color: "#334155"
+                }}
+              >
                 <li>
-                  You begin
-                  repayments
-                  above{" "}
-                  {money(
-                    threshold
-                  )}
+                  Current repayments around{" "}
+                  {money(monthlyRepayment)} / month
                 </li>
-
-                <li>
-                  Current
-                  repayments:
-                  around{" "}
-                  {money(
-                    monthlyRepayment
-                  )}
-                  /month
-                </li>
-
                 <li>
                   {repayLikely
                     ? "At a similar income, full repayment may happen before write-off."
-                    : "At a similar income, full repayment may be unlikely before write-off."}
+                    : "At a similar income, full repayment before write-off may be less likely."}
                 </li>
-
                 <li>
-                  Comparison
-                  runs until
-                  around age{" "}
-                  {
-                    compareUntilAge
-                  }
+                  Comparison runs until age{" "}
+                  {compareUntilAge}
                 </li>
-
                 <li>
-                  Illustrative
-                  salary to
-                  clear within{" "}
-                  {
-                    selectedPlan.years
-                  }{" "}
-                  years:{" "}
-                  {money(
-                    requiredSalary
-                  )}
+                  Estimated salary to clear in{" "}
+                  {selectedPlan.years} years:{" "}
+                  {money(requiredSalary)}
                 </li>
               </ul>
 
               <hr />
 
-              <h3>
-                What this
-                suggests
-              </h3>
+              <h3>What this suggests</h3>
 
               <p>
-                <strong>
-                  {
-                    direction
-                  }
-                </strong>{" "}
-                appears
-                stronger based
-                on these
-                assumptions.
+                <strong>{direction}</strong> looks
+                stronger based on these assumptions.
               </p>
 
-              {wealthDiff !==
-                null && (
+              {wealthDiff !== null && (
                 <p>
                   {getDifferenceText(
                     wealthDiff,
@@ -771,99 +567,54 @@ export default function StudentLoanTool() {
                 </p>
               )}
 
-              <hr />
-
-              <h3>
-                When
-                overpaying
-                matters
-              </h3>
-
-              <p>
-                {salary <
-                requiredSalary *
-                  0.9
-                  ? "You appear below the key zone where overpaying often has the biggest effect."
-                  : salary <=
-                    requiredSalary *
-                      1.1
-                  ? "You appear near the key decision zone where comparing both routes is especially worthwhile."
-                  : "You appear in a stronger repayment zone where overpaying can become more valuable."}
-              </p>
+              <div
+                style={{
+                  marginTop: 18,
+                  padding: 14,
+                  borderRadius: 12,
+                  background: "#ecfdf5",
+                  color: "#065f46"
+                }}
+              >
+                Save this scenario soon: Email my
+                results (coming next).
+              </div>
             </div>
           )}
 
           {/* CHART */}
-          {tab ===
-            "journey" && (
-            <div
-              style={{
-                ...card,
-                marginTop: 16
-              }}
-            >
+          {tab === "chart" && (
+            <div style={{ ...card, marginTop: 16 }}>
               <h3>
-                Projected
-                Financial
-                Position
+                Projected financial position
               </h3>
 
-              <p
-                style={{
-                  color:
-                    "#475569"
-                }}
-              >
-                This compares
-                your estimated
-                overall
-                financial
-                position under
-                each route —
-                not remaining
-                loan balance.
+              <p style={{ color: "#475569" }}>
+                This compares estimated overall
+                wealth under each route.
               </p>
 
               <ResponsiveContainer
                 width="100%"
                 height={360}
               >
-                <LineChart
-                  data={
-                    chartData
-                  }
-                >
+                <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
-
                   <XAxis dataKey="age" />
-
-                  <YAxis
-                    tickFormatter={
-                      moneyK
+                  <YAxis tickFormatter={moneyK} />
+                  <Tooltip
+                    formatter={(value) =>
+                      money(value)
                     }
                   />
-
-                  <Tooltip
-                    formatter={(
-                      value
-                    ) =>
-                      `£${Math.round(
-                        value
-                      ).toLocaleString()}`}
-                  />
-
                   <Legend />
 
                   <Line
                     type="monotone"
                     dataKey="invest"
                     stroke="#10b981"
-                    strokeWidth={
-                      3
-                    }
-                    dot={
-                      false
-                    }
+                    strokeWidth={3}
+                    dot={false}
                     name="Invest route"
                   />
 
@@ -871,90 +622,40 @@ export default function StudentLoanTool() {
                     type="monotone"
                     dataKey="overpay"
                     stroke="#2563eb"
-                    strokeWidth={
-                      3
-                    }
-                    dot={
-                      false
-                    }
+                    strokeWidth={3}
+                    dot={false}
                     name="Overpay route"
                   />
                 </LineChart>
               </ResponsiveContainer>
-
-              <p
-                style={{
-                  marginTop: 12
-                }}
-              >
-                {direction ===
-                "Investing"
-                  ? "Based on these assumptions, investing comes out ahead over time."
-                  : direction ===
-                    "Overpaying"
-                  ? "Based on these assumptions, overpaying comes out ahead over time."
-                  : "Based on these assumptions, outcomes are fairly close."}
-              </p>
             </div>
           )}
 
           {/* METHOD */}
-          {tab ===
-            "method" && (
-            <div
-              style={{
-                ...card,
-                marginTop: 16
-              }}
-            >
-              <h3>
-                How this
-                works
-              </h3>
+          {tab === "method" && (
+            <div style={{ ...card, marginTop: 16 }}>
+              <h3>How this works</h3>
 
               <p>
-                We compare two
-                routes:
+                We compare two routes:
               </p>
 
               <p>
-                1. Overpay your
-                loan
+                1. Overpay your student loan
               </p>
 
               <p>
-                2. Invest the
-                same monthly
-                amount
+                2. Invest the same monthly amount
               </p>
 
               <p>
-                The default end
-                age is based on
-                a typical loan
-                timeline for
-                your selected
-                plan. You can
-                edit it anytime.
+                Results are scenario estimates,
+                not personal financial advice.
               </p>
 
               <p>
-                Built by Wayli
-                to help you
-                explore money
-                decisions more
-                clearly.
-              </p>
-
-              <p>
-                This tool is
-                for educational
-                purposes and
-                scenario
-                exploration. It
-                is not personal
-                financial
-                advice.
+                Built by Wayli to help you make
+                clearer money decisions.
               </p>
             </div>
           )}

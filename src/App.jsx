@@ -9,7 +9,7 @@ export default function App() {
     borderRadius: 12,
     border: "none",
     cursor: "pointer",
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: 16
   };
 
@@ -40,7 +40,7 @@ export default function App() {
               marginBottom: 18
             }}
           >
-            ← Back to MoneyMapper
+            ← Back to Wayli
           </button>
 
           <StudentLoanTool />
@@ -74,7 +74,7 @@ export default function App() {
               color: "#0f172a"
             }}
           >
-            MoneyMapper
+            Wayli
           </div>
 
           <div
@@ -86,7 +86,7 @@ export default function App() {
               lineHeight: 1.25
             }}
           >
-            Life’s a journey. Map your money wisely.
+            Smarter tools for life’s money choices.
           </div>
 
           <div
@@ -100,7 +100,8 @@ export default function App() {
               lineHeight: 1.6
             }}
           >
-            Simple tools to explore your options and plan ahead clearly.
+            Compare meaningful financial decisions clearly — from student
+            loans to mortgages, cars, investing and more.
           </div>
 
           <div
@@ -131,7 +132,7 @@ export default function App() {
                 color: "white"
               }}
             >
-              Student Loan: Should I Overpay?
+              Student Loan Tool
             </button>
           </div>
 
@@ -142,8 +143,7 @@ export default function App() {
               fontSize: 15
             }}
           >
-            We’re building more tools to help you navigate life’s big money
-            decisions.
+            Built for UK consumers making real-world money decisions.
           </div>
         </div>
 
@@ -164,7 +164,7 @@ export default function App() {
                 color: "#0f172a"
               }}
             >
-              🎓 Student Loan
+              🎓 Student Loan Tool
             </div>
 
             <div
@@ -174,8 +174,8 @@ export default function App() {
                 lineHeight: 1.6
               }}
             >
-              Compare overpaying your loan with investing the same money.
-              Built for UK student loan plans.
+              Should you overpay your student loan or invest instead?
+              Compare both routes using UK loan plans.
             </div>
 
             <button
@@ -200,7 +200,7 @@ export default function App() {
                 color: "#0f172a"
               }}
             >
-              🏠 Mortgage Tools
+              🏠 Mortgage Tool
             </div>
 
             <div
@@ -210,14 +210,15 @@ export default function App() {
                 lineHeight: 1.6
               }}
             >
-              Overpayments, term reduction and smarter repayment scenarios.
+              Should you overpay your mortgage or invest instead?
+              High-value decisions made clearer.
             </div>
 
             <div
               style={{
                 marginTop: 18,
                 color: "#10b981",
-                fontWeight: 600
+                fontWeight: 700
               }}
             >
               Coming soon
@@ -232,7 +233,7 @@ export default function App() {
                 color: "#0f172a"
               }}
             >
-              💰 Savings & Investing
+              🚗 Car Decision Tool
             </div>
 
             <div
@@ -242,14 +243,15 @@ export default function App() {
                 lineHeight: 1.6
               }}
             >
-              Explore growth scenarios, trade-offs and future value planning.
+              Should you repair your car or replace it? Compare the real
+              costs and trade-offs.
             </div>
 
             <div
               style={{
                 marginTop: 18,
                 color: "#10b981",
-                fontWeight: 600
+                fontWeight: 700
               }}
             >
               Coming soon
