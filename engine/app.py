@@ -12,8 +12,10 @@ app = Flask(__name__)
 # CORS CONFIG
 # -------------------------------------------------
 allowed_origins = [
-    "https://moneymapper-zeta.vercel.app",   # current live URL
-    "http://localhost:5173",                # local Vite dev
+    "https://wayli.uk",
+    "https://www.wayli.uk",
+    "https://moneymapper-zeta.vercel.app",
+    "http://localhost:5173",
 ]
 
 # Optional future Wayli domain support
