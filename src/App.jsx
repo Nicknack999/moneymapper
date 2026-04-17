@@ -103,8 +103,7 @@ export default function App() {
             Should I overpay my student loan or pay the minimum? 
             Should I overpay my mortgage or save/invest instead? 
             How much do I need for retirement? 
-            I made these tools for my own family. 
-            And maybe they are of use to you. 
+            More tools and financial calculators to come.
             
              
         
