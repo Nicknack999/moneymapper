@@ -86,7 +86,7 @@ export default function App() {
               lineHeight: 1.25
             }}
           >
-            Smarter tools for life’s money choices.
+            Smarter tools for life's money choices
           </div>
 
           <div
@@ -100,11 +100,11 @@ export default function App() {
               lineHeight: 1.6
             }}
           >
-            Helping you to make informed decisions about your finances. 
-            Is it better to overpay your student loan or invest spare cash? 
-            The same applies for overpaying a mortgage or investing.
-            Or how about replacing or repairing your car. 
-            Oh, and how much do you need to save for retirement?
+            Making informed decisions about finances. 
+            Should I overpay my student loan or pay the minimum? 
+            Should I overpay my mortgage or invest instead?
+            Should I replace or repair my car? 
+            How much do I need for retirement?
         
           </div>
 
@@ -147,7 +147,7 @@ export default function App() {
               fontSize: 15
             }}
           >
-            Smart tools for UK consumers with money on their minds.
+            Smart tools = smart money
           </div>
         </div>
 
