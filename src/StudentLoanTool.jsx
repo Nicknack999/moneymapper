@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -22,86 +22,63 @@ export default function StudentLoanTool() {
     plan1: {
       name: "Plan 1",
       threshold: 26065,
-      years: 25,
-      typicalStartAge: 21
+      years: 25
     },
     plan2: {
       name: "Plan 2",
       threshold: 27295,
-      years: 30,
-      typicalStartAge: 21
+      years: 30
     },
     plan5: {
       name: "Plan 5",
       threshold: 25000,
-      years: 40,
-      typicalStartAge: 21
+      years: 40
     },
     pg: {
       name: "Postgraduate",
       threshold: 21000,
-      years: 30,
-      typicalStartAge: 24
+      years: 30
     }
   };
 
   // ---------------------------------
   // HELPERS
   // ---------------------------------
-  const money = (value) =>
-    `£${Math.round(Number(value || 0)).toLocaleString()}`;
+  const money = (v) =>
+    `£${Math.round(Number(v || 0)).toLocaleString()}`;
 
-  const moneyK = (value) =>
-    `£${Math.round(Number(value || 0) / 1000)}k`;
+  const moneyK = (v) =>
+    `£${Math.round(Number(v || 0) / 1000)}k`;
 
   const parseNum = (value) =>
     value === "" ? "" : Number(value);
 
   const getDefaultEndAge = (planKey, age) => {
-    const selected = plans[planKey];
-    return Math.max(
-      Number(age || 0) + 1,
-      selected.typicalStartAge + selected.years
-    );
+    const current = Number(age || 30);
+    return current + plans[planKey].years;
   };
 
-  const getDifferenceText = (
-    diff,
-    age,
-    direction
-  ) => {
-    const amount = Math.abs(diff);
+  const strategyName = (key) => {
+    const map = {
+      minimum: "Minimum repayments only",
+      overpay: "Overpay monthly",
+      invest: "Invest monthly"
+    };
 
-    if (amount < 1000) {
-      return `By age ${age}, both routes are projected to leave you in a very similar overall position.`;
-    }
-
-    if (direction === "Investing") {
-      return `By age ${age}, investing is estimated to leave you ${money(
-        amount
-      )} better off overall.`;
-    }
-
-    if (direction === "Overpaying") {
-      return `By age ${age}, overpaying is estimated to leave you ${money(
-        amount
-      )} better off overall.`;
-    }
-
-    return `By age ${age}, both routes are projected to finish similarly.`;
+    return map[key] || key;
   };
 
   // ---------------------------------
   // STATE
   // ---------------------------------
-  const [tab, setTab] =
-    useState("summary");
-
   const [loading, setLoading] =
     useState(false);
 
   const [error, setError] =
     useState("");
+
+  const [tab, setTab] =
+    useState("summary");
 
   const [result, setResult] =
     useState(null);
@@ -124,7 +101,7 @@ export default function StudentLoanTool() {
   const [
     compareUntilAge,
     setCompareUntilAge
-  ] = useState(51);
+  ] = useState(60);
 
   const [returnRate, setReturnRate] =
     useState(5);
@@ -136,33 +113,6 @@ export default function StudentLoanTool() {
 
   const selectedPlan =
     plans[plan];
-
-  // ---------------------------------
-  // SMART DEFAULT END AGE
-  // ---------------------------------
-  useEffect(() => {
-    setCompareUntilAge((prev) => {
-      if (
-        prev === "" ||
-        prev === null ||
-        prev === undefined
-      ) {
-        return getDefaultEndAge(
-          plan,
-          currentAge
-        );
-      }
-
-      return prev;
-    });
-  }, [plan, currentAge]);
-
-  const comparisonYears =
-    Math.max(
-      1,
-      Number(compareUntilAge || 0) -
-        Number(currentAge || 0)
-    );
 
   // ---------------------------------
   // VALIDATION
@@ -177,38 +127,7 @@ export default function StudentLoanTool() {
     loanInterest !== "";
 
   // ---------------------------------
-  // FRONTEND CALCS
-  // ---------------------------------
-  const threshold =
-    selectedPlan.threshold;
-
-  const monthlyRepayment =
-    Math.max(
-      0,
-      (Number(salary || 0) -
-        threshold) *
-        0.09
-    ) / 12;
-
-  const yearsToRepay =
-    monthlyRepayment > 0
-      ? Number(balance || 0) /
-        (monthlyRepayment * 12)
-      : null;
-
-  const repayLikely =
-    yearsToRepay !== null &&
-    yearsToRepay <=
-      selectedPlan.years;
-
-  const requiredSalary =
-    threshold +
-    Number(balance || 0) /
-      selectedPlan.years /
-      0.09;
-
-  // ---------------------------------
-  // API CALL
+  // RUN MODEL
   // ---------------------------------
   const runModel = async () => {
     if (!canRun || loading) return;
@@ -237,8 +156,9 @@ export default function StudentLoanTool() {
               Number(
                 compareUntilAge
               ),
-            monthly_savings: 200,
             overpay:
+              Number(overpay),
+            monthly_savings:
               Number(overpay),
             return_rate:
               Number(
@@ -248,6 +168,9 @@ export default function StudentLoanTool() {
               Number(
                 loanInterest
               ) / 100,
+            threshold:
+              selectedPlan.threshold,
+            repayment_rate: 0.09,
             write_off_years:
               selectedPlan.years,
             model_opportunity_cost: true
@@ -255,18 +178,17 @@ export default function StudentLoanTool() {
         }
       );
 
-      if (!res.ok) {
+      if (!res.ok)
         throw new Error();
-      }
 
       const data =
         await res.json();
 
       setResult(data);
       setTab("summary");
-    } catch {
+    } catch (err) {
       setError(
-        "We couldn't load your comparison right now."
+        "We couldn't run your comparison right now."
       );
     } finally {
       setLoading(false);
@@ -274,142 +196,41 @@ export default function StudentLoanTool() {
   };
 
   // ---------------------------------
-  // RESULT DATA
+  // CHART DATA
   // ---------------------------------
-  const ages =
-    result?.curves?.ages || [];
-
-  const invest =
-    result?.curves
-      ?.invest_net_worth || [];
-
-  const overpayCurve =
-    result?.curves
-      ?.overpay_net_worth || [];
-
-  const wealthDiff =
-    result?.insights
-      ?.wealth_difference ??
-    null;
-
-  const direction =
-    wealthDiff === null
-      ? "Either route"
-      : wealthDiff < 0
-      ? "Investing"
-      : "Overpaying";
-
-  const chartData = ages.map(
-    (age, i) => ({
-      age,
-      invest:
-        invest[i] ?? 0,
-      overpay:
-        overpayCurve[i] ?? 0
-    })
-  );
-
-  // ---------------------------------
-  // TOOLTIP
-  // ---------------------------------
-  const CustomTooltip = ({
-    active,
-    payload,
-    label
-  }) => {
-    if (
-      !active ||
-      !payload ||
-      !payload.length
-    )
-      return null;
-
-    const investVal =
-      payload[0]?.value ?? 0;
-
-    const overpayVal =
-      payload[1]?.value ?? 0;
-
-    const diff =
-      investVal - overpayVal;
-
-    return (
-      <div
-        style={{
-          background: "white",
-          border:
-            "1px solid #e5e7eb",
-          borderRadius: 14,
-          padding: 14,
-          boxShadow:
-            "0 10px 24px rgba(0,0,0,0.08)"
-        }}
-      >
-        <strong>
-          Age {label}
-        </strong>
-
-        <div
-          style={{
-            marginTop: 8,
-            color: "#10b981"
-          }}
-        >
-          If you invested:
-          <br />
-          {money(
-            investVal
-          )}
-        </div>
-
-        <div
-          style={{
-            marginTop: 8,
-            color: "#2563eb"
-          }}
-        >
-          If you overpaid:
-          <br />
-          {money(
-            overpayVal
-          )}
-        </div>
-
-        <div
-          style={{
-            marginTop: 10,
-            fontWeight: 700,
-            color: "#0f172a"
-          }}
-        >
-          {Math.abs(diff) <
-          500
-            ? "Both options are very similar here."
-            : diff > 0
-            ? `Investing is estimated to leave you ${money(
-                diff
-              )} better off overall here.`
-            : `Overpaying is estimated to leave you ${money(
-                Math.abs(
-                  diff
-                )
-              )} better off overall here.`}
-        </div>
-      </div>
-    );
-  };
+  const chartData =
+    result?.curves?.ages?.map(
+      (age, i) => ({
+        age,
+        minimum:
+          result.curves
+            .minimum_net_worth?.[
+            i
+          ] ?? 0,
+        overpay:
+          result.curves
+            .overpay_net_worth?.[
+            i
+          ] ?? 0,
+        invest:
+          result.curves
+            .invest_net_worth?.[
+            i
+          ] ?? 0
+      })
+    ) || [];
 
   // ---------------------------------
   // STYLES
   // ---------------------------------
   const card = {
     background: "white",
-    borderRadius: 20,
-    padding: 22,
+    borderRadius: 18,
+    padding: 20,
     border:
       "1px solid #e5e7eb",
     boxShadow:
-      "0 10px 28px rgba(15,23,42,0.05)"
+      "0 10px 24px rgba(15,23,42,0.05)"
   };
 
   const input = {
@@ -422,15 +243,15 @@ export default function StudentLoanTool() {
     fontSize: 16
   };
 
-  const labelStyle = {
+  const label = {
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: 600,
     color: "#0f172a"
   };
 
   const pill = (active) => ({
     padding:
-      "10px 16px",
+      "10px 14px",
     borderRadius: 999,
     border: "none",
     cursor: "pointer",
@@ -451,9 +272,7 @@ export default function StudentLoanTool() {
       style={{
         maxWidth: 1100,
         margin: "0 auto",
-        padding: 16,
-        background:
-          "#f8fafc"
+        padding: 16
       }}
     >
       {/* HERO */}
@@ -461,9 +280,8 @@ export default function StudentLoanTool() {
         <div
           style={{
             fontSize: 13,
-            fontWeight: 800,
+            fontWeight: 700,
             color: "#10b981",
-            letterSpacing: 1,
             textTransform:
               "uppercase"
           }}
@@ -474,30 +292,26 @@ export default function StudentLoanTool() {
         <h1
           style={{
             marginTop: 8,
-            marginBottom: 10,
-            fontSize: 30,
-            color: "#0f172a"
+            marginBottom: 10
           }}
         >
-          Student Loan:
-          Overpay or Invest?
+          Student Loan Strategy Tool
         </h1>
 
         <p
           style={{
-            color:
-              "#475569",
-            lineHeight: 1.7,
             margin: 0,
-            fontSize: 17
+            color: "#475569",
+            lineHeight: 1.7
           }}
         >
-          Compare whether
-          overpaying your UK
-          student loan or
-          investing the same
-          money may leave you
-          better off overall.
+          Explore how paying
+          the minimum,
+          overpaying, or
+          investing instead
+          could affect your
+          longer-term
+          financial position.
         </p>
       </div>
 
@@ -518,14 +332,9 @@ export default function StudentLoanTool() {
           }}
         >
           <div>
-            <label
-              style={
-                labelStyle
-              }
-            >
+            <label style={label}>
               Loan plan
             </label>
-
             <select
               value={plan}
               onChange={(e) =>
@@ -552,22 +361,22 @@ export default function StudentLoanTool() {
 
           {[
             [
-              "Your salary (£)",
+              "Salary (£)",
               salary,
               setSalary
             ],
             [
-              "Current loan balance (£)",
+              "Loan balance (£)",
               balance,
               setBalance
             ],
             [
-              "Extra overpayment / month (£)",
+              "Extra monthly amount (£)",
               overpay,
               setOverpay
             ],
             [
-              "Your current age",
+              "Current age",
               currentAge,
               setCurrentAge
             ],
@@ -592,13 +401,9 @@ export default function StudentLoanTool() {
               value,
               setter
             ]) => (
-              <div
-                key={text}
-              >
+              <div key={text}>
                 <label
-                  style={
-                    labelStyle
-                  }
+                  style={label}
                 >
                   {text}
                 </label>
@@ -616,78 +421,11 @@ export default function StudentLoanTool() {
                       )
                     )
                   }
-                  style={
-                    input
-                  }
+                  style={input}
                 />
               </div>
             )
           )}
-        </div>
-
-        <div
-          style={{
-            fontSize: 13,
-            color:
-              "#64748b",
-            marginTop: 8
-          }}
-        >
-          {comparisonYears} year
-          comparison
-        </div>
-
-        {/* PLAN BOX */}
-        <div
-          style={{
-            marginTop: 18,
-            padding: 16,
-            background:
-              "#f8fafc",
-            borderRadius: 14
-          }}
-        >
-          <strong>
-            {
-              selectedPlan.name
-            }{" "}
-            assumptions
-          </strong>
-
-          <div
-            style={{
-              marginTop: 8,
-              color:
-                "#475569",
-              lineHeight: 1.8
-            }}
-          >
-            • Repayments start
-            above{" "}
-            {money(
-              threshold
-            )}
-            <br />
-            • 9% of income
-            above threshold
-            <br />
-            • Typical write-off
-            after{" "}
-            {
-              selectedPlan.years
-            }{" "}
-            years
-            <br />
-            • If repayments
-            began around age{" "}
-            {
-              selectedPlan.typicalStartAge
-            }
-            , write-off may be
-            around age{" "}
-            {selectedPlan.typicalStartAge +
-              selectedPlan.years}
-          </div>
         </div>
 
         <button
@@ -700,30 +438,29 @@ export default function StudentLoanTool() {
           }
           style={{
             marginTop: 18,
+            width: "100%",
             padding:
               "14px 18px",
-            border:
-              "none",
+            border: "none",
             borderRadius: 14,
             background:
-              !canRun ||
-              loading
+              loading ||
+              !canRun
                 ? "#94a3b8"
                 : "#10b981",
             color:
               "white",
-            fontWeight: 800,
+            fontWeight: 700,
             fontSize: 16,
             cursor:
-              !canRun ||
-              loading
+              loading ||
+              !canRun
                 ? "not-allowed"
-                : "pointer",
-            width: "100%"
+                : "pointer"
           }}
         >
           {loading
-            ? "Comparing options..."
+            ? "Comparing..."
             : "Compare My Options"}
         </button>
 
@@ -743,6 +480,104 @@ export default function StudentLoanTool() {
       {/* RESULTS */}
       {result && (
         <>
+          {/* HEADLINE */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18,
+              background:
+                "#ecfdf5"
+            }}
+          >
+            <div
+              style={{
+                fontSize: 14,
+                color: "#065f46"
+              }}
+            >
+              Highest projected
+              outcome under
+              these
+              assumptions
+            </div>
+
+            <h2
+              style={{
+                marginTop: 8,
+                marginBottom: 8
+              }}
+            >
+              {
+                result.summary
+                  .winner_label
+              }
+            </h2>
+
+            <p
+              style={{
+                margin: 0
+              }}
+            >
+              {money(
+                result.summary
+                  .winner_difference
+              )}{" "}
+              ahead of the next
+              closest route by
+              age{" "}
+              {
+                compareUntilAge
+              }
+              .
+            </p>
+          </div>
+
+          {/* RANKING */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              Projected finish
+              order
+            </h3>
+
+            <ol
+              style={{
+                lineHeight: 2
+              }}
+            >
+              {result.summary.ranking_labels.map(
+                (
+                  item,
+                  i
+                ) => (
+                  <li
+                    key={i}
+                  >
+                    {item}
+                  </li>
+                )
+              )}
+            </ol>
+
+            <p
+              style={{
+                color:
+                  "#475569"
+              }}
+            >
+              {
+                result
+                  .insights
+                  .explanation
+              }
+            </p>
+          </div>
+
+          {/* TABS */}
           <div
             style={{
               display:
@@ -756,28 +591,28 @@ export default function StudentLoanTool() {
             {[
               "summary",
               "chart",
-              "method"
+              "meaning"
             ].map(
               (name) => (
                 <button
                   key={name}
-                  style={pill(
-                    tab ===
-                      name
-                  )}
                   onClick={() =>
                     setTab(
                       name
                     )
                   }
+                  style={pill(
+                    tab ===
+                      name
+                  )}
                 >
                   {name ===
                   "summary"
                     ? "Summary"
                     : name ===
                       "chart"
-                    ? "Comparison Chart"
-                    : "How It Works"}
+                    ? "Compare Over Time"
+                    : "What This Means"}
                 </button>
               )
             )}
@@ -793,69 +628,74 @@ export default function StudentLoanTool() {
               }}
             >
               <h3>
-                Your repayment
-                picture
+                Scenario values
+                by age{" "}
+                {
+                  compareUntilAge
+                }
               </h3>
 
               <ul
                 style={{
-                  lineHeight: 1.8,
-                  color:
-                    "#334155"
+                  lineHeight: 2
                 }}
               >
                 <li>
-                  Current
-                  repayments are
-                  around{" "}
+                  Minimum
+                  repayments
+                  only:{" "}
                   {money(
-                    monthlyRepayment
-                  )}{" "}
-                  per month
+                    result
+                      .summary
+                      .minimum_final
+                  )}
                 </li>
 
                 <li>
-                  {repayLikely
-                    ? "At a similar income, full repayment may happen before write-off."
-                    : "At a similar income, full repayment before write-off may be less likely."}
-                </li>
-
-                <li>
-                  Comparison runs
-                  until age{" "}
-                  {
-                    compareUntilAge
-                  }
-                </li>
-
-                <li>
-                  Illustrative
-                  salary to clear
-                  within{" "}
-                  {
-                    selectedPlan.years
-                  }{" "}
-                  years:{" "}
+                  Overpay
+                  monthly:{" "}
                   {money(
-                    requiredSalary
+                    result
+                      .summary
+                      .overpay_final
+                  )}
+                </li>
+
+                <li>
+                  Invest
+                  monthly:{" "}
+                  {money(
+                    result
+                      .summary
+                      .invest_final
                   )}
                 </li>
               </ul>
 
-              <hr />
-
-              <h3>
-                What this
-                suggests
-              </h3>
-
-              <p>
-                {getDifferenceText(
-                  wealthDiff,
-                  compareUntilAge,
-                  direction
-                )}
-              </p>
+              <button
+                onClick={() =>
+                  setResult(
+                    null
+                  )
+                }
+                style={{
+                  marginTop: 8,
+                  padding:
+                    "12px 16px",
+                  border:
+                    "none",
+                  borderRadius: 12,
+                  background:
+                    "#0f172a",
+                  color:
+                    "white",
+                  cursor:
+                    "pointer"
+                }}
+              >
+                Compare Another
+                Scenario
+              </button>
             </div>
           )}
 
@@ -869,9 +709,7 @@ export default function StudentLoanTool() {
               }}
             >
               <h3>
-                Estimated
-                financial
-                position over
+                Compare over
                 time
               </h3>
 
@@ -881,15 +719,11 @@ export default function StudentLoanTool() {
                     "#475569"
                 }}
               >
-                This shows your
-                estimated overall
+                Estimated
+                overall
                 financial
-                position at each
-                age after loan
-                costs, repayments
-                and potential
-                investment
-                growth.
+                position under
+                each route.
               </p>
 
               <ResponsiveContainer
@@ -912,24 +746,27 @@ export default function StudentLoanTool() {
                   />
 
                   <Tooltip
-                    content={
-                      <CustomTooltip />
-                    }
+                    formatter={(
+                      value
+                    ) =>
+                      money(
+                        value
+                      )}
                   />
 
                   <Legend />
 
                   <Line
                     type="monotone"
-                    dataKey="invest"
-                    stroke="#10b981"
+                    dataKey="minimum"
+                    stroke="#94a3b8"
                     strokeWidth={
-                      3
+                      2
                     }
                     dot={
                       false
                     }
-                    name="If you invested"
+                    name="Minimum only"
                   />
 
                   <Line
@@ -942,16 +779,29 @@ export default function StudentLoanTool() {
                     dot={
                       false
                     }
-                    name="If you overpaid"
+                    name="Overpay"
+                  />
+
+                  <Line
+                    type="monotone"
+                    dataKey="invest"
+                    stroke="#10b981"
+                    strokeWidth={
+                      3
+                    }
+                    dot={
+                      false
+                    }
+                    name="Invest"
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           )}
 
-          {/* METHOD */}
+          {/* MEANING */}
           {tab ===
-            "method" && (
+            "meaning" && (
             <div
               style={{
                 ...card,
@@ -959,49 +809,43 @@ export default function StudentLoanTool() {
               }}
             >
               <h3>
-                How this works
+                What this
+                means
               </h3>
 
               <p>
-                We compare two
-                routes:
+                UK student
+                loans often
+                work
+                differently
+                from normal
+                debt.
               </p>
 
               <p>
-                1. Overpay your
-                student loan
+                Depending on
+                earnings,
+                some people
+                repay in full
+                while others
+                may not before
+                write-off.
               </p>
 
               <p>
-                2. Invest the
-                same monthly
-                amount
-              </p>
-
-              <p>
-                For many UK
-                borrowers,
-                student loans
-                behave more like
-                an income-linked
-                graduate tax than
-                traditional debt.
-              </p>
-
-              <p>
-                Results are
+                This tool
+                helps you
+                compare
+                possible
+                routes using
+                assumptions.
+                It is for
+                education and
                 scenario
-                estimates, not
+                planning, not
                 personal
                 financial
                 advice.
-              </p>
-
-              <p>
-                Built by Wayli to
-                help you make
-                clearer money
-                decisions.
               </p>
             </div>
           )}
