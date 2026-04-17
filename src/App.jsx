@@ -100,8 +100,12 @@ export default function App() {
               lineHeight: 1.6
             }}
           >
-            Compare meaningful financial decisions clearly — from student
-            loans to mortgages, cars, investing and more.
+            Helping you to make informed decisions about your finances. 
+            Is it better to overpay your student loan or invest spare cash? 
+            The same applies for overpaying a mortgage or investing.
+            Or how about replacing or repairing your car. 
+            Oh, and how much do you need to save for retirement?
+        
           </div>
 
           <div
@@ -143,7 +147,7 @@ export default function App() {
               fontSize: 15
             }}
           >
-            Built for UK consumers making real-world money decisions.
+            Smart tools for UK consumers with money on their minds.
           </div>
         </div>
 
