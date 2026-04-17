@@ -16,6 +16,7 @@ allowed_origins = [
     "https://www.wayli.uk",
     "https://moneymapper-zeta.vercel.app",
     "http://localhost:5173",
+    "https://wayli.app",
 ]
 
 # Optional future Wayli domain support
