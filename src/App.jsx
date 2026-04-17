@@ -101,11 +101,12 @@ export default function App() {
             }}
           >
             Should I overpay my student loan or pay the minimum? 
-            Should I overpay my mortgage or invest instead?
-            Should I replace or repair my car? 
-            How much do I need for retirement?
-            I made these tools for my own family
-            Hopefully, they can help you too
+            Should I overpay my mortgage or save/invest instead? 
+            How much do I need for retirement? 
+            I made these tools for my own family. 
+            And maybe they are of use to you. 
+            
+             
         
           </div>
 
@@ -179,8 +180,8 @@ export default function App() {
                 lineHeight: 1.6
               }}
             >
-              Should you overpay your student loan or invest instead?
-              Compare both routes using UK loan plans.
+              Should you overpay your student loan or could you invest instead?
+              Comparing choices for students with UK loan plans.
             </div>
 
             <button
@@ -216,7 +217,7 @@ export default function App() {
               }}
             >
               Should you overpay your mortgage or invest instead?
-              High-value decisions made clearer.
+              High-value choices made clearer.
             </div>
 
             <div
@@ -248,8 +249,8 @@ export default function App() {
                 lineHeight: 1.6
               }}
             >
-              Should you repair your car or replace it? Compare the real
-              costs and trade-offs.
+              Should you repair or replace your car? 
+              Compare costs and trade-offs.
             </div>
 
             <div
