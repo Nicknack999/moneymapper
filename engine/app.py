@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
 
 from student_loan import calculate_loan
 from forecast import run_forecast
@@ -7,62 +8,91 @@ from full_model import run_full_model
 
 app = Flask(__name__)
 
-# -----------------------------
-# CORS CONFIG (FIXED 🔥)
-# -----------------------------
+# -------------------------------------------------
+# CORS CONFIG
+# -------------------------------------------------
+allowed_origins = [
+    "https://moneymapper-zeta.vercel.app",   # current live URL
+    "http://localhost:5173",                # local Vite dev
+]
+
+# Optional future Wayli domain support
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 CORS(
     app,
-    resources={r"/*": {"origins": "https://moneymapper-zeta.vercel.app"}},
+    resources={r"/*": {"origins": allowed_origins}},
     supports_credentials=True
 )
 
-# -----------------------------
+# -------------------------------------------------
 # HEALTH CHECK
-# -----------------------------
-@app.route("/")
+# -------------------------------------------------
+@app.route("/", methods=["GET"])
 def home():
-    return "MoneyMapper API v2 🚀"
+    return jsonify({
+        "status": "ok",
+        "service": "Wayli API",
+        "message": "Wayli backend live 🚀"
+    })
 
 
-# -----------------------------
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "healthy"
+    })
+
+
+# -------------------------------------------------
 # ROUTES
-# -----------------------------
+# -------------------------------------------------
 @app.route("/student-loan", methods=["POST"])
 def student_loan():
     try:
-        data = request.get_json(force=True)
+        data = request.get_json(force=True) or {}
         result = calculate_loan(data)
         return jsonify(result)
+
     except Exception as e:
         print("Error in /student-loan:", e)
-        return jsonify({"error": "Failed to process student loan"}), 500
+        return jsonify({
+            "error": "Failed to process student loan comparison."
+        }), 500
 
 
 @app.route("/forecast", methods=["POST"])
 def forecast():
     try:
-        data = request.get_json(force=True)
+        data = request.get_json(force=True) or {}
         result = run_forecast(data)
         return jsonify(result)
+
     except Exception as e:
         print("Error in /forecast:", e)
-        return jsonify({"error": "Failed to run forecast"}), 500
+        return jsonify({
+            "error": "Failed to run forecast."
+        }), 500
 
 
 @app.route("/full-model", methods=["POST"])
 def full_model():
     try:
-        data = request.get_json(force=True)
+        data = request.get_json(force=True) or {}
         result = run_full_model(data)
         return jsonify(result)
+
     except Exception as e:
         print("Error in /full-model:", e)
-        return jsonify({"error": "Failed to run full model"}), 500
+        return jsonify({
+            "error": "Failed to run comparison model."
+        }), 500
 
 
-# -----------------------------
+# -------------------------------------------------
 # RUN
-# -----------------------------
+# -------------------------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run(host="0.0.0.0", port=5000, debug=True)

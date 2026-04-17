@@ -294,9 +294,7 @@ code {
     border-right-color: var(--border);
   }
 }
-/* =========================
-   FORM LAYOUT (MoneyMapper)
-   ========================= */
+
 
 .input-row {
   display: flex;
