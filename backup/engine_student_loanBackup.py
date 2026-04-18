@@ -1,7 +1,6 @@
 # --------------------------------------------------
-# WAYLI - STUDENT LOAN ENGINE (PRODUCTION UPGRADE)
-# UK-focused / Backward Compatible / Safer Forecasting
-# Drop-in replacement for student_loan.py
+# WAYLI - STUDENT LOAN ENGINE (SAFE REFACTOR)
+# Keeps legacy output contract + adds UK plan support
 # --------------------------------------------------
 
 # --------------------------------------------------
@@ -10,31 +9,26 @@
 
 PLAN_CONFIG = {
     "plan1": {
-        "name": "Plan 1",
         "threshold": 26065,
         "write_off_years": 25,
         "rate": 9,
     },
     "plan2": {
-        "name": "Plan 2",
         "threshold": 27295,
         "write_off_years": 30,
         "rate": 9,
     },
     "plan4": {
-        "name": "Plan 4",
         "threshold": 32745,
         "write_off_years": 30,
         "rate": 9,
     },
     "plan5": {
-        "name": "Plan 5",
         "threshold": 25000,
         "write_off_years": 40,
         "rate": 9,
     },
     "postgrad": {
-        "name": "Postgraduate",
         "threshold": 21000,
         "write_off_years": 30,
         "rate": 6,
@@ -46,6 +40,11 @@ PLAN_CONFIG = {
 # HELPERS
 # --------------------------------------------------
 
+def get_plan(plan_name):
+    key = str(plan_name).lower().replace(" ", "")
+    return PLAN_CONFIG.get(key, PLAN_CONFIG["plan2"])
+
+
 def num(value, default=0):
     try:
         return float(value)
@@ -53,17 +52,8 @@ def num(value, default=0):
         return default
 
 
-def clamp(value, low, high):
-    return max(low, min(high, value))
-
-
-def get_plan(plan_name):
-    key = str(plan_name).lower().replace(" ", "")
-    return PLAN_CONFIG.get(key, PLAN_CONFIG["plan2"])
-
-
 # --------------------------------------------------
-# YEARLY MECHANICS
+# LEVEL 1: YEARLY MECHANICS
 # --------------------------------------------------
 
 def annual_loan_repayment(
@@ -86,8 +76,9 @@ def apply_loan_year(
     interest_rate_percent,
     repayment
 ):
-    interest = balance * (
-        interest_rate_percent / 100
+    interest = (
+        balance *
+        (interest_rate_percent / 100)
     )
 
     new_balance = (
@@ -108,7 +99,7 @@ def apply_loan_year(
 
 
 # --------------------------------------------------
-# CORE SIMULATION
+# LEVEL 2: FULL SIMULATION
 # --------------------------------------------------
 
 def simulate_loan(
@@ -120,7 +111,6 @@ def simulate_loan(
     years,
     overpay=0,
     salary_growth=0.03,
-    threshold_growth=0.02,
     return_schedule=False
 ):
     total_repaid = 0
@@ -135,13 +125,9 @@ def simulate_loan(
             (1 + salary_growth) ** (year - 1)
         )
 
-        current_threshold = threshold * (
-            (1 + threshold_growth) ** (year - 1)
-        )
-
         repayment = annual_loan_repayment(
             current_salary,
-            current_threshold,
+            threshold,
             rate
         )
 
@@ -158,15 +144,10 @@ def simulate_loan(
         if return_schedule:
             schedule.append({
                 "year": year,
-                "salary": round(current_salary, 0),
-                "threshold": round(current_threshold, 0),
                 "balance": round(balance, 0),
                 "repayment": round(actual_repayment, 0),
                 "interest": round(interest_paid, 0)
             })
-
-    if balance > 0:
-        balance = 0
 
     if return_schedule:
         return total_repaid, schedule
@@ -175,30 +156,7 @@ def simulate_loan(
 
 
 # --------------------------------------------------
-# FUTURE VALUE
-# --------------------------------------------------
-
-def future_value(
-    monthly_amount,
-    years,
-    return_rate=0.05
-):
-    months = int(years * 12)
-
-    monthly_rate = return_rate / 12
-    value = 0
-
-    for _ in range(months):
-        value = (
-            value *
-            (1 + monthly_rate)
-        ) + monthly_amount
-
-    return value
-
-
-# --------------------------------------------------
-# BREAK EVEN SALARY
+# LEVEL 3: SCENARIO COMPARISON
 # --------------------------------------------------
 
 def repayment_difference(
@@ -209,8 +167,7 @@ def repayment_difference(
     rate,
     years,
     overpay,
-    salary_growth,
-    threshold_growth
+    salary_growth
 ):
     normal = simulate_loan(
         balance,
@@ -219,9 +176,8 @@ def repayment_difference(
         threshold,
         rate,
         years,
-        0,
-        salary_growth,
-        threshold_growth
+        overpay=0,
+        salary_growth=salary_growth
     )
 
     overpay_case = simulate_loan(
@@ -231,13 +187,16 @@ def repayment_difference(
         threshold,
         rate,
         years,
-        overpay,
-        salary_growth,
-        threshold_growth
+        overpay=overpay,
+        salary_growth=salary_growth
     )
 
     return overpay_case - normal
 
+
+# --------------------------------------------------
+# LEVEL 4: BREAK EVEN SALARY
+# --------------------------------------------------
 
 def find_break_even_salary(
     balance,
@@ -246,11 +205,10 @@ def find_break_even_salary(
     rate,
     years,
     overpay,
-    salary_growth,
-    threshold_growth
+    salary_growth
 ):
     low = 20000
-    high = 180000
+    high = 150000
     tolerance = 1
     mid = low
 
@@ -262,8 +220,7 @@ def find_break_even_salary(
         rate,
         years,
         overpay,
-        salary_growth,
-        threshold_growth
+        salary_growth
     )
 
     high_diff = repayment_difference(
@@ -274,8 +231,7 @@ def find_break_even_salary(
         rate,
         years,
         overpay,
-        salary_growth,
-        threshold_growth
+        salary_growth
     )
 
     if low_diff > 0:
@@ -295,8 +251,7 @@ def find_break_even_salary(
             rate,
             years,
             overpay,
-            salary_growth,
-            threshold_growth
+            salary_growth
         )
 
         if diff > 0:
@@ -308,7 +263,29 @@ def find_break_even_salary(
 
 
 # --------------------------------------------------
-# BREAK EVEN RETURN
+# LEVEL 5A: INVESTMENT VALUE
+# --------------------------------------------------
+
+def future_value(
+    monthly_amount,
+    years,
+    return_rate=0.05
+):
+    months = years * 12
+    monthly_rate = return_rate / 12
+    value = 0
+
+    for _ in range(months):
+        value = (
+            value *
+            (1 + monthly_rate)
+        ) + monthly_amount
+
+    return value
+
+
+# --------------------------------------------------
+# LEVEL 5B: BREAK EVEN RETURN
 # --------------------------------------------------
 
 def find_break_even_return(
@@ -319,8 +296,7 @@ def find_break_even_return(
     rate,
     years,
     monthly_overpay,
-    salary_growth,
-    threshold_growth
+    salary_growth
 ):
     annual_overpay = monthly_overpay * 12
 
@@ -331,9 +307,8 @@ def find_break_even_return(
         threshold,
         rate,
         years,
-        0,
-        salary_growth,
-        threshold_growth
+        overpay=0,
+        salary_growth=salary_growth
     )
 
     overpay_case = simulate_loan(
@@ -343,12 +318,13 @@ def find_break_even_return(
         threshold,
         rate,
         years,
-        annual_overpay,
-        salary_growth,
-        threshold_growth
+        overpay=annual_overpay,
+        salary_growth=salary_growth
     )
 
-    overpay_benefit = normal - overpay_case
+    overpay_benefit = (
+        normal - overpay_case
+    )
 
     if overpay_benefit <= 0:
         return None
@@ -427,46 +403,27 @@ def calculate_loan(data):
         )
     )
 
-    salary_growth = clamp(
-        num(
-            data.get(
-                "salary_growth",
-                0.03
-            )
-        ),
-        -0.05,
-        0.10
+    salary_growth = num(
+        data.get(
+            "salary_growth",
+            0.03
+        )
     )
 
-    threshold_growth = clamp(
-        num(
-            data.get(
-                "threshold_growth",
-                0.02
-            )
-        ),
-        0,
-        0.10
-    )
-
-    return_rate = clamp(
-        num(
-            data.get(
-                "return_rate",
-                0.05
-            )
-        ),
-        -0.10,
-        0.20
+    return_rate = num(
+        data.get(
+            "return_rate",
+            0.05
+        )
     )
 
     annual_overpay = (
         monthly_overpay * 12
     )
 
-    # --------------------------
-    # Base Scenario
-    # --------------------------
+    # ----------------------------
+    # BASE SCENARIO
+    # ----------------------------
     total_repaid, schedule = simulate_loan(
         loan_balance,
         salary,
@@ -476,13 +433,12 @@ def calculate_loan(data):
         years,
         overpay=0,
         salary_growth=salary_growth,
-        threshold_growth=threshold_growth,
         return_schedule=True
     )
 
-    # --------------------------
-    # Overpay Scenario
-    # --------------------------
+    # ----------------------------
+    # OVERPAY SCENARIO
+    # ----------------------------
     total_repaid_overpay, overpay_schedule = simulate_loan(
         loan_balance,
         salary,
@@ -492,7 +448,6 @@ def calculate_loan(data):
         years,
         overpay=annual_overpay,
         salary_growth=salary_growth,
-        threshold_growth=threshold_growth,
         return_schedule=True
     )
 
@@ -506,18 +461,18 @@ def calculate_loan(data):
         if overpay_schedule else 0
     )
 
-    # --------------------------
-    # Investment Scenario
-    # --------------------------
+    # ----------------------------
+    # INVESTMENT
+    # ----------------------------
     invest_value = future_value(
         monthly_overpay,
         years,
         return_rate
     )
 
-    # --------------------------
-    # Net Positions
-    # --------------------------
+    # ----------------------------
+    # NET POSITIONS
+    # ----------------------------
     minimum_net = -remaining_balance
     overpay_net = -remaining_balance_overpay
     invest_net = (
@@ -530,19 +485,19 @@ def calculate_loan(data):
         overpay_net
     )
 
-    # --------------------------
-    # Repayment Outcome
-    # --------------------------
+    # ----------------------------
+    # OUTCOME TYPE
+    # ----------------------------
     if remaining_balance > 0:
         outcome_type = "write_off"
         explanation = (
-            "You are unlikely to fully repay your loan before write-off."
+            "You are unlikely to fully repay your loan before it is written off."
         )
 
     elif total_repaid < loan_balance * 1.1:
         outcome_type = "borderline"
         explanation = (
-            "You may repay in full, but outcomes depend on future earnings and rates."
+            "You may repay your loan, but outcomes depend on future earnings and interest rates."
         )
 
     else:
@@ -551,9 +506,25 @@ def calculate_loan(data):
             "You are likely to fully repay your loan."
         )
 
-    # --------------------------
-    # Curves
-    # --------------------------
+    decision = {
+        "repayment_outcome": {
+            "type": outcome_type,
+            "explanation": explanation
+        },
+        "strategy": (
+            "invest"
+            if wealth_difference > 0
+            else "overpay"
+        )
+    }
+
+    insights = {
+        "wealth_difference": round(
+            wealth_difference,
+            0
+        )
+    }
+
     minimum_curve = [
         round(-row["balance"], 0)
         for row in schedule
@@ -564,9 +535,6 @@ def calculate_loan(data):
         for row in overpay_schedule
     ]
 
-    # --------------------------
-    # Break-even Metrics
-    # --------------------------
     break_even_salary = find_break_even_salary(
         loan_balance,
         interest,
@@ -574,8 +542,7 @@ def calculate_loan(data):
         rate,
         years,
         annual_overpay,
-        salary_growth,
-        threshold_growth
+        salary_growth
     )
 
     break_even_return = find_break_even_return(
@@ -586,34 +553,12 @@ def calculate_loan(data):
         rate,
         years,
         monthly_overpay,
-        salary_growth,
-        threshold_growth
+        salary_growth
     )
 
-    # --------------------------
-    # Final Output
-    # --------------------------
     return {
-        "decision": {
-            "repayment_outcome": {
-                "type": outcome_type,
-                "explanation": explanation
-            },
-            "strategy": (
-                "invest"
-                if wealth_difference > 0
-                else "overpay"
-            )
-        },
-
-        "insights": {
-            "wealth_difference": round(
-                wealth_difference,
-                0
-            )
-        },
-
-        "plan_used": plan["name"],
+        "decision": decision,
+        "insights": insights,
 
         "total_repaid": round(
             total_repaid,
