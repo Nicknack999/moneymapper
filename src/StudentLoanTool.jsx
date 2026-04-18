@@ -16,7 +16,7 @@ export default function StudentLoanTool() {
     "https://moneymapper-backend-018g.onrender.com";
 
   // ---------------------------------
-  // PLAN RULES (UK)
+  // PLAN RULES
   // ---------------------------------
   const plans = {
     plan1: {
@@ -66,11 +66,11 @@ export default function StudentLoanTool() {
 
   const card = {
     background: "white",
-    borderRadius: 18,
-    padding: 20,
+    borderRadius: 20,
+    padding: 22,
     border: "1px solid #e5e7eb",
     boxShadow:
-      "0 10px 24px rgba(15,23,42,0.05)"
+      "0 12px 28px rgba(15,23,42,0.06)"
   };
 
   const input = {
@@ -199,10 +199,9 @@ export default function StudentLoanTool() {
     }
   };
 
- // ---------------------------------
-// RESULT HELPERS
-// ---------------------------------
-
+  // ---------------------------------
+  // RESULT HELPERS
+  // ---------------------------------
   const winner =
     result?.summary?.winner_label ||
     "No result yet";
@@ -210,46 +209,61 @@ export default function StudentLoanTool() {
   const winnerGap =
     result?.summary?.winner_difference || 0;
 
-  // Correct ranking: map sorted strategy keys to their true values
   const ranking =
-    result?.summary?.ranking?.map((key) => {
-      const labels = {
-        minimum: "Minimum repayments only",
-        overpay: "Overpay monthly",
-        invest: "Invest monthly"
-      };
+    result?.summary?.ranking?.map(
+      (key) => {
+        const labels = {
+          minimum:
+            "Minimum repayments only",
+          overpay:
+            "Overpay monthly",
+          invest:
+            "Invest monthly"
+        };
 
-      const values = {
-        minimum:
-          result?.summary?.minimum_final || 0,
-        overpay:
-          result?.summary?.overpay_final || 0,
-        invest:
-          result?.summary?.invest_final || 0
-      };
+        const values = {
+          minimum:
+            result?.summary
+              ?.minimum_final || 0,
+          overpay:
+            result?.summary
+              ?.overpay_final || 0,
+          invest:
+            result?.summary
+              ?.invest_final || 0
+        };
 
-      return {
-        label: labels[key] || key,
-        value: values[key] || 0
-      };
-    }) || [];
-
-  const summaryText =
-    result?.insights?.explanation || "";
+        return {
+          label:
+            labels[key] || key,
+          value:
+            values[key] || 0
+        };
+      }
+    ) || [];
 
   const chartData =
-    result?.curves?.ages?.map((age, i) => ({
-      age,
+    result?.curves?.ages?.map(
+      (age, i) => ({
+        age,
+        minimum:
+          result?.curves
+            ?.minimum_net_worth?.[
+            i
+          ] || 0,
+        overpay:
+          result?.curves
+            ?.overpay_net_worth?.[
+            i
+          ] || 0,
+        invest:
+          result?.curves
+            ?.invest_net_worth?.[
+            i
+          ] || 0
+      })
+    ) || [];
 
-      minimum:
-        result?.curves?.minimum_net_worth?.[i] || 0,
-
-      overpay:
-        result?.curves?.overpay_net_worth?.[i] || 0,
-
-      invest:
-        result?.curves?.invest_net_worth?.[i] || 0
-   })) || [];
   // ---------------------------------
   // TOOLTIP
   // ---------------------------------
@@ -266,7 +280,8 @@ export default function StudentLoanTool() {
       return (
         <div
           style={{
-            background: "white",
+            background:
+              "white",
             border:
               "1px solid #e5e7eb",
             padding: 12,
@@ -285,9 +300,7 @@ export default function StudentLoanTool() {
               }}
             >
               {item.name}:{" "}
-              {money(
-                item.value
-              )}
+              {money(item.value)}
             </div>
           ))}
         </div>
@@ -296,6 +309,71 @@ export default function StudentLoanTool() {
 
     return null;
   };
+
+  // ---------------------------------
+  // RESULT META
+  // ---------------------------------
+  const closeResult =
+    result?.insights
+      ?.close_result || false;
+
+  const explanation =
+    result?.insights
+      ?.explanation || "";
+
+  const repaymentType =
+    result?.decision
+      ?.repayment_outcome
+      ?.type || "";
+
+  const confidence =
+    closeResult
+      ? "Medium"
+      : winnerGap > 15000
+      ? "High"
+      : "Moderate";
+
+  const confidenceColor =
+    closeResult
+      ? "#f59e0b"
+      : "#10b981";
+
+  const changes = [];
+
+  if (
+    repaymentType ===
+    "full_repay"
+  ) {
+    changes.push(
+      "If future income rises strongly, clearing the loan sooner can become more attractive."
+    );
+  }
+
+  if (
+    repaymentType ===
+    "borderline"
+  ) {
+    changes.push(
+      "This appears close enough that modest assumption changes may alter the ranking."
+    );
+  }
+
+  if (
+    repaymentType ===
+    "write_off"
+  ) {
+    changes.push(
+      "If part of the balance is unlikely to be repaid, extra repayments can offer lower value."
+    );
+  }
+
+  changes.push(
+    "Lower investment returns would reduce the projected benefit of investing."
+  );
+
+  changes.push(
+    "Some users prioritise certainty or debt reduction over higher projected long-term outcomes."
+  );
 
   // ---------------------------------
   // UI
@@ -317,9 +395,9 @@ export default function StudentLoanTool() {
             fontSize: 13,
             fontWeight: 700,
             color: "#10b981",
-            letterSpacing: 1,
             textTransform:
-              "uppercase"
+              "uppercase",
+            letterSpacing: 1
           }}
         >
           Wayli
@@ -329,7 +407,7 @@ export default function StudentLoanTool() {
           style={{
             marginTop: 8,
             marginBottom: 10,
-            fontSize: 30
+            fontSize: 32
           }}
         >
           Student Loan Strategy Tool
@@ -344,11 +422,10 @@ export default function StudentLoanTool() {
           }}
         >
           Compare three common
-          approaches using
-          simplified UK student
-          loan assumptions:
-          pay minimum, overpay,
-          or invest instead.
+          approaches using simplified
+          UK student loan
+          assumptions: pay minimum,
+          overpay, or invest instead.
         </p>
       </div>
 
@@ -372,6 +449,7 @@ export default function StudentLoanTool() {
             <label style={label}>
               Loan plan
             </label>
+
             <select
               value={plan}
               onChange={(e) =>
@@ -450,7 +528,9 @@ export default function StudentLoanTool() {
                 <input
                   type="number"
                   value={value}
-                  onChange={(e) =>
+                  onChange={(
+                    e
+                  ) =>
                     setter(
                       parseNum(
                         e.target
@@ -497,326 +577,354 @@ export default function StudentLoanTool() {
         )}
       </div>
 
-      // =====================================
-// PREMIUM RESULTS V2 JSX
-// Replace your current {result && ( ... )}
-// results block with this
-// =====================================
-
-{result && (() => {
-  const closeResult =
-    result?.insights?.close_result;
-
-  const explanation =
-    result?.insights?.explanation || "";
-
-  const repaymentType =
-    result?.decision?.repayment_outcome?.type || "";
-
-  const winnerName =
-    winner || "No result";
-
-  const confidenceLabel =
-    closeResult
-      ? "Medium"
-      : winnerGap > 15000
-      ? "High"
-      : "Moderate";
-
-  const confidenceColor =
-    closeResult
-      ? "#f59e0b"
-      : "#10b981";
-
-  const scenarioShift = [];
-
-  if (repaymentType === "full_repay") {
-    scenarioShift.push(
-      "If your loan is likely to be fully repaid, extra repayments can become more valuable."
-    );
-  }
-
-  if (repaymentType === "borderline") {
-    scenarioShift.push(
-      "This appears close to the point where future salary growth could materially change the result."
-    );
-  }
-
-  scenarioShift.push(
-    "Lower investment returns would reduce the advantage of investing."
-  );
-
-  scenarioShift.push(
-    "Personal preference for certainty or flexibility may also matter."
-  );
-
-  return (
-    <>
-      {/* HERO VERDICT */}
-      <div
-        style={{
-          ...card,
-          marginTop: 18,
-          background: "#ecfdf5",
-          border: "1px solid #bbf7d0"
-        }}
-      >
-        <div
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: "#065f46",
-            textTransform: "uppercase",
-            letterSpacing: 0.6
-          }}
-        >
-          Strongest projected outcome
-        </div>
-
-        <h2 style={{ marginTop: 8, marginBottom: 8 }}>
-          {winnerName}
-        </h2>
-
-        <p
-          style={{
-            margin: 0,
-            color: "#065f46",
-            lineHeight: 1.6
-          }}
-        >
-          Based on the figures entered, this route currently projects
-          the strongest overall financial position by age {compareAge}.
-        </p>
-
-        <div
-          style={{
-            marginTop: 14,
-            fontSize: 22,
-            fontWeight: 800,
-            color: "#065f46"
-          }}
-        >
-          {money(winnerGap)} ahead
-        </div>
-
-        <p
-          style={{
-            marginTop: 4,
-            marginBottom: 0,
-            color: "#065f46"
-          }}
-        >
-          Estimated lead over the next closest option under these assumptions.
-        </p>
-
-        <div
-          style={{
-            marginTop: 14,
-            display: "inline-block",
-            padding: "8px 12px",
-            borderRadius: 999,
-            background: "#ffffff",
-            border: `1px solid ${confidenceColor}`,
-            fontWeight: 700,
-            color: confidenceColor
-          }}
-        >
-          Confidence: {confidenceLabel}
-        </div>
-      </div>
-
-      {/* WHY THIS MAY BE HAPPENING */}
-      <div style={{ ...card, marginTop: 18 }}>
-        <h3 style={{ marginTop: 0 }}>
-          Why this may be happening
-        </h3>
-
-        <p
-          style={{
-            color: "#334155",
-            lineHeight: 1.7
-          }}
-        >
-          {explanation}
-        </p>
-
-        {repaymentType === "write_off" && (
-          <p style={{ color: "#475569", lineHeight: 1.7 }}>
-            If some balance may remain until write-off, extra repayments can
-            sometimes deliver less value than expected.
-          </p>
-        )}
-
-        {repaymentType === "full_repay" && (
-          <p style={{ color: "#475569", lineHeight: 1.7 }}>
-            Where a loan is likely to be fully repaid, reducing interest and
-            clearing the balance earlier can become more competitive.
-          </p>
-        )}
-
-        {repaymentType === "borderline" && (
-          <p style={{ color: "#475569", lineHeight: 1.7 }}>
-            This appears relatively sensitive to future income growth and rates,
-            so small changes may alter the outcome.
-          </p>
-        )}
-      </div>
-
-      {/* WHAT COULD CHANGE RESULT */}
-      <div style={{ ...card, marginTop: 18 }}>
-        <h3 style={{ marginTop: 0 }}>
-          What could change the result
-        </h3>
-
-        <div
-          style={{
-            display: "grid",
-            gap: 10
-          }}
-        >
-          {scenarioShift.map((item, i) => (
-            <div
-              key={i}
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                color: "#334155"
-              }}
-            >
-              {item}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* COMPARE OPTIONS */}
-      <div style={{ ...card, marginTop: 18 }}>
-        <h3 style={{ marginTop: 0 }}>
-          How each route compares
-        </h3>
-
-        {ranking.map((item, i) => (
+      {/* RESULTS */}
+      {result && (
+        <>
+          {/* HERO RESULT */}
           <div
-            key={item.label}
             style={{
-              padding: "14px 0",
-              borderBottom:
-                i < ranking.length - 1
-                  ? "1px solid #f1f5f9"
-                  : "none"
+              ...card,
+              marginTop: 18,
+              background:
+                "#ecfdf5",
+              border:
+                "1px solid #bbf7d0"
             }}
           >
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12
+                fontSize: 13,
+                fontWeight: 700,
+                color:
+                  "#065f46",
+                textTransform:
+                  "uppercase"
               }}
             >
-              <strong>
-                {i + 1}. {item.label}
-              </strong>
-
-              <span style={{ fontWeight: 700 }}>
-                {moneyShort(item.value)}
-              </span>
+              Strongest projected
+              outcome
             </div>
+
+            <h2
+              style={{
+                marginTop: 8,
+                marginBottom: 8
+              }}
+            >
+              {winner}
+            </h2>
+
+            <p
+              style={{
+                color:
+                  "#065f46",
+                lineHeight: 1.6,
+                margin: 0
+              }}
+            >
+              Based on the figures
+              entered, this route
+              currently projects the
+              strongest overall
+              financial position by
+              age {compareAge}.
+            </p>
 
             <div
               style={{
-                marginTop: 6,
-                color: "#64748b",
-                fontSize: 14
+                marginTop: 14,
+                fontSize: 24,
+                fontWeight: 800,
+                color:
+                  "#065f46"
               }}
             >
-              {item.label === "Invest monthly" &&
-                "Higher projected long-term growth in this example."}
+              {money(winnerGap)} ahead
+            </div>
 
-              {item.label === "Minimum repayments only" &&
-                "Keeps flexibility and preserves monthly cash flow."}
+            <p
+              style={{
+                color:
+                  "#065f46",
+                marginTop: 4
+              }}
+            >
+              Estimated lead over the
+              next closest option
+              under these
+              assumptions.
+            </p>
 
-              {item.label === "Overpay monthly" &&
-                "Reduces debt sooner and may feel lower risk."}
+            <div
+              style={{
+                marginTop: 12,
+                display:
+                  "inline-block",
+                padding:
+                  "8px 12px",
+                borderRadius:
+                  999,
+                border: `1px solid ${confidenceColor}`,
+                color:
+                  confidenceColor,
+                fontWeight: 700,
+                background:
+                  "white"
+              }}
+            >
+              Confidence:{" "}
+              {confidence}
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* CHART */}
-      <div style={{ ...card, marginTop: 18 }}>
-        <h3>
-          Projected overall financial position
-        </h3>
+          {/* WHY */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              Why this may be
+              happening
+            </h3>
 
-        <p style={{ color: "#475569" }}>
-          This chart illustrates how each route may develop over time using
-          your assumptions.
-        </p>
+            <p
+              style={{
+                color:
+                  "#334155",
+                lineHeight: 1.7
+              }}
+            >
+              {explanation}
+            </p>
+          </div>
 
-        <ResponsiveContainer width="100%" height={380}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="age" />
-            <YAxis tickFormatter={moneyShort} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
+          {/* WHAT CHANGES */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              What could change the
+              result
+            </h3>
 
-            <Line
-              type="monotone"
-              dataKey="invest"
-              stroke="#10b981"
-              strokeWidth={3}
-              dot={false}
-              name="Invest monthly"
-            />
+            <div
+              style={{
+                display:
+                  "grid",
+                gap: 10
+              }}
+            >
+              {changes.map(
+                (
+                  item,
+                  i
+                ) => (
+                  <div
+                    key={i}
+                    style={{
+                      padding: 12,
+                      borderRadius: 12,
+                      background:
+                        "#f8fafc",
+                      border:
+                        "1px solid #e2e8f0",
+                      color:
+                        "#334155",
+                      lineHeight: 1.6
+                    }}
+                  >
+                    {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
 
-            <Line
-              type="monotone"
-              dataKey="minimum"
-              stroke="#64748b"
-              strokeWidth={3}
-              dot={false}
-              name="Minimum repayments only"
-            />
+          {/* RANKING */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              How each route compares
+            </h3>
 
-            <Line
-              type="monotone"
-              dataKey="overpay"
-              stroke="#2563eb"
-              strokeWidth={3}
-              dot={false}
-              name="Overpay monthly"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+            {ranking.map(
+              (
+                item,
+                i
+              ) => (
+                <div
+                  key={
+                    item.label
+                  }
+                  style={{
+                    padding:
+                      "14px 0",
+                    borderBottom:
+                      i <
+                      ranking.length -
+                        1
+                        ? "1px solid #f1f5f9"
+                        : "none"
+                  }}
+                >
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      justifyContent:
+                        "space-between",
+                      gap: 12
+                    }}
+                  >
+                    <strong>
+                      {i + 1}.{" "}
+                      {
+                        item.label
+                      }
+                    </strong>
 
-      {/* FOOTER */}
-      <div
-        style={{
-          ...card,
-          marginTop: 18,
-          textAlign: "center"
-        }}
-      >
-        <h3>Important context</h3>
+                    <span
+                      style={{
+                        fontWeight: 700
+                      }}
+                    >
+                      {moneyShort(
+                        item.value
+                      )}
+                    </span>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
 
-        <p
-          style={{
-            color: "#475569",
-            lineHeight: 1.7,
-            maxWidth: 760,
-            margin: "0 auto"
-          }}
-        >
-          This tool is an educational scenario comparison based on simplified
-          assumptions. It is not personal financial advice. Real outcomes depend
-          on future earnings, rates, tax treatment, investment performance and
-          policy changes.
-        </p>
-      </div>
-    </>
+          {/* CHART */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              Projected overall
+              financial position
+            </h3>
+
+            <p
+              style={{
+                color:
+                  "#475569"
+              }}
+            >
+              This chart illustrates
+              how each route may
+              develop over time using
+              the assumptions
+              entered.
+            </p>
+
+            <ResponsiveContainer
+              width="100%"
+              height={380}
+            >
+              <LineChart
+                data={chartData}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+
+                <XAxis dataKey="age" />
+
+                <YAxis
+                  tickFormatter={
+                    moneyShort
+                  }
+                />
+
+                <Tooltip
+                  content={
+                    <CustomTooltip />
+                  }
+                />
+
+                <Legend />
+
+                <Line
+                  type="monotone"
+                  dataKey="invest"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  dot={false}
+                  name="Invest monthly"
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="minimum"
+                  stroke="#64748b"
+                  strokeWidth={3}
+                  dot={false}
+                  name="Minimum repayments only"
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="overpay"
+                  stroke="#2563eb"
+                  strokeWidth={3}
+                  dot={false}
+                  name="Overpay monthly"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* FOOTER */}
+          <div
+            style={{
+              ...card,
+              marginTop: 18,
+              textAlign:
+                "center"
+            }}
+          >
+            <h3>
+              Important context
+            </h3>
+
+            <p
+              style={{
+                color:
+                  "#475569",
+                lineHeight: 1.7,
+                maxWidth: 760,
+                margin:
+                  "0 auto"
+              }}
+            >
+              This tool provides an
+              educational scenario
+              comparison using
+              simplified assumptions.
+              It is not personal
+              financial advice. Real
+              outcomes depend on
+              future earnings,
+              interest rates,
+              investment performance
+              and policy changes.
+            </p>
+          </div>
+        </>
+      )}
+    </div>
   );
-})()}
+}
