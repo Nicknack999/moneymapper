@@ -15,9 +15,6 @@ export default function StudentLoanTool() {
     import.meta.env.VITE_API_URL ||
     "https://moneymapper-backend-018g.onrender.com";
 
-  // ---------------------------------
-  // PLAN RULES
-  // ---------------------------------
   const plans = {
     plan1: { name: "Plan 1", threshold: 26065, years: 25 },
     plan2: { name: "Plan 2", threshold: 27295, years: 30 },
@@ -47,6 +44,22 @@ export default function StudentLoanTool() {
 
   const parseNum = (v) =>
     v === "" ? "" : Number(v);
+
+  const describeValue = (v) => {
+    const n = Number(v || 0);
+
+    if (n > 5000) {
+      return `${moneyShort(n)} ahead`;
+    }
+
+    if (n < -5000) {
+      return `${moneyShort(
+        Math.abs(n)
+      )} behind break-even`;
+    }
+
+    return "Around break-even";
+  };
 
   const card = {
     background: "white",
@@ -78,7 +91,7 @@ export default function StudentLoanTool() {
     width: "100%"
   };
 
-  const ghostButton = {
+  const chip = {
     padding: "10px 14px",
     borderRadius: 12,
     border: "1px solid #d1d5db",
@@ -130,7 +143,7 @@ export default function StudentLoanTool() {
   // API
   // ---------------------------------
   const runModel = async (
-    override = {}
+    overrides = {}
   ) => {
     setLoading(true);
     setError("");
@@ -139,42 +152,42 @@ export default function StudentLoanTool() {
       const payload = {
         salary:
           Number(
-            override.salary ??
+            overrides.salary ??
               salary
           ),
         loan_balance:
           Number(
-            override.balance ??
+            overrides.balance ??
               balance
           ),
         current_age:
           Number(
-            override.currentAge ??
+            overrides.currentAge ??
               currentAge
           ),
         retirement_age:
           Number(
-            override.compareAge ??
+            overrides.compareAge ??
               compareAge
           ),
         monthly_savings:
           Number(
-            override.monthlyAmount ??
+            overrides.monthlyAmount ??
               monthlyAmount
           ),
         overpay:
           Number(
-            override.monthlyAmount ??
+            overrides.monthlyAmount ??
               monthlyAmount
           ),
         return_rate:
           Number(
-            override.returnRate ??
+            overrides.returnRate ??
               returnRate
           ) / 100,
         loan_interest:
           Number(
-            override.loanInterest ??
+            overrides.loanInterest ??
               loanInterest
           ) / 100,
         threshold:
@@ -206,7 +219,7 @@ export default function StudentLoanTool() {
         await res.json();
 
       setResult(data);
-    } catch (err) {
+    } catch {
       setError(
         "We couldn't run your comparison right now."
       );
@@ -216,7 +229,7 @@ export default function StudentLoanTool() {
   };
 
   // ---------------------------------
-  // QUICK SCENARIOS (AUTO RUN)
+  // AUTO SCENARIOS
   // ---------------------------------
   const runScenario = (
     type
@@ -255,8 +268,7 @@ export default function StudentLoanTool() {
   // ---------------------------------
   const winner =
     result?.summary
-      ?.winner_label ||
-    "";
+      ?.winner_label || "";
 
   const winnerGap =
     result?.summary
@@ -339,7 +351,7 @@ export default function StudentLoanTool() {
               "1px solid #e5e7eb",
             padding: 14,
             borderRadius: 12,
-            maxWidth: 260
+            maxWidth: 280
           }}
         >
           <strong>
@@ -348,17 +360,15 @@ export default function StudentLoanTool() {
 
           <p
             style={{
-              marginTop: 6,
+              fontSize: 13,
               color:
                 "#64748b",
-              fontSize: 13
+              marginTop: 6
             }}
           >
-            Estimated net
-            position here:
-            savings/investments
-            minus remaining
-            loan balance.
+            Money built up
+            compared with any
+            loan still left.
           </p>
 
           {payload.map(
@@ -376,10 +386,17 @@ export default function StudentLoanTool() {
                     item.name
                   }
                 </strong>
-                :{" "}
-                {money(
-                  item.value
-                )}
+                <br />
+                <span
+                  style={{
+                    color:
+                      "#334155"
+                  }}
+                >
+                  {describeValue(
+                    item.value
+                  )}
+                </span>
               </div>
             )
           )}
@@ -589,7 +606,6 @@ export default function StudentLoanTool() {
       {/* RESULTS */}
       {result && (
         <>
-          {/* HERO RESULT */}
           <div
             style={{
               ...card,
@@ -624,8 +640,7 @@ export default function StudentLoanTool() {
               }}
             >
               Based on what you
-              entered, this
-              currently comes out
+              entered, this looks
               ahead by{" "}
               {money(
                 winnerGap
@@ -645,8 +660,9 @@ export default function StudentLoanTool() {
             }}
           >
             <h3>
-              What each route
-              could look like
+              What each route may
+              look like by age{" "}
+              {compareAge}
             </h3>
 
             {ranking.map(
@@ -660,7 +676,7 @@ export default function StudentLoanTool() {
                   }
                   style={{
                     padding:
-                      "14px 0",
+                      "16px 0",
                     borderBottom:
                       i <
                       ranking.length -
@@ -679,14 +695,13 @@ export default function StudentLoanTool() {
                   <div
                     style={{
                       marginTop: 6,
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: 800
                     }}
                   >
-                    {moneyShort(
+                    {describeValue(
                       item.value
-                    )}{" "}
-                    net position
+                    )}
                   </div>
 
                   <div
@@ -699,22 +714,22 @@ export default function StudentLoanTool() {
                   >
                     {item.label ===
                       "Invest monthly" &&
-                      "This looks stronger here because the money has time to grow."}
+                      "This looks stronger here because the same monthly amount has more time to grow."}
 
                     {item.label ===
                       "Minimum repayments only" &&
-                      "Keeps life flexible month to month, but builds less long-term value in this example."}
+                      "You may keep more monthly flexibility, but build less extra value in this example."}
 
                     {item.label ===
                       "Overpay monthly" &&
-                      "Clears the loan sooner, which some people prefer, but comes out lower here."}
+                      "You may clear the balance sooner, though with less money growing elsewhere."}
                   </div>
                 </div>
               )
             )}
           </div>
 
-          {/* CHART */}
+          {/* GRAPH */}
           <div
             style={{
               ...card,
@@ -722,8 +737,8 @@ export default function StudentLoanTool() {
             }}
           >
             <h3>
-              How things may look
-              over time
+              How things may
+              change over time
             </h3>
 
             <p
@@ -732,13 +747,10 @@ export default function StudentLoanTool() {
                   "#475569"
               }}
             >
-              This shows your
-              estimated net
-              position each year:
-              money built up minus
-              any remaining
-              student loan
-              balance.
+              We compare money
+              built up against any
+              student loan still
+              remaining.
             </p>
 
             <ResponsiveContainer
@@ -794,7 +806,7 @@ export default function StudentLoanTool() {
             </ResponsiveContainer>
           </div>
 
-          {/* COMPARE */}
+          {/* AUTO SCENARIOS */}
           <div
             style={{
               ...card,
@@ -812,24 +824,24 @@ export default function StudentLoanTool() {
                   "#475569"
               }}
             >
-              See how the result
-              changes if life goes
-              differently.
+              One thing to notice:
+              small changes can
+              shift the result.
             </p>
 
             <div
               style={{
                 display:
                   "flex",
-                gap: 10,
                 flexWrap:
                   "wrap",
+                gap: 10,
                 marginTop: 12
               }}
             >
               <button
                 style={
-                  ghostButton
+                  chip
                 }
                 onClick={() =>
                   runScenario(
@@ -842,7 +854,7 @@ export default function StudentLoanTool() {
 
               <button
                 style={
-                  ghostButton
+                  chip
                 }
                 onClick={() =>
                   runScenario(
@@ -855,7 +867,7 @@ export default function StudentLoanTool() {
 
               <button
                 style={
-                  ghostButton
+                  chip
                 }
                 onClick={() =>
                   runScenario(
@@ -868,7 +880,7 @@ export default function StudentLoanTool() {
 
               <button
                 style={
-                  ghostButton
+                  chip
                 }
                 onClick={() =>
                   runScenario(
