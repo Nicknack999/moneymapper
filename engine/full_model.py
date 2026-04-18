@@ -188,7 +188,7 @@ def explanation_text(
 # -------------------------------------------------
 # MAIN ROUTE FUNCTION
 # -------------------------------------------------
-def run_full_model():
+def run_full_model(data):
     data = request.json or {}
 
     salary = num(
