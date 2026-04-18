@@ -15,6 +15,9 @@ export default function StudentLoanTool() {
     import.meta.env.VITE_API_URL ||
     "https://moneymapper-backend-018g.onrender.com";
 
+  // ---------------------------------
+  // PLAN RULES
+  // ---------------------------------
   const plans = {
     plan1: { name: "Plan 1", threshold: 26065, years: 25 },
     plan2: { name: "Plan 2", threshold: 27295, years: 30 },
@@ -329,6 +332,47 @@ export default function StudentLoanTool() {
       })
     ) || [];
 
+  const repaymentType =
+    result?.decision
+      ?.repayment_outcome
+      ?.type || "";
+
+  const salaryTriggerText =
+    result?.insights
+      ?.salary_trigger_text || "";
+
+  // ---------------------------------
+  // DYNAMIC EXPLANATION
+  // ---------------------------------
+  const whyWinner = () => {
+    if (
+      repaymentType ===
+      "full_repay"
+    ) {
+      return "Your current income suggests the loan may already be repaid through normal payroll deductions over time. That can make investing extra monthly money more attractive than overpaying.";
+    }
+
+    if (
+      repaymentType ===
+      "write_off"
+    ) {
+      return "If full repayment looks less likely before write-off, sending extra money to the loan can sometimes deliver less value than investing elsewhere.";
+    }
+
+    return "This one looks fairly close. Small changes to future earnings, returns or timing could change the ranking.";
+  };
+
+  const whyOverpay = () => {
+    if (
+      repaymentType ===
+      "full_repay"
+    ) {
+      return "Overpaying could clear the balance sooner, reduce interest paid and remove deductions earlier — which some people prefer.";
+    }
+
+    return "Some people still prefer reducing the balance for certainty or peace of mind.";
+  };
+
   // ---------------------------------
   // TOOLTIP
   // ---------------------------------
@@ -387,12 +431,7 @@ export default function StudentLoanTool() {
                   }
                 </strong>
                 <br />
-                <span
-                  style={{
-                    color:
-                      "#334155"
-                  }}
-                >
+                <span>
                   {describeValue(
                     item.value
                   )}
@@ -433,8 +472,7 @@ export default function StudentLoanTool() {
 
         <h1
           style={{
-            marginTop: 8,
-            marginBottom: 10
+            marginTop: 8
           }}
         >
           Student Loan Tool
@@ -475,7 +513,6 @@ export default function StudentLoanTool() {
             <label>
               Loan plan
             </label>
-
             <select
               value={plan}
               onChange={(e) =>
@@ -594,8 +631,7 @@ export default function StudentLoanTool() {
           <p
             style={{
               color:
-                "#dc2626",
-              marginTop: 12
+                "#dc2626"
             }}
           >
             {error}
@@ -606,6 +642,7 @@ export default function StudentLoanTool() {
       {/* RESULTS */}
       {result && (
         <>
+          {/* HERO RESULT */}
           <div
             style={{
               ...card,
@@ -650,6 +687,47 @@ export default function StudentLoanTool() {
                 compareAge
               }.
             </p>
+
+            <p
+              style={{
+                color:
+                  "#065f46",
+                lineHeight: 1.7,
+                marginTop: 12
+              }}
+            >
+              {whyWinner()}
+            </p>
+
+            {salaryTriggerText && (
+              <div
+                style={{
+                  marginTop: 14,
+                  padding: 14,
+                  borderRadius: 14,
+                  background:
+                    "white"
+                }}
+              >
+                <strong>
+                  Worth knowing
+                </strong>
+
+                <p
+                  style={{
+                    marginTop: 8,
+                    marginBottom: 0,
+                    lineHeight: 1.7,
+                    color:
+                      "#334155"
+                  }}
+                >
+                  {
+                    salaryTriggerText
+                  }
+                </p>
+              </div>
+            )}
           </div>
 
           {/* ROUTES */}
@@ -722,7 +800,7 @@ export default function StudentLoanTool() {
 
                     {item.label ===
                       "Overpay monthly" &&
-                      "You may clear the balance sooner, though with less money growing elsewhere."}
+                      whyOverpay()}
                   </div>
                 </div>
               )
@@ -818,24 +896,13 @@ export default function StudentLoanTool() {
               of the future
             </h3>
 
-            <p
-              style={{
-                color:
-                  "#475569"
-              }}
-            >
-              One thing to notice:
-              small changes can
-              shift the result.
-            </p>
-
             <div
               style={{
                 display:
                   "flex",
+                gap: 10,
                 flexWrap:
                   "wrap",
-                gap: 10,
                 marginTop: 12
               }}
             >

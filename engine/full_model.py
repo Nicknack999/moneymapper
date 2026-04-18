@@ -4,81 +4,84 @@ from forecast import run_forecast
 
 full_model_bp = Blueprint("full_model", __name__)
 
-
 # -------------------------------------------------
 # HELPERS
 # -------------------------------------------------
-def safe_num(v, default=0):
+def num(value, default=0):
     try:
-        return float(v)
+        return float(value)
     except:
         return default
 
 
 def classify_repayment(
-    total_repaid,
+    remaining_balance,
     original_balance,
-    remaining_balance
+    total_repaid
 ):
     """
-    Decide if user likely fully repays,
-    writes off, or sits near border.
+    Decide whether user is likely to:
+    - fully repay
+    - likely write off
+    - borderline
     """
-    repay_ratio = (
-        total_repaid /
-        max(original_balance, 1)
-    )
 
     if remaining_balance <= 100:
         return "full_repay"
 
-    if repay_ratio < 0.65:
+    repay_ratio = total_repaid / max(
+        original_balance, 1
+    )
+
+    if repay_ratio < 0.70:
         return "write_off"
 
     return "borderline"
 
 
+def label(key):
+    labels = {
+        "minimum":
+            "Minimum repayments only",
+        "overpay":
+            "Overpay monthly",
+        "invest":
+            "Invest monthly"
+    }
+    return labels.get(key, key)
+
+
 def estimate_salary_trigger(
-    payload
+    loan_balance,
+    threshold,
+    write_off_years,
+    loan_interest,
+    current_age,
+    retirement_age
 ):
     """
-    Finds rough salary where full
-    repayment becomes more likely.
+    Find approximate salary level where
+    full repayment becomes likely.
     """
-    start = 25000
-    end = 150000
-    step = 2500
 
     for salary in range(
-        start,
-        end + step,
-        step
+        25000,
+        150001,
+        2500
     ):
-        result = calculate_loan(
+        test = calculate_loan(
             salary=salary,
-            loan_balance=payload[
-                "loan_balance"
-            ],
-            threshold=payload[
-                "threshold"
-            ],
-            write_off_years=payload[
-                "write_off_years"
-            ],
-            loan_interest=payload[
-                "loan_interest"
-            ],
-            current_age=payload[
-                "current_age"
-            ],
-            retirement_age=payload[
-                "retirement_age"
-            ],
+            loan_balance=loan_balance,
+            threshold=threshold,
+            write_off_years=write_off_years,
+            loan_interest=loan_interest,
+            current_age=current_age,
+            retirement_age=retirement_age,
             overpay=0
         )
 
         if (
-            result.get(
+            test.get(
                 "remaining_balance",
                 0
             )
@@ -89,88 +92,109 @@ def estimate_salary_trigger(
     return None
 
 
-def rank_results(
+def create_trigger_text(
+    current_salary,
+    trigger_salary
+):
+    if trigger_salary is None:
+        return (
+            "With your current balance and assumptions, "
+            "full repayment looks less likely within the period selected."
+        )
+
+    if current_salary >= trigger_salary:
+        return (
+            "At your current income, full repayment already looks "
+            "more likely within the selected timeframe."
+        )
+
+    return (
+        f"With your current balance and assumptions, "
+        f"full repayment may become more likely from around "
+        f"£{trigger_salary:,} salary upward."
+    )
+
+
+def adjusted_scores(
     minimum_final,
     overpay_final,
     invest_final,
     repayment_type,
     salary,
-    balance
+    loan_balance
 ):
     """
-    More balanced ranking logic.
+    Reduce 'invest always wins' bias.
     """
 
-    adjusted = {
+    scores = {
         "minimum": minimum_final,
         "overpay": overpay_final,
         "invest": invest_final
     }
 
     # -----------------------------
-    # If full repay likely:
-    # reward overpay more
+    # Full repay likely:
+    # overpay gets stronger
     # -----------------------------
     if repayment_type == "full_repay":
-        adjusted["overpay"] += (
-            balance * 0.08
+        scores["overpay"] += (
+            loan_balance * 0.10
         )
 
         if salary >= 70000:
-            adjusted["overpay"] += (
-                balance * 0.05
+            scores["overpay"] += (
+                loan_balance * 0.05
             )
 
     # -----------------------------
-    # If write off likely:
-    # invest more attractive
+    # Write off likely:
+    # investing stronger
     # -----------------------------
     if repayment_type == "write_off":
-        adjusted["invest"] += (
-            balance * 0.05
+        scores["invest"] += (
+            loan_balance * 0.05
         )
 
     # -----------------------------
     # Borderline:
-    # keep close
+    # modest overpay boost
     # -----------------------------
     if repayment_type == "borderline":
-        adjusted["overpay"] += (
-            balance * 0.02
+        scores["overpay"] += (
+            loan_balance * 0.03
         )
 
-    ordered = sorted(
-        adjusted.items(),
-        key=lambda x: x[1],
-        reverse=True
-    )
-
-    ranking = [
-        item[0]
-        for item in ordered
-    ]
-
-    winner = ranking[0]
-    gap = (
-        ordered[0][1]
-        - ordered[1][1]
-    )
-
-    return ranking, winner, gap
+    return scores
 
 
-def winner_label(key):
-    labels = {
-        "minimum":
-            "Minimum repayments only",
-        "overpay":
-            "Overpay monthly",
-        "invest":
-            "Invest monthly"
-    }
-    return labels.get(
-        key,
-        key
+def explanation_text(
+    repayment_type,
+    winner_key
+):
+    if repayment_type == "full_repay":
+        if winner_key == "invest":
+            return (
+                "Your income suggests the loan may already be repaid "
+                "through normal deductions over time, which can make "
+                "investing extra monthly money more attractive."
+            )
+
+        if winner_key == "overpay":
+            return (
+                "Because full repayment looks likely, reducing the balance "
+                "earlier and limiting interest can become more valuable."
+            )
+
+    if repayment_type == "write_off":
+        return (
+            "This looks more like a case where the loan may not be fully "
+            "repaid before write-off, so investing can sometimes come out stronger."
+        )
+
+    return (
+        "This result looks relatively close. Small changes to future "
+        "earnings, returns or timing could change the ranking."
     )
 
 
@@ -184,18 +208,18 @@ def winner_label(key):
 def full_model():
     data = request.json or {}
 
-    salary = safe_num(
+    salary = num(
         data.get("salary"),
         40000
     )
 
-    loan_balance = safe_num(
+    loan_balance = num(
         data.get("loan_balance"),
         50000
     )
 
     current_age = int(
-        safe_num(
+        num(
             data.get(
                 "current_age"
             ),
@@ -204,7 +228,7 @@ def full_model():
     )
 
     retirement_age = int(
-        safe_num(
+        num(
             data.get(
                 "retirement_age"
             ),
@@ -212,33 +236,35 @@ def full_model():
         )
     )
 
-    monthly_savings = safe_num(
+    monthly_savings = num(
         data.get(
             "monthly_savings"
         ),
         100
     )
 
-    overpay = safe_num(
-        data.get("overpay"),
+    overpay = num(
+        data.get(
+            "overpay"
+        ),
         100
     )
 
-    return_rate = safe_num(
+    return_rate = num(
         data.get(
             "return_rate"
         ),
         0.05
     )
 
-    loan_interest = safe_num(
+    loan_interest = num(
         data.get(
             "loan_interest"
         ),
         0.06
     )
 
-    threshold = safe_num(
+    threshold = num(
         data.get(
             "threshold"
         ),
@@ -246,7 +272,7 @@ def full_model():
     )
 
     write_off_years = int(
-        safe_num(
+        num(
             data.get(
                 "write_off_years"
             ),
@@ -255,7 +281,7 @@ def full_model():
     )
 
     # --------------------------------
-    # RUN LOAN MODELS
+    # RUN BASE MODELS
     # --------------------------------
     minimum = calculate_loan(
         salary=salary,
@@ -292,22 +318,7 @@ def full_model():
     )
 
     # --------------------------------
-    # CLASSIFY REPAYMENT TYPE
-    # --------------------------------
-    repayment_type = classify_repayment(
-        minimum.get(
-            "total_repaid",
-            0
-        ),
-        loan_balance,
-        minimum.get(
-            "remaining_balance",
-            0
-        )
-    )
-
-    # --------------------------------
-    # FINAL VALUES
+    # EXTRACT VALUES
     # --------------------------------
     minimum_final = minimum.get(
         "net_position",
@@ -324,7 +335,22 @@ def full_model():
         0
     )
 
-    ranking, winner, winner_gap = rank_results(
+    repayment_type = classify_repayment(
+        minimum.get(
+            "remaining_balance",
+            0
+        ),
+        loan_balance,
+        minimum.get(
+            "total_repaid",
+            0
+        )
+    )
+
+    # --------------------------------
+    # BETTER SCORING
+    # --------------------------------
+    scores = adjusted_scores(
         minimum_final,
         overpay_final,
         invest_final,
@@ -333,9 +359,24 @@ def full_model():
         loan_balance
     )
 
-    # --------------------------------
-    # CLOSE RESULT
-    # --------------------------------
+    ordered = sorted(
+        scores.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    ranking = [
+        item[0]
+        for item in ordered
+    ]
+
+    winner_key = ranking[0]
+
+    winner_gap = (
+        ordered[0][1]
+        - ordered[1][1]
+    )
+
     close_result = (
         abs(winner_gap) < 10000
     )
@@ -344,54 +385,26 @@ def full_model():
     # SALARY TRIGGER
     # --------------------------------
     trigger_salary = estimate_salary_trigger(
-        {
-            "loan_balance":
-                loan_balance,
-            "threshold":
-                threshold,
-            "write_off_years":
-                write_off_years,
-            "loan_interest":
-                loan_interest,
-            "current_age":
-                current_age,
-            "retirement_age":
-                retirement_age
-        }
+        loan_balance,
+        threshold,
+        write_off_years,
+        loan_interest,
+        current_age,
+        retirement_age
     )
 
-    if trigger_salary:
-        trigger_text = (
-            f"With your current balance and assumptions, "
-            f"full repayment may become more likely from around "
-            f"£{int(trigger_salary):,} salary upward."
-        )
-    else:
-        trigger_text = (
-            "With your current balance and assumptions, "
-            "full repayment looks less likely within the period selected."
-        )
+    trigger_text = create_trigger_text(
+        salary,
+        trigger_salary
+    )
 
     # --------------------------------
     # EXPLANATION
     # --------------------------------
-    if repayment_type == "write_off":
-        explanation = (
-            "This looks more like a case where the loan may not be fully repaid "
-            "before write-off, so investing can sometimes come out stronger."
-        )
-
-    elif repayment_type == "full_repay":
-        explanation = (
-            "This looks more like a case where the loan may be fully repaid, "
-            "so overpaying becomes more competitive."
-        )
-
-    else:
-        explanation = (
-            "This looks relatively close. Small changes to earnings, rates or timing "
-            "could change the result."
-        )
+    explanation = explanation_text(
+        repayment_type,
+        winner_key
+    )
 
     # --------------------------------
     # RESPONSE
@@ -399,8 +412,8 @@ def full_model():
     return jsonify({
         "summary": {
             "winner_label":
-                winner_label(
-                    winner
+                label(
+                    winner_key
                 ),
             "winner_difference":
                 round(
