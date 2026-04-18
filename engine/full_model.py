@@ -1,8 +1,6 @@
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
 from student_loan import calculate_loan
 from forecast import run_forecast
-
-full_model_bp = Blueprint("full_model", __name__)
 
 # -------------------------------------------------
 # HELPERS
@@ -20,9 +18,9 @@ def classify_repayment(
     total_repaid
 ):
     """
-    Decide whether user is likely to:
-    - fully repay
-    - likely write off
+    Decide whether loan is likely:
+    - fully repaid
+    - written off
     - borderline
     """
 
@@ -48,6 +46,7 @@ def label(key):
         "invest":
             "Invest monthly"
     }
+
     return labels.get(key, key)
 
 
@@ -60,7 +59,7 @@ def estimate_salary_trigger(
     retirement_age
 ):
     """
-    Find approximate salary level where
+    Estimate salary where
     full repayment becomes likely.
     """
 
@@ -69,7 +68,7 @@ def estimate_salary_trigger(
         150001,
         2500
     ):
-        test = calculate_loan(
+        result = calculate_loan(
             salary=salary,
             loan_balance=loan_balance,
             threshold=threshold,
@@ -81,7 +80,7 @@ def estimate_salary_trigger(
         )
 
         if (
-            test.get(
+            result.get(
                 "remaining_balance",
                 0
             )
@@ -124,7 +123,7 @@ def adjusted_scores(
     loan_balance
 ):
     """
-    Reduce 'invest always wins' bias.
+    Reduce invest-always-wins bias.
     """
 
     scores = {
@@ -133,10 +132,6 @@ def adjusted_scores(
         "invest": invest_final
     }
 
-    # -----------------------------
-    # Full repay likely:
-    # overpay gets stronger
-    # -----------------------------
     if repayment_type == "full_repay":
         scores["overpay"] += (
             loan_balance * 0.10
@@ -147,19 +142,11 @@ def adjusted_scores(
                 loan_balance * 0.05
             )
 
-    # -----------------------------
-    # Write off likely:
-    # investing stronger
-    # -----------------------------
     if repayment_type == "write_off":
         scores["invest"] += (
             loan_balance * 0.05
         )
 
-    # -----------------------------
-    # Borderline:
-    # modest overpay boost
-    # -----------------------------
     if repayment_type == "borderline":
         scores["overpay"] += (
             loan_balance * 0.03
@@ -199,13 +186,9 @@ def explanation_text(
 
 
 # -------------------------------------------------
-# ROUTE
+# MAIN ROUTE FUNCTION
 # -------------------------------------------------
-@full_model_bp.route(
-    "/full-model",
-    methods=["POST"]
-)
-def full_model():
+def run_full_model():
     data = request.json or {}
 
     salary = num(
@@ -281,7 +264,7 @@ def full_model():
     )
 
     # --------------------------------
-    # RUN BASE MODELS
+    # RUN MODELS
     # --------------------------------
     minimum = calculate_loan(
         salary=salary,
@@ -317,9 +300,6 @@ def full_model():
         return_rate=return_rate
     )
 
-    # --------------------------------
-    # EXTRACT VALUES
-    # --------------------------------
     minimum_final = minimum.get(
         "net_position",
         0
@@ -347,9 +327,6 @@ def full_model():
         )
     )
 
-    # --------------------------------
-    # BETTER SCORING
-    # --------------------------------
     scores = adjusted_scores(
         minimum_final,
         overpay_final,
@@ -381,9 +358,6 @@ def full_model():
         abs(winner_gap) < 10000
     )
 
-    # --------------------------------
-    # SALARY TRIGGER
-    # --------------------------------
     trigger_salary = estimate_salary_trigger(
         loan_balance,
         threshold,
@@ -398,17 +372,11 @@ def full_model():
         trigger_salary
     )
 
-    # --------------------------------
-    # EXPLANATION
-    # --------------------------------
     explanation = explanation_text(
         repayment_type,
         winner_key
     )
 
-    # --------------------------------
-    # RESPONSE
-    # --------------------------------
     return jsonify({
         "summary": {
             "winner_label":
