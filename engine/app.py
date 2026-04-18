@@ -20,7 +20,6 @@ allowed_origins = [
     "https://wayli.app",
 ]
 
-# Optional future Wayli domain support
 frontend_url = os.getenv("FRONTEND_URL")
 if frontend_url:
     allowed_origins.append(frontend_url)
@@ -57,15 +56,22 @@ def health():
 def student_loan():
     try:
         data = request.get_json(force=True) or {}
+
+        print("Incoming /student-loan data:")
+        print(data)
+
         result = calculate_loan(data)
+
         return jsonify(result)
 
-    except Exception:
+    except Exception as e:
         print("Error in /student-loan:")
+        print(str(e))
         traceback.print_exc()
 
         return jsonify({
-            "error": "Failed to process student loan comparison."
+            "error": "Failed to process student loan comparison.",
+            "details": str(e)
         }), 500
 
 
@@ -73,15 +79,22 @@ def student_loan():
 def forecast():
     try:
         data = request.get_json(force=True) or {}
+
+        print("Incoming /forecast data:")
+        print(data)
+
         result = run_forecast(data)
+
         return jsonify(result)
 
-    except Exception:
+    except Exception as e:
         print("Error in /forecast:")
+        print(str(e))
         traceback.print_exc()
 
         return jsonify({
-            "error": "Failed to run forecast."
+            "error": "Failed to run forecast.",
+            "details": str(e)
         }), 500
 
 
@@ -89,15 +102,24 @@ def forecast():
 def full_model():
     try:
         data = request.get_json(force=True) or {}
+
+        print("Incoming /full-model data:")
+        print(data)
+
         result = run_full_model(data)
+
+        print("Full model success")
+
         return jsonify(result)
 
     except Exception as e:
         print("Error in /full-model:")
+        print(str(e))
         traceback.print_exc()
 
         return jsonify({
-            "error": str(e)
+            "error": "Failed to run comparison model.",
+            "details": str(e)
         }), 500
 
 
@@ -106,6 +128,7 @@ def full_model():
 # -------------------------------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+
     app.run(
         host="0.0.0.0",
         port=port,
