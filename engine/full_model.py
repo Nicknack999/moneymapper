@@ -37,9 +37,9 @@ def explanation_text(repayment_type, winner_key):
     if repayment_type == "full_repay":
         if winner_key == "invest":
             return (
-                "Your income suggests the loan may already be repaid through "
-                "normal payroll deductions over time. That can make investing "
-                "extra monthly money more attractive than overpaying."
+                "Your current income suggests the loan may already be repaid "
+                "through normal payroll deductions over time. That can make "
+                "investing extra monthly money more attractive."
             )
 
         if winner_key == "overpay":
@@ -56,7 +56,7 @@ def explanation_text(repayment_type, winner_key):
         )
 
     return (
-        "This looks relatively close. Small changes to future earnings, "
+        "This looks fairly close. Small changes to future earnings, "
         "returns or timing could change the ranking."
     )
 
@@ -110,62 +110,34 @@ def estimate_salary_trigger(
     return None
 
 
-def build_curve_from_yearly_data(yearly_data, starting_balance):
+def build_curve_from_schedule(schedule):
     """
-    Convert calculate_loan yearly_data into graph line.
-    Negative values represent debt remaining.
+    Convert student_loan yearly schedule to graph line.
+    Negative values = debt remaining.
     """
     curve = []
-    balance = starting_balance
 
-    for row in yearly_data:
-        balance = row.get("balance", balance)
-        curve.append(round(-balance, 0))
+    for row in schedule:
+        curve.append(round(-row.get("balance", 0), 0))
 
     return curve
 
 
-def extract_result(model, fallback_balance):
-    """
-    Normalise calculate_loan output into consistent fields.
-    """
-    yearly_data = model.get("invest", {}).get("yearly_data", [])
-
-    curve = model.get("curve")
-
+def pad_curve(curve, target_len):
     if not curve:
-        curve = build_curve_from_yearly_data(
-            yearly_data,
-            fallback_balance
-        )
+        return [0] * target_len
 
-    remaining_balance = model.get(
-        "remaining_balance",
-        yearly_data[-1]["balance"] if yearly_data else fallback_balance
-    )
+    if len(curve) < target_len:
+        curve = curve + [curve[-1]] * (target_len - len(curve))
 
-    total_repaid = model.get(
-        "total_repaid",
-        0
-    )
-
-    net_position = model.get(
-        "net_position",
-        model.get("insights", {}).get("wealth_difference", 0)
-    )
-
-    return {
-        "curve": curve,
-        "remaining_balance": remaining_balance,
-        "total_repaid": total_repaid,
-        "net_position": net_position,
-    }
+    return curve[:target_len]
 
 
 # -------------------------------------------------
 # MAIN FUNCTION
 # -------------------------------------------------
 def run_full_model(data):
+
     # --------------------------------
     # INPUTS
     # --------------------------------
@@ -182,9 +154,9 @@ def run_full_model(data):
     model_opportunity_cost = data.get("model_opportunity_cost", True)
 
     # --------------------------------
-    # RUN SCENARIOS
+    # MINIMUM
     # --------------------------------
-    minimum_raw = calculate_loan(
+    minimum = calculate_loan(
         {
             "salary": salary,
             "loan_balance": loan_balance,
@@ -194,10 +166,14 @@ def run_full_model(data):
             "current_age": current_age,
             "retirement_age": retirement_age,
             "overpay": 0,
+            "return_rate": return_rate,
         }
     )
 
-    overpay_raw = calculate_loan(
+    # --------------------------------
+    # OVERPAY
+    # --------------------------------
+    overpay_case = calculate_loan(
         {
             "salary": salary,
             "loan_balance": loan_balance,
@@ -207,9 +183,13 @@ def run_full_model(data):
             "current_age": current_age,
             "retirement_age": retirement_age,
             "overpay": overpay,
+            "return_rate": return_rate,
         }
     )
 
+    # --------------------------------
+    # INVEST
+    # --------------------------------
     invest_case = run_forecast(
         {
             "salary": salary,
@@ -226,16 +206,29 @@ def run_full_model(data):
         }
     )
 
-    minimum = extract_result(minimum_raw, loan_balance)
-    overpay_case = extract_result(overpay_raw, loan_balance)
+    # --------------------------------
+    # FINAL VALUES
+    # --------------------------------
+    minimum_final = minimum.get("net_position", 0)
+
+    overpay_final = (
+        overpay_case.get("overpay", {}).get(
+            "net_position",
+            overpay_case.get("net_position", 0)
+        )
+    )
+
+    invest_final = invest_case.get(
+        "final_investment_value",
+        0
+    ) - invest_case.get(
+        "final_remaining_balance",
+        0
+    )
 
     # --------------------------------
-    # VALUES
+    # SCOREBOARD
     # --------------------------------
-    minimum_final = minimum["net_position"]
-    overpay_final = overpay_case["net_position"]
-    invest_final = invest_case.get("net_position", 0)
-
     scores = {
         "minimum": minimum_final,
         "overpay": overpay_final,
@@ -249,18 +242,20 @@ def run_full_model(data):
     )
 
     ranking = [x[0] for x in ordered]
+
     winner_key = ranking[0]
 
     winner_gap = ordered[0][1] - ordered[1][1]
+
     close_result = abs(winner_gap) < 10000
 
     # --------------------------------
-    # LOAN STATUS
+    # STATUS TEXT
     # --------------------------------
     repayment_type = classify_repayment(
-        minimum["remaining_balance"],
+        minimum.get("remaining_balance", loan_balance),
         loan_balance,
-        minimum["total_repaid"],
+        minimum.get("total_repaid", 0),
     )
 
     explanation = explanation_text(
@@ -283,18 +278,29 @@ def run_full_model(data):
     )
 
     # --------------------------------
-    # CURVES ALIGNMENT
+    # CURVES
     # --------------------------------
     ages = invest_case.get("ages", [])
 
-    def pad_curve(curve):
-        if len(curve) < len(ages):
-            curve = curve + [curve[-1] if curve else 0] * (len(ages) - len(curve))
-        return curve[:len(ages)]
+    if not ages:
+        ages = list(range(current_age, retirement_age + 1))
 
-    minimum_curve = pad_curve(minimum["curve"])
-    overpay_curve = pad_curve(overpay_case["curve"])
-    invest_curve = pad_curve(invest_case.get("curve", []))
+    minimum_curve = build_curve_from_schedule(
+        minimum.get("invest", {}).get("yearly_data", [])
+    )
+
+    overpay_curve = build_curve_from_schedule(
+        overpay_case.get("overpay", {}).get(
+            "yearly_data",
+            overpay_case.get("invest", {}).get("yearly_data", [])
+        )
+    )
+
+    invest_curve = invest_case.get("net_worth", [])
+
+    minimum_curve = pad_curve(minimum_curve, len(ages))
+    overpay_curve = pad_curve(overpay_curve, len(ages))
+    invest_curve = pad_curve(invest_curve, len(ages))
 
     # --------------------------------
     # OUTPUT
