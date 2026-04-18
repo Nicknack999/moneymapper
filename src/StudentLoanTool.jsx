@@ -199,41 +199,57 @@ export default function StudentLoanTool() {
     }
   };
 
-  // ---------------------------------
+ // ---------------------------------
 // RESULT HELPERS
 // ---------------------------------
 
-const winner =
-  result?.summary?.winner_label ||
-  "No result yet";
+  const winner =
+    result?.summary?.winner_label ||
+    "No result yet";
 
-const winnerGap =
-  result?.summary?.winner_difference || 0;
+  const winnerGap =
+    result?.summary?.winner_difference || 0;
 
-const ranking =
-  result?.summary?.ranking_labels?.map((label, i) => ({
-    label,
-    value: [
-      result?.summary?.minimum_final,
-      result?.summary?.overpay_final,
-      result?.summary?.invest_final
-    ][i] || 0
-  })) || [];
+  // Correct ranking: map sorted strategy keys to their true values
+  const ranking =
+    result?.summary?.ranking?.map((key) => {
+      const labels = {
+        minimum: "Minimum repayments only",
+        overpay: "Overpay monthly",
+        invest: "Invest monthly"
+      };
 
-const summaryText =
-  result?.insights?.explanation || "";
+      const values = {
+        minimum:
+          result?.summary?.minimum_final || 0,
+        overpay:
+          result?.summary?.overpay_final || 0,
+        invest:
+          result?.summary?.invest_final || 0
+      };
 
-const chartData =
-  result?.curves?.ages?.map((age, i) => ({
-    age,
-    minimum:
-      result?.curves?.minimum_net_worth?.[i] || 0,
-    overpay:
-      result?.curves?.overpay_net_worth?.[i] || 0,
-    invest:
-      result?.curves?.invest_net_worth?.[i] || 0
-  })) || [];
+      return {
+        label: labels[key] || key,
+        value: values[key] || 0
+      };
+    }) || [];
 
+  const summaryText =
+    result?.insights?.explanation || "";
+
+  const chartData =
+    result?.curves?.ages?.map((age, i) => ({
+      age,
+
+      minimum:
+        result?.curves?.minimum_net_worth?.[i] || 0,
+
+      overpay:
+        result?.curves?.overpay_net_worth?.[i] || 0,
+
+      invest:
+        result?.curves?.invest_net_worth?.[i] || 0
+   })) || [];
   // ---------------------------------
   // TOOLTIP
   // ---------------------------------
