@@ -40,9 +40,12 @@ def simulate_loan(
         if balance <= 0:
             break
 
-        repayment = annual_loan_repayment(salary, threshold, rate)
+        repayment = annual_loan_repayment(
+            salary,
+            threshold,
+            rate
+        )
 
-        # overpay here is ANNUAL
         repayment += overpay
 
         balance, actual_repayment, interest_paid = apply_loan_year(
@@ -71,9 +74,34 @@ def simulate_loan(
 # LEVEL 3: Scenario comparison
 # ----------------------------------
 
-def repayment_difference(salary, balance, interest, threshold, rate, years, overpay):
-    normal = simulate_loan(balance, salary, interest, threshold, rate, years, overpay=0)
-    overpay_case = simulate_loan(balance, salary, interest, threshold, rate, years, overpay=overpay)
+def repayment_difference(
+    salary,
+    balance,
+    interest,
+    threshold,
+    rate,
+    years,
+    overpay
+):
+    normal = simulate_loan(
+        balance,
+        salary,
+        interest,
+        threshold,
+        rate,
+        years,
+        overpay=0
+    )
+
+    overpay_case = simulate_loan(
+        balance,
+        salary,
+        interest,
+        threshold,
+        rate,
+        years,
+        overpay=overpay
+    )
 
     return overpay_case - normal
 
@@ -82,20 +110,54 @@ def repayment_difference(salary, balance, interest, threshold, rate, years, over
 # LEVEL 4: Break-even salary
 # ----------------------------------
 
-def find_break_even_salary(balance, interest, threshold, rate, years, overpay):
+def find_break_even_salary(
+    balance,
+    interest,
+    threshold,
+    rate,
+    years,
+    overpay
+):
     low = 20000
     high = 150000
     tolerance = 1
 
-    if repayment_difference(low, balance, interest, threshold, rate, years, overpay) > 0:
+    if repayment_difference(
+        low,
+        balance,
+        interest,
+        threshold,
+        rate,
+        years,
+        overpay
+    ) > 0:
         return None
 
-    if repayment_difference(high, balance, interest, threshold, rate, years, overpay) < 0:
+    if repayment_difference(
+        high,
+        balance,
+        interest,
+        threshold,
+        rate,
+        years,
+        overpay
+    ) < 0:
         return None
+
+    mid = low
 
     while high - low > tolerance:
         mid = (low + high) / 2
-        diff = repayment_difference(mid, balance, interest, threshold, rate, years, overpay)
+
+        diff = repayment_difference(
+            mid,
+            balance,
+            interest,
+            threshold,
+            rate,
+            years,
+            overpay
+        )
 
         if diff > 0:
             high = mid
@@ -109,7 +171,11 @@ def find_break_even_salary(balance, interest, threshold, rate, years, overpay):
 # LEVEL 5A: Investment comparison
 # ----------------------------------
 
-def future_value(monthly_amount, years, return_rate=0.05):
+def future_value(
+    monthly_amount,
+    years,
+    return_rate=0.05
+):
     months = years * 12
     monthly_rate = return_rate / 12
     value = 0
@@ -135,8 +201,25 @@ def find_break_even_return(
 ):
     annual_overpay = monthly_overpay * 12
 
-    normal = simulate_loan(balance, salary, interest, threshold, rate, years, overpay=0)
-    overpay_case = simulate_loan(balance, salary, interest, threshold, rate, years, overpay=annual_overpay)
+    normal = simulate_loan(
+        balance,
+        salary,
+        interest,
+        threshold,
+        rate,
+        years,
+        overpay=0
+    )
+
+    overpay_case = simulate_loan(
+        balance,
+        salary,
+        interest,
+        threshold,
+        rate,
+        years,
+        overpay=annual_overpay
+    )
 
     overpay_benefit = normal - overpay_case
 
@@ -145,11 +228,16 @@ def find_break_even_return(
 
     low = 0.0
     high = 0.15
+    mid = 0
 
     for _ in range(25):
         mid = (low + high) / 2
 
-        invest_value = future_value(monthly_overpay, years, return_rate=mid)
+        invest_value = future_value(
+            monthly_overpay,
+            years,
+            return_rate=mid
+        )
 
         if invest_value > overpay_benefit:
             high = mid
@@ -160,32 +248,7 @@ def find_break_even_return(
 
 
 # ----------------------------------
-# LEVEL 5C: Salary curve
-# ----------------------------------
-
-def generate_salary_curve(balance, interest, threshold, rate, years, overpay):
-    salary_range = list(range(20000, 100001, 2000))
-    curve = []
-
-    for s in salary_range:
-        invest = simulate_loan(balance, s, interest, threshold, rate, years, overpay=0)
-        overpay_case = simulate_loan(balance, s, interest, threshold, rate, years, overpay=overpay)
-
-        curve.append({
-            "salary": s,
-            "invest_outcome": round(invest, 0),
-            "overpay_outcome": round(overpay_case, 0),
-        })
-
-    return curve
-
-
-# ----------------------------------
 # LEVEL 6: API WRAPPER
-# ----------------------------------
-
-# ----------------------------------
-# LEVEL 6: API WRAPPER (FIXED)
 # ----------------------------------
 
 def calculate_loan(data):
@@ -203,7 +266,9 @@ def calculate_loan(data):
 
     annual_overpay = monthly_overpay * 12
 
-    # ---- BASE SCENARIO ----
+    # ----------------------------------
+    # BASE SCENARIO
+    # ----------------------------------
     total_repaid, schedule = simulate_loan(
         loan_balance,
         salary,
@@ -211,66 +276,127 @@ def calculate_loan(data):
         threshold,
         rate,
         years,
+        overpay=0,
         return_schedule=True
     )
 
-    # ---- OVERPAY SCENARIO ----
-    total_repaid_overpay = simulate_loan(
+    # ----------------------------------
+    # OVERPAY SCENARIO
+    # ----------------------------------
+    total_repaid_overpay, overpay_schedule = simulate_loan(
         loan_balance,
         salary,
         interest,
         threshold,
         rate,
         years,
-        overpay=annual_overpay
+        overpay=annual_overpay,
+        return_schedule=True
     )
 
-    # ---- INVESTMENT ----
-    invest_value = future_value(monthly_overpay, years, return_rate)
+    # ----------------------------------
+    # REMAINING BALANCES
+    # ----------------------------------
+    remaining_balance = (
+        schedule[-1]["balance"]
+        if schedule else 0
+    )
 
-    # ---- NET WORTH (CRITICAL FIX) ----
-    remaining_balance = max(0, loan_balance - total_repaid)
-    remaining_balance_overpay = max(0, loan_balance - total_repaid_overpay)
+    remaining_balance_overpay = (
+        overpay_schedule[-1]["balance"]
+        if overpay_schedule else 0
+    )
 
-    invest_net_worth = invest_value - remaining_balance
-    overpay_net_worth = -remaining_balance_overpay
+    # ----------------------------------
+    # INVESTMENT
+    # ----------------------------------
+    invest_value = future_value(
+        monthly_overpay,
+        years,
+        return_rate
+    )
 
-    wealth_difference = invest_net_worth - overpay_net_worth
+    # ----------------------------------
+    # NET POSITIONS
+    # ----------------------------------
+    minimum_net = -remaining_balance
 
-    # ---- REPAYMENT OUTCOME (NEW) ----
+    overpay_net = -remaining_balance_overpay
+
+    invest_net = invest_value - remaining_balance
+
+    wealth_difference = invest_net - overpay_net
+
+    # ----------------------------------
+    # REPAYMENT OUTCOME
+    # ----------------------------------
     if remaining_balance > 0:
         outcome_type = "write_off"
-        explanation = "You are unlikely to fully repay your loan before it is written off."
+        explanation = (
+            "You are unlikely to fully repay your loan "
+            "before it is written off."
+        )
+
     elif total_repaid < loan_balance * 1.1:
         outcome_type = "borderline"
-        explanation = "You may repay your loan, but outcomes depend on future earnings and interest rates."
+        explanation = (
+            "You may repay your loan, but outcomes depend "
+            "on future earnings and interest rates."
+        )
+
     else:
         outcome_type = "full_repay"
-        explanation = "You are likely to fully repay your loan."
+        explanation = (
+            "You are likely to fully repay your loan."
+        )
 
     repayment_outcome = {
         "type": outcome_type,
         "explanation": explanation
     }
 
-    # ---- DECISION OBJECT (FIXED STRUCTURE) ----
     decision = {
         "repayment_outcome": repayment_outcome,
-        "strategy": "invest" if wealth_difference > 0 else "overpay"
+        "strategy": (
+            "invest"
+            if wealth_difference > 0
+            else "overpay"
+        )
     }
 
     insights = {
-        "wealth_difference": round(wealth_difference, 0)
+        "wealth_difference": round(
+            wealth_difference,
+            0
+        )
     }
 
-    # ---- KEEP YOUR ADVANCED FEATURES ----
+    # ----------------------------------
+    # CURVES
+    # ----------------------------------
+    minimum_curve = []
+    overpay_curve = []
+
+    for row in schedule:
+        minimum_curve.append(
+            round(-row["balance"], 0)
+        )
+
+    for row in overpay_schedule:
+        overpay_curve.append(
+            round(-row["balance"], 0)
+        )
+
+    # ----------------------------------
+    # BREAK-EVEN FEATURES
+    # ----------------------------------
     break_even_salary = find_break_even_salary(
         loan_balance,
         interest,
         threshold,
         rate,
         years,
-        overpay=annual_overpay
+        annual_overpay
     )
 
     break_even_return = find_break_even_return(
@@ -283,20 +409,52 @@ def calculate_loan(data):
         monthly_overpay
     )
 
+    # ----------------------------------
+    # FINAL RESPONSE
+    # ----------------------------------
     return {
-        # 👇 WHAT FRONTEND NEEDS
         "decision": decision,
         "insights": insights,
 
-        # 👇 EXISTING FEATURES (KEEP THESE)
         "total_repaid": round(total_repaid, 0),
-        "total_repaid_overpay": round(total_repaid_overpay, 0),
-        "invest_future_value": round(invest_value, 0),
+        "total_repaid_overpay": round(
+            total_repaid_overpay,
+            0
+        ),
+
+        "invest_future_value": round(
+            invest_value,
+            0
+        ),
+
         "break_even_salary": break_even_salary,
         "break_even_return": break_even_return,
 
-        # 👇 GRAPH DATA
+        "remaining_balance": round(
+            remaining_balance,
+            0
+        ),
+
+        "net_position": round(
+            minimum_net,
+            0
+        ),
+
+        "curve": minimum_curve,
+
         "invest": {
             "yearly_data": schedule
+        },
+
+        "overpay": {
+            "remaining_balance": round(
+                remaining_balance_overpay,
+                0
+            ),
+            "net_position": round(
+                overpay_net,
+                0
+            ),
+            "curve": overpay_curve
         }
     }
