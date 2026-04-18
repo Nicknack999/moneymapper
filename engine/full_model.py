@@ -237,6 +237,12 @@ def run_full_model(data):
         "monthly_savings": monthly_savings,
         "return_rate": return_rate
     })
+    #  -----------------------------------------------
+    # DEBUG
+    # ------------------------------------------------
+    print("MINIMUM:", minimum)
+    print("OVERPAY:", overpay_case)
+    print("INVEST:", invest_case)
 
     # -------------------------------------------------
     # RESULTS
