@@ -266,16 +266,16 @@ def run_full_model(data):
     # --------------------------------
     # RUN MODELS
     # --------------------------------
-    minimum = calculate_loan(
-        salary=salary,
-        loan_balance=loan_balance,
-        threshold=threshold,
-        write_off_years=write_off_years,
-        loan_interest=loan_interest,
-        current_age=current_age,
-        retirement_age=retirement_age,
-        overpay=0
-    )
+    minimum = calculate_loan({
+    "salary": salary,
+    "loan_balance": loan_balance,
+    "threshold": threshold,
+    "write_off_years": write_off_years,
+    "loan_interest": loan_interest,
+    "current_age": current_age,
+    "retirement_age": retirement_age,
+    "overpay": 0
+})
 
     overpay_case = calculate_loan(
         salary=salary,
