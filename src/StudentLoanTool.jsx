@@ -200,23 +200,39 @@ export default function StudentLoanTool() {
   };
 
   // ---------------------------------
-  // RESULT HELPERS
-  // ---------------------------------
-  const winner =
-    result?.winner_label ||
-    "No result yet";
+// RESULT HELPERS
+// ---------------------------------
 
-  const winnerGap =
-    result?.winner_gap || 0;
+const winner =
+  result?.summary?.winner_label ||
+  "No result yet";
 
-  const ranking =
-    result?.ranking || [];
+const winnerGap =
+  result?.summary?.winner_difference || 0;
 
-  const chartData =
-    result?.chart || [];
+const ranking =
+  result?.summary?.ranking_labels?.map((label, i) => ({
+    label,
+    value: [
+      result?.summary?.minimum_final,
+      result?.summary?.overpay_final,
+      result?.summary?.invest_final
+    ][i] || 0
+  })) || [];
 
-  const summaryText =
-    result?.summary_text || "";
+const summaryText =
+  result?.insights?.explanation || "";
+
+const chartData =
+  result?.curves?.ages?.map((age, i) => ({
+    age,
+    minimum:
+      result?.curves?.minimum_net_worth?.[i] || 0,
+    overpay:
+      result?.curves?.overpay_net_worth?.[i] || 0,
+    invest:
+      result?.curves?.invest_net_worth?.[i] || 0
+  })) || [];
 
   // ---------------------------------
   // TOOLTIP
