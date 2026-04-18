@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+import traceback
 
 from student_loan import calculate_loan
 from forecast import run_forecast
@@ -59,8 +60,10 @@ def student_loan():
         result = calculate_loan(data)
         return jsonify(result)
 
-    except Exception as e:
-        print("Error in /student-loan:", e)
+    except Exception:
+        print("Error in /student-loan:")
+        traceback.print_exc()
+
         return jsonify({
             "error": "Failed to process student loan comparison."
         }), 500
@@ -73,8 +76,10 @@ def forecast():
         result = run_forecast(data)
         return jsonify(result)
 
-    except Exception as e:
-        print("Error in /forecast:", e)
+    except Exception:
+        print("Error in /forecast:")
+        traceback.print_exc()
+
         return jsonify({
             "error": "Failed to run forecast."
         }), 500
@@ -88,9 +93,11 @@ def full_model():
         return jsonify(result)
 
     except Exception as e:
-        print("Error in /full-model:", e)
+        print("Error in /full-model:")
+        traceback.print_exc()
+
         return jsonify({
-            "error": "Failed to run comparison model."
+            "error": str(e)
         }), 500
 
 
@@ -98,4 +105,9 @@ def full_model():
 # RUN
 # -------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=True
+    )
