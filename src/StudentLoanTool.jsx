@@ -809,8 +809,9 @@ export default function StudentLoanTool() {
                 <Line
                   type="monotone"
                   dataKey="minimum"
-                  stroke="#64748b"
-                  strokeWidth={3}
+                  stroke="#111827"
+                  strokeWidth={4}
+                  strokeDasharray="6 4"
                   dot={false}
                   name="Minimum repayments only"
                 />
