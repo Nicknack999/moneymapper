@@ -24,11 +24,11 @@ export default function App() {
 
   const muted = {
     color: "#475569",
-    lineHeight: 1.6
+    lineHeight: 1.7
   };
 
   // ---------------------------------
-  // TOOL PAGE
+  // TOOL PAGE (TEMPORARY BETA ACCESS)
   // ---------------------------------
   if (page === "student-loan") {
     return (
@@ -52,7 +52,6 @@ export default function App() {
             ← Back to Wayli
           </button>
 
-          {/* TRUST BANNER */}
           <div
             style={{
               ...cardStyle,
@@ -68,7 +67,7 @@ export default function App() {
                 marginBottom: 8
               }}
             >
-              Before you begin
+              Beta preview
             </div>
 
             <div
@@ -77,9 +76,9 @@ export default function App() {
                 lineHeight: 1.7
               }}
             >
-              {wayliMessages.education.assumptions}
-              <br />
-              {wayliMessages.education.notAdvice}
+              We are rebuilding Wayli into a clearer
+              decision platform. This tool remains
+              available while we improve the next version.
             </div>
           </div>
 
@@ -106,13 +105,13 @@ export default function App() {
         <div
           style={{
             textAlign: "center",
-            paddingTop: 44,
-            paddingBottom: 44
+            paddingTop: 52,
+            paddingBottom: 52
           }}
         >
           <div
             style={{
-              fontSize: 42,
+              fontSize: 44,
               fontWeight: 800,
               color: "#0f172a"
             }}
@@ -140,20 +139,19 @@ export default function App() {
               maxWidth: 760,
               marginLeft: "auto",
               marginRight: "auto",
-              lineHeight: 1.7
+              lineHeight: 1.8
             }}
           >
-            Start with our Student Loan Tool — compare
-            overpaying, investing, or paying the minimum.
+            We&apos;re rebuilding Wayli into a simpler,
+            more trusted decision platform for UK households.
             <br />
-            More practical decision tools for mortgages,
-            cars and other major money choices coming soon.
+            Clear answers. Plain English. Real-life money choices.
           </div>
 
           {/* CTA */}
           <div
             style={{
-              marginTop: 28,
+              marginTop: 30,
               display: "flex",
               gap: 12,
               justifyContent: "center",
@@ -168,7 +166,7 @@ export default function App() {
                 color: "white"
               }}
             >
-              Try Student Loan Tool
+              Use Current Student Loan Beta
             </button>
 
             <button
@@ -179,7 +177,7 @@ export default function App() {
                 border: "1px solid #cbd5e1"
               }}
             >
-              More Tools Coming Soon
+              New Version Coming Soon
             </button>
           </div>
 
@@ -197,13 +195,19 @@ export default function App() {
           >
             <span>✔ UK-focused</span>
             <span>✔ Free to use</span>
-            <span>✔ Plain-English results</span>
+            <span>✔ Plain-English guidance</span>
             <span>✔ Built for real decisions</span>
           </div>
         </div>
 
-        {/* FEATURED TOOL */}
-        <div style={{ ...cardStyle, marginBottom: 18 }}>
+        {/* REBUILD MESSAGE */}
+        <div
+          style={{
+            ...cardStyle,
+            marginBottom: 18,
+            background: "#f8fafc"
+          }}
+        >
           <div
             style={{
               fontSize: 13,
@@ -212,7 +216,7 @@ export default function App() {
               textTransform: "uppercase"
             }}
           >
-            Start Here
+            In Progress
           </div>
 
           <h2
@@ -222,14 +226,45 @@ export default function App() {
               color: "#0f172a"
             }}
           >
-            🎓 Student Loan Tool
+            Wayli is evolving
           </h2>
 
           <div style={muted}>
-            Should you overpay your student loan,
-            invest instead, or keep paying the minimum?
+            We started with calculators.
             <br />
-            Compare long-term outcomes in minutes.
+            We are now building something better:
+            decision tools that help people know
+            what to do next.
+          </div>
+        </div>
+
+        {/* CURRENT TOOL */}
+        <div style={{ ...cardStyle, marginBottom: 18 }}>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#10b981",
+              textTransform: "uppercase"
+            }}
+          >
+            Available Now
+          </div>
+
+          <h2
+            style={{
+              marginTop: 10,
+              marginBottom: 10,
+              color: "#0f172a"
+            }}
+          >
+            🎓 Student Loan Tool (Beta)
+          </h2>
+
+          <div style={muted}>
+            Compare whether overpaying,
+            investing or paying the minimum
+            may suit you best.
           </div>
 
           <div
@@ -239,7 +274,9 @@ export default function App() {
               lineHeight: 1.7
             }}
           >
-            {wayliMessages.education.taxLike}
+            {wayliMessages.education.assumptions}
+            <br />
+            {wayliMessages.education.notAdvice}
           </div>
 
           <button
@@ -251,53 +288,11 @@ export default function App() {
               marginTop: 18
             }}
           >
-            Use Tool Free
+            Try Beta Tool
           </button>
         </div>
 
-        {/* HOW IT WORKS */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 18,
-            marginBottom: 18
-          }}
-        >
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>
-              Compare Options
-            </h3>
-
-            <div style={muted}>
-              See different routes side by side
-              instead of relying on guesswork.
-            </div>
-          </div>
-
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>
-              Understand Trade-Offs
-            </h3>
-
-            <div style={muted}>
-              See what may change outcomes over time.
-            </div>
-          </div>
-
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>
-              Decide Clearly
-            </h3>
-
-            <div style={muted}>
-              Plain-English outputs built for real life.
-            </div>
-          </div>
-        </div>
-
-        {/* INSIGHTS */}
+        {/* WHAT'S COMING */}
         <div
           style={{
             display: "grid",
@@ -309,69 +304,24 @@ export default function App() {
         >
           <div style={cardStyle}>
             <h3 style={{ marginTop: 0 }}>
-              Typical Insights
+              🎓 Student Loan V2
             </h3>
 
             <div style={muted}>
-              • Salary where repayment becomes more likely
-              <br />
-              • Years earlier debt could clear
-              <br />
-              • Growth potential of investing instead
+              Clearer recommendations,
+              simpler outputs,
+              smarter guidance.
             </div>
           </div>
 
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>
-              What Matters Most
-            </h3>
-
-            <div style={muted}>
-              Best maths outcome and best personal
-              choice are not always the same thing.
-            </div>
-          </div>
-
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>
-              Stress Test Choices
-            </h3>
-
-            <div style={muted}>
-              Try higher salary, lower returns,
-              bigger overpayments or later ages.
-            </div>
-          </div>
-        </div>
-
-        {/* COMING SOON */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 18,
-            marginBottom: 18
-          }}
-        >
           <div style={cardStyle}>
             <h3 style={{ marginTop: 0 }}>
               🏠 Mortgage Tool
             </h3>
 
             <div style={muted}>
-              Should you overpay your mortgage
-              or invest instead?
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                color: "#10b981",
-                fontWeight: 700
-              }}
-            >
-              Coming soon
+              Should you overpay
+              your mortgage or invest instead?
             </div>
           </div>
 
@@ -381,55 +331,24 @@ export default function App() {
             </h3>
 
             <div style={muted}>
-              Should you repair or replace
-              your car?
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                color: "#10b981",
-                fontWeight: 700
-              }}
-            >
-              Coming soon
-            </div>
-          </div>
-
-          <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>
-              🏡 More Tools
-            </h3>
-
-            <div style={muted}>
-              Rent vs buy, retirement choices,
-              savings decisions and more.
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                color: "#10b981",
-                fontWeight: 700
-              }}
-            >
-              In development
+              Repair, replace,
+              finance or keep driving?
             </div>
           </div>
         </div>
 
-        {/* GUIDES */}
+        {/* WHY WAYLI */}
         <div style={{ ...cardStyle, marginBottom: 18 }}>
           <h3 style={{ marginTop: 0 }}>
-            Popular Guides
+            Why Wayli?
           </h3>
 
           <div style={muted}>
-            • Should I overpay my student loan in the UK?
+            Most money sites give numbers.
             <br />
-            • Mortgage overpay vs invest: what matters most
+            Wayli aims to give decisions.
             <br />
-            • When is a car repair not worth it?
+            Clear thinking for real life.
           </div>
         </div>
 
