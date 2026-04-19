@@ -9,39 +9,29 @@ def num(value, default=0):
 
 
 def run_forecast(data):
-    """
-    Proper comparative forecast model.
 
-    Simulates:
-    - student loan repayments each year
-    - optional overpayments
-    - investing spare monthly money
-    - salary growth over time
-    - write-off year
-
-    Returns chart curves + summary metrics.
-    """
-
-    # ---------------------------------
-    # INPUTS
-    # ---------------------------------
     current_age = int(num(data.get("current_age"), 30))
     retirement_age = int(num(data.get("retirement_age"), 60))
 
     salary = num(data.get("salary"), 30000)
     salary_growth = num(data.get("salary_growth"), 0.03)
 
+    threshold = num(data.get("threshold"), 27295)
+    threshold_growth = num(data.get("threshold_growth"), 0.02)
+
     monthly_savings = num(data.get("monthly_savings"), 200)
     growth_rate = num(data.get("return_rate"), 0.05)
 
-    initial_loan_balance = num(data.get("loan_balance"), 50000)
+    loan_balance = num(data.get("loan_balance"), 50000)
     loan_interest = num(data.get("loan_interest"), 0.06)
 
-    threshold = num(data.get("threshold"), 27295)
     repayment_rate = num(data.get("repayment_rate"), 0.09)
 
     overpay_annual = num(data.get("overpay"), 0) * 12
-    write_off_years = int(num(data.get("write_off_years"), 30))
+
+    write_off_years = int(
+        num(data.get("write_off_years"), 30)
+    )
 
     model_opportunity_cost = data.get(
         "model_opportunity_cost",
@@ -50,77 +40,67 @@ def run_forecast(data):
 
     years = max(0, retirement_age - current_age)
 
-    # ---------------------------------
-    # STATE
-    # ---------------------------------
-    loan_balance = float(initial_loan_balance)
     pot = 0.0
     total_paid = 0.0
     loan_cleared_age = None
 
     ages = []
-    net_worth = []
-    loan_balances = []
+    curve = []
+    balances = []
 
-    # ---------------------------------
-    # YEAR LOOP
-    # ---------------------------------
     for year in range(years + 1):
+
         age = current_age + year
 
-        # salary rises yearly
-        current_salary = salary * ((1 + salary_growth) ** year)
+        current_salary = salary * (
+            (1 + salary_growth) ** year
+        )
 
-        # ---------------------------------
-        # WRITE OFF
-        # ---------------------------------
+        current_threshold = threshold * (
+            (1 + threshold_growth) ** year
+        )
+
+        # write off
         if year >= write_off_years and loan_balance > 0:
             loan_balance = 0
 
-        # ---------------------------------
-        # REQUIRED REPAYMENT
-        # ---------------------------------
+        # repayments
         if loan_balance > 0:
-            base_repayment = annual_loan_repayment(
+            base = annual_loan_repayment(
                 current_salary,
-                threshold,
+                current_threshold,
                 repayment_rate * 100
             )
         else:
-            base_repayment = 0
+            base = 0
 
-        # ---------------------------------
-        # EXTRA OVERPAYMENT
-        # ---------------------------------
-        extra_overpay = overpay_annual if loan_balance > 0 else 0
+        extra = overpay_annual if loan_balance > 0 else 0
 
-        # ---------------------------------
-        # INVESTABLE CASH
-        # ---------------------------------
         annual_savings = monthly_savings * 12
 
         if model_opportunity_cost:
-            annual_savings -= extra_overpay
+            annual_savings -= extra
 
         annual_savings = max(0, annual_savings)
 
-        # add money monthly-equivalent yearly
-        pot += annual_savings
-
-        # grow investments
+        # grow existing investments first
         pot *= (1 + growth_rate)
 
-        # ---------------------------------
-        # APPLY LOAN YEAR
-        # ---------------------------------
+        # then add this year's savings
+        pot += annual_savings
+
+        # apply loan
         if loan_balance > 0:
-            scheduled_payment = base_repayment + extra_overpay
 
-            max_possible = loan_balance * (1 + loan_interest)
+            scheduled = base + extra
 
-            scheduled_payment = min(
-                scheduled_payment,
-                max_possible
+            max_payment = loan_balance * (
+                1 + loan_interest
+            )
+
+            scheduled = min(
+                scheduled,
+                max_payment
             )
 
             old_balance = loan_balance
@@ -128,11 +108,13 @@ def run_forecast(data):
             loan_balance, _, _ = apply_loan_year(
                 loan_balance,
                 loan_interest * 100,
-                scheduled_payment
+                scheduled
             )
 
-            actual_paid = old_balance - loan_balance
-            actual_paid = max(0, actual_paid)
+            actual_paid = max(
+                0,
+                old_balance - loan_balance
+            )
 
             total_paid += actual_paid
 
@@ -142,23 +124,17 @@ def run_forecast(data):
                 if loan_cleared_age is None:
                     loan_cleared_age = age
 
-        # ---------------------------------
-        # NET WORTH
-        # ---------------------------------
-        current_net = pot - loan_balance
+        net = pot - loan_balance
 
         ages.append(age)
-        net_worth.append(round(current_net, 0))
-        loan_balances.append(round(loan_balance, 0))
+        curve.append(round(net, 0))
+        balances.append(round(loan_balance, 0))
 
-    # ---------------------------------
-    # OUTPUT
-    # ---------------------------------
     return {
         "ages": ages,
-        "curve": net_worth,
-        "net_worth": net_worth,
-        "loan_balance": loan_balances,
+        "curve": curve,
+        "net_worth": curve,
+        "loan_balance": balances,
         "loan_cleared_age": loan_cleared_age,
         "final_investment_value": round(pot, 0),
         "final_remaining_balance": round(loan_balance, 0),
