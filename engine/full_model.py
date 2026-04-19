@@ -1,18 +1,14 @@
+# full_model.py
 # -------------------------------------------------
-# WAYLI FULL_MODEL V8.1
-# Safe production patch
-# Preserves proven structure
-# Fixes inflated rankings
-# Keeps API contract stable
+# WAYLI FULL_MODEL V9
+# Clean scoring engine
+# Drop-in replacement
 # -------------------------------------------------
 
 from student_loan import calculate_loan
 from forecast import run_forecast
 
 
-# -------------------------------------------------
-# HELPERS
-# -------------------------------------------------
 def num(value, default=0):
     try:
         return float(value)
@@ -52,38 +48,30 @@ def explanation_text(
     if repayment_type == "write_off":
         if winner_key == "invest":
             return (
-                "Full repayment looks less likely under these assumptions, "
-                "so keeping spare money invested may create more value."
+                "Full repayment looks less likely, so investing spare money may be stronger here."
             )
 
         return (
-            "Full repayment looks less likely under these assumptions. "
-            "Reducing the balance sooner may still suit some people."
+            "Full repayment looks less likely under these assumptions."
         )
 
     if repayment_type == "full_repay":
         if winner_key == "overpay":
             return (
-                "Full repayment looks likely. Overpaying may reduce interest "
-                "and clear the balance sooner."
+                "Full repayment looks likely. Overpaying may reduce interest and clear the loan sooner."
             )
 
         if winner_key == "invest":
             return (
-                "Full repayment looks likely. Investing the same money may still "
-                "produce the strongest projected outcome."
+                "Full repayment looks likely, but investing may still create more long-term value."
             )
 
     return (
-        "This looks fairly close. Small changes to salary, returns or timing "
-        "could change the ranking."
+        "This looks relatively close. Small changes could change the ranking."
     )
 
 
-def create_trigger_text(
-    current_salary,
-    trigger_salary
-):
+def create_trigger_text(current_salary, trigger_salary):
     if trigger_salary is None:
         return (
             "Full repayment looks less likely under the current assumptions."
@@ -91,13 +79,11 @@ def create_trigger_text(
 
     if current_salary >= trigger_salary:
         return (
-            "At your current income, full repayment already looks more likely "
-            "within the selected timeframe."
+            "At your current income, full repayment already looks more likely."
         )
 
     return (
-        f"Full repayment may become more likely from around "
-        f"£{trigger_salary:,.0f} salary upward."
+        f"Full repayment may become more likely from around £{trigger_salary:,.0f} salary upward."
     )
 
 
@@ -123,44 +109,20 @@ def estimate_salary_trigger(
             }
         )
 
-        if result.get(
-            "remaining_balance",
-            loan_balance
-        ) <= 100:
+        if result.get("remaining_balance", loan_balance) <= 100:
             return salary
 
     return None
 
 
-# -------------------------------------------------
-# NORMALISE OUTPUT
-# -------------------------------------------------
-def extract_result(
-    model,
-    fallback_balance
-):
-    yearly_data = model.get(
-        "invest",
-        {}
-    ).get(
-        "yearly_data",
-        []
-    )
+def extract_result(model, fallback_balance):
+    yearly_data = model.get("invest", {}).get("yearly_data", [])
 
-    curve = model.get(
-        "curve",
-        []
-    )
+    curve = model.get("curve", [])
 
     if not curve and yearly_data:
         curve = [
-            round(
-                -row.get(
-                    "balance",
-                    fallback_balance
-                ),
-                0
-            )
+            round(-row.get("balance", fallback_balance), 0)
             for row in yearly_data
         ]
 
@@ -182,69 +144,18 @@ def extract_result(
 
 
 # -------------------------------------------------
-# SAFE SCORING
-# -------------------------------------------------
-def safe_invest_score(
-    invest_case,
-    monthly_amount,
-    years
-):
-    # Cap extreme outputs by using the
-    # lower of forecast score or plausible max
-
-    raw = invest_case.get(
-        "net_position",
-        0
-    )
-
-    total_contributed = (
-        monthly_amount * 12 * years
-    )
-
-    plausible_cap = (
-        total_contributed * 2.5
-    )
-
-    return min(raw, plausible_cap)
-
-
-# -------------------------------------------------
 # MAIN ENGINE
 # -------------------------------------------------
 def run_full_model(data):
 
-    # --------------------------------
-    # INPUTS
-    # --------------------------------
-    salary = num(
-        data.get("salary"),
-        40000
-    )
-
-    loan_balance = num(
-        data.get("loan_balance"),
-        50000
-    )
-
-    current_age = int(
-        num(
-            data.get("current_age"),
-            30
-        )
-    )
-
-    retirement_age = int(
-        num(
-            data.get("retirement_age"),
-            60
-        )
-    )
+    salary = num(data.get("salary"), 40000)
+    loan_balance = num(data.get("loan_balance"), 50000)
+    current_age = int(num(data.get("current_age"), 30))
+    retirement_age = int(num(data.get("retirement_age"), 60))
 
     monthly_amount = num(
-        data.get(
-            "monthly_savings",
-            100
-        )
+        data.get("monthly_savings"),
+        100
     )
 
     if monthly_amount == 0:
@@ -253,37 +164,16 @@ def run_full_model(data):
             100
         )
 
-    return_rate = num(
-        data.get("return_rate"),
-        0.05
-    )
-
-    loan_interest = num(
-        data.get("loan_interest"),
-        0.06
-    )
-
-    threshold = num(
-        data.get("threshold"),
-        27295
-    )
+    return_rate = num(data.get("return_rate"), 0.05)
+    loan_interest = num(data.get("loan_interest"), 0.06)
+    threshold = num(data.get("threshold"), 27295)
 
     write_off_years = int(
-        num(
-            data.get(
-                "write_off_years",
-                30
-            )
-        )
-    )
-
-    years = max(
-        1,
-        retirement_age - current_age
+        num(data.get("write_off_years"), 30)
     )
 
     # --------------------------------
-    # MINIMUM
+    # Minimum route
     # --------------------------------
     minimum_raw = calculate_loan(
         {
@@ -302,7 +192,7 @@ def run_full_model(data):
     )
 
     # --------------------------------
-    # OVERPAY
+    # Overpay route
     # --------------------------------
     overpay_raw = calculate_loan(
         {
@@ -321,7 +211,7 @@ def run_full_model(data):
     )
 
     # --------------------------------
-    # INVEST
+    # Invest route
     # --------------------------------
     invest_case = run_forecast(
         {
@@ -340,20 +230,13 @@ def run_full_model(data):
     )
 
     # --------------------------------
-    # SCORES
+    # CLEAN SCORES
     # --------------------------------
-    minimum_final = minimum[
-        "net_position"
-    ]
-
-    overpay_final = overpay_case[
-        "net_position"
-    ]
-
-    invest_final = safe_invest_score(
-        invest_case,
-        monthly_amount,
-        years
+    minimum_final = minimum["net_position"]
+    overpay_final = overpay_case["net_position"]
+    invest_final = invest_case.get(
+        "net_position",
+        0
     )
 
     scores = {
@@ -368,10 +251,7 @@ def run_full_model(data):
         reverse=True
     )
 
-    ranking = [
-        x[0]
-        for x in ordered
-    ]
+    ranking = [x[0] for x in ordered]
 
     winner_key = ranking[0]
 
@@ -380,13 +260,8 @@ def run_full_model(data):
         2
     )
 
-    close_result = (
-        abs(winner_gap) < 10000
-    )
+    close_result = abs(winner_gap) < 10000
 
-    # --------------------------------
-    # STATUS
-    # --------------------------------
     repayment_type = classify_repayment(
         minimum["remaining_balance"],
         loan_balance,
@@ -412,48 +287,22 @@ def run_full_model(data):
         trigger_salary
     )
 
-    # --------------------------------
-    # CURVES
-    # --------------------------------
-    ages = invest_case.get(
-        "ages",
-        []
-    )
+    ages = invest_case.get("ages", [])
 
     def pad(curve):
         if len(curve) < len(ages):
-            filler = (
-                curve[-1]
-                if curve else 0
+            filler = curve[-1] if curve else 0
+            curve = curve + [filler] * (
+                len(ages) - len(curve)
             )
-
-            curve = curve + [
-                filler
-            ] * (
-                len(ages) -
-                len(curve)
-            )
-
         return curve[:len(ages)]
 
-    minimum_curve = pad(
-        minimum["curve"]
-    )
-
-    overpay_curve = pad(
-        overpay_case["curve"]
-    )
-
+    minimum_curve = pad(minimum["curve"])
+    overpay_curve = pad(overpay_case["curve"])
     invest_curve = pad(
-        invest_case.get(
-            "curve",
-            []
-        )
+        invest_case.get("curve", [])
     )
 
-    # --------------------------------
-    # OUTPUT
-    # --------------------------------
     return {
         "summary": {
             "winner_label": (
@@ -462,18 +311,9 @@ def run_full_model(data):
             ),
             "winner_difference": winner_gap,
             "ranking": ranking,
-            "minimum_final": round(
-                minimum_final,
-                2
-            ),
-            "overpay_final": round(
-                overpay_final,
-                2
-            ),
-            "invest_final": round(
-                invest_final,
-                2
-            ),
+            "minimum_final": round(minimum_final, 2),
+            "overpay_final": round(overpay_final, 2),
+            "invest_final": round(invest_final, 2),
         },
 
         "insights": {
