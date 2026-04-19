@@ -9,6 +9,7 @@ import {
   CartesianGrid,
   Legend
 } from "recharts";
+import { wayliMessages } from "./wayliMessages";
 
 export default function StudentLoanTool() {
   const API_URL =
@@ -19,27 +20,49 @@ export default function StudentLoanTool() {
   // PLAN RULES
   // ---------------------------------
   const plans = {
-    plan1: { name: "Plan 1", threshold: 26065, years: 25 },
-    plan2: { name: "Plan 2", threshold: 27295, years: 30 },
-    plan5: { name: "Plan 5", threshold: 25000, years: 40 },
-    pg: { name: "Postgraduate", threshold: 21000, years: 30 }
+    plan1: {
+      name: "Plan 1",
+      threshold: 26065,
+      years: 25
+    },
+    plan2: {
+      name: "Plan 2",
+      threshold: 27295,
+      years: 30
+    },
+    plan5: {
+      name: "Plan 5",
+      threshold: 25000,
+      years: 40
+    },
+    pg: {
+      name: "Postgraduate",
+      threshold: 21000,
+      years: 30
+    }
   };
 
   // ---------------------------------
   // HELPERS
   // ---------------------------------
   const money = (v) =>
-    `£${Math.round(Number(v || 0)).toLocaleString()}`;
+    `£${Math.round(
+      Number(v || 0)
+    ).toLocaleString()}`;
 
   const moneyShort = (v) => {
     const n = Number(v || 0);
 
     if (Math.abs(n) >= 1000000) {
-      return `£${(n / 1000000).toFixed(1)}m`;
+      return `£${(
+        n / 1000000
+      ).toFixed(1)}m`;
     }
 
     if (Math.abs(n) >= 1000) {
-      return `£${Math.round(n / 1000)}k`;
+      return `£${Math.round(
+        n / 1000
+      )}k`;
     }
 
     return money(n);
@@ -64,6 +87,18 @@ export default function StudentLoanTool() {
     return "Around break-even";
   };
 
+  const routeLabel = {
+    minimum:
+      "Minimum repayments only",
+    overpay:
+      "Overpay monthly",
+    invest:
+      "Invest monthly"
+  };
+
+  // ---------------------------------
+  // STYLES
+  // ---------------------------------
   const card = {
     background: "white",
     borderRadius: 20,
@@ -278,18 +313,18 @@ export default function StudentLoanTool() {
     result?.summary
       ?.winner_difference || 0;
 
+  const repaymentType =
+    result?.decision
+      ?.repayment_outcome
+      ?.type || "";
+
+  const salaryTriggerText =
+    result?.insights
+      ?.salary_trigger_text || "";
+
   const ranking =
     result?.summary?.ranking?.map(
       (key) => {
-        const labels = {
-          minimum:
-            "Minimum repayments only",
-          overpay:
-            "Overpay monthly",
-          invest:
-            "Invest monthly"
-        };
-
         const values = {
           minimum:
             result?.summary
@@ -305,7 +340,7 @@ export default function StudentLoanTool() {
         return {
           key,
           label:
-            labels[key],
+            routeLabel[key],
           value:
             values[key]
         };
@@ -334,15 +369,6 @@ export default function StudentLoanTool() {
       })
     ) || [];
 
-  const repaymentType =
-    result?.decision
-      ?.repayment_outcome
-      ?.type || "";
-
-  const salaryTriggerText =
-    result?.insights
-      ?.salary_trigger_text || "";
-
   // ---------------------------------
   // TEXT HELPERS
   // ---------------------------------
@@ -351,17 +377,20 @@ export default function StudentLoanTool() {
       repaymentType ===
       "full_repay"
     ) {
-      return "You may repay the loan anyway through normal payroll deductions. That means investing extra money can sometimes come out strongest — but overpaying could still reduce interest and clear the balance sooner.";
+      return (
+        "Full repayment looks more likely. " +
+        wayliMessages.comparison.valuesMatter
+      );
     }
 
     if (
       repaymentType ===
       "write_off"
     ) {
-      return "If full repayment looks less likely before write-off, paying extra into the loan may create less benefit than keeping that money elsewhere.";
+      return wayliMessages.repayment.unlikelyRepay;
     }
 
-    return "This looks close. Small changes to earnings, returns or timing could change the result.";
+    return wayliMessages.comparison.close;
   };
 
   const routeExplain = (
@@ -370,18 +399,23 @@ export default function StudentLoanTool() {
     if (
       item.key === "invest"
     ) {
-      return `This assumes you invest £${monthlyAmount} each month instead of overpaying your loan. The figure shown is what you may be ahead or behind by age ${compareAge}.`;
+      return wayliMessages.investing.growthPotential(
+        item.value
+      );
     }
 
     if (
       item.key === "minimum"
     ) {
-      return "This means paying only the normal required student loan deductions through payroll, with no extra monthly payments. It is compared with the other two routes.";
+      return wayliMessages.minimum.flexibility;
     }
 
-    return `This assumes you overpay £${monthlyAmount} each month on top of normal deductions. It can help clear the balance earlier and reduce interest.`;
+    return wayliMessages.overpaying.debtSooner;
   };
 
+  // ---------------------------------
+  // TOOLTIP
+  // ---------------------------------
   const CustomTooltip = ({
     active,
     payload,
@@ -406,6 +440,17 @@ export default function StudentLoanTool() {
           <strong>
             Age {label}
           </strong>
+
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: 13,
+              color:
+                "#64748b"
+            }}
+          >
+            Higher lines are generally better.
+          </div>
 
           {payload.map(
             (item) => (
@@ -470,11 +515,9 @@ export default function StudentLoanTool() {
             lineHeight: 1.7
           }}
         >
-          Compare three ways to
-          use the same monthly
-          money:
+          Compare three ways to use the same monthly money:
           <br />
-          • Pay only normal loan deductions
+          • Pay only normal deductions
           <br />
           • Overpay the loan
           <br />
@@ -626,7 +669,7 @@ export default function StudentLoanTool() {
       {/* RESULTS */}
       {result && (
         <>
-          {/* WINNER */}
+          {/* HERO RESULT */}
           <div
             style={{
               ...card,
@@ -645,14 +688,13 @@ export default function StudentLoanTool() {
                   "#065f46"
               }}
             >
-              What looks strongest right now
+              Best financial outcome in this model
             </div>
 
             <h2>{winner}</h2>
 
             <p>
-              Based on what you entered,
-              this looks ahead by{" "}
+              Based on what you entered, this route is ahead by{" "}
               {money(
                 winnerGap
               )}{" "}
@@ -700,7 +742,7 @@ export default function StudentLoanTool() {
             }}
           >
             <h3>
-              What each route may look like
+              How each route compares
             </h3>
 
             {ranking.map(
@@ -921,12 +963,13 @@ export default function StudentLoanTool() {
                 margin: 0
               }}
             >
-              Educational comparison only.
-              Real outcomes depend on
-              future earnings,
-              policy changes,
-              investment returns
-              and personal priorities.
+              {
+                wayliMessages.education.assumptions
+              }
+              <br />
+              {
+                wayliMessages.education.notAdvice
+              }
             </p>
           </div>
         </>
