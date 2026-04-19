@@ -21,6 +21,27 @@ def label(key):
     return labels.get(key, key)
 
 
+def winner_label(key):
+    """
+    Preferred frontend wording.
+    """
+    labels = {
+        "minimum":
+            "Minimum repayments only "
+            "(best financial outcome in this model)",
+
+        "overpay":
+            "Overpay monthly "
+            "(best financial outcome in this model)",
+
+        "invest":
+            "Invest monthly "
+            "(best financial outcome in this model)",
+    }
+
+    return labels.get(key, key)
+
+
 def classify_repayment(
     remaining_balance,
     original_balance,
@@ -38,8 +59,7 @@ def classify_repayment(
 
 
 # -------------------------------------------------
-# SAFE SCORING PATCH
-# Only light nudges. No aggressive distortions.
+# SAFE SCORE NUDGES ONLY
 # -------------------------------------------------
 def adjusted_scores(
     minimum_final,
@@ -54,20 +74,15 @@ def adjusted_scores(
         "invest": invest_final,
     }
 
-    # If loan likely fully repaid,
-    # slight favour to overpaying.
     if repayment_type == "full_repay":
         scores["overpay"] *= 1.06
 
         if salary >= 60000:
             scores["overpay"] *= 1.03
 
-    # If likely write-off,
-    # slight favour investing.
     elif repayment_type == "write_off":
         scores["invest"] *= 1.03
 
-    # Borderline = mild overpay nudge
     else:
         scores["overpay"] *= 1.02
 
@@ -79,6 +94,7 @@ def explanation_text(
     winner_key
 ):
     if repayment_type == "full_repay":
+
         if winner_key == "invest":
             return (
                 "Investing looks strongest mathematically here, "
@@ -101,8 +117,8 @@ def explanation_text(
         )
 
     return (
-        "This result looks fairly close. Small changes to earnings, "
-        "returns or timing could change the ranking."
+        "This looks close. Small changes to earnings, "
+        "returns or timing could change the result."
     )
 
 
@@ -152,12 +168,10 @@ def estimate_salary_trigger(
             }
         )
 
-        remaining = result.get(
+        if result.get(
             "remaining_balance",
             loan_balance
-        )
-
-        if remaining <= 100:
+        ) <= 100:
             return salary
 
     return None
@@ -228,13 +242,10 @@ def extract_result(
 
 
 # -------------------------------------------------
-# MAIN FUNCTION
+# MAIN
 # -------------------------------------------------
 def run_full_model(data):
 
-    # -----------------------------
-    # INPUTS
-    # -----------------------------
     salary = num(data.get("salary"), 40000)
     loan_balance = num(data.get("loan_balance"), 50000)
     current_age = int(num(data.get("current_age"), 30))
@@ -253,9 +264,9 @@ def run_full_model(data):
         True
     )
 
-    # -----------------------------
+    # --------------------------------
     # RUN MODELS
-    # -----------------------------
+    # --------------------------------
     minimum_raw = calculate_loan(
         {
             "salary": salary,
@@ -308,9 +319,6 @@ def run_full_model(data):
         loan_balance
     )
 
-    # -----------------------------
-    # VALUES
-    # -----------------------------
     minimum_final = minimum["net_position"]
     overpay_final = overpay_case["net_position"]
     invest_final = invest_case.get(
@@ -324,6 +332,10 @@ def run_full_model(data):
         minimum["total_repaid"]
     )
 
+    # --------------------------------
+    # ranking uses nudged scores
+    # display values use REAL values
+    # --------------------------------
     scores = adjusted_scores(
         minimum_final,
         overpay_final,
@@ -338,25 +350,26 @@ def run_full_model(data):
         reverse=True
     )
 
-    ranking = [
-        x[0]
-        for x in ordered
-    ]
+    ranking = [x[0] for x in ordered]
 
     winner_key = ranking[0]
 
-    winner_gap = (
-        ordered[0][1] -
-        ordered[1][1]
-    )
+    # TRUST FIX:
+    # gap now based on real outputs,
+    # not adjusted scores.
+    real_values = {
+        "minimum": minimum_final,
+        "overpay": overpay_final,
+        "invest": invest_final,
+    }
 
-    close_result = (
-        abs(winner_gap) < 10000
-    )
+    winner_real = real_values[ranking[0]]
+    second_real = real_values[ranking[1]]
 
-    # -----------------------------
-    # INSIGHTS
-    # -----------------------------
+    winner_gap = winner_real - second_real
+
+    close_result = abs(winner_gap) < 10000
+
     explanation = explanation_text(
         repayment_type,
         winner_key
@@ -376,13 +389,10 @@ def run_full_model(data):
         trigger_salary
     )
 
-    # -----------------------------
+    # --------------------------------
     # CURVES
-    # -----------------------------
-    ages = invest_case.get(
-        "ages",
-        []
-    )
+    # --------------------------------
+    ages = invest_case.get("ages", [])
 
     def pad_curve(curve):
         if len(curve) < len(ages):
@@ -405,25 +415,28 @@ def run_full_model(data):
         invest_case.get("curve", [])
     )
 
-    # -----------------------------
+    # --------------------------------
     # RESPONSE
-    # -----------------------------
+    # --------------------------------
     return {
         "summary": {
-            "winner_label": label(winner_key),
+            "winner_label": winner_label(winner_key),
             "winner_difference": round(
                 winner_gap,
                 2
             ),
             "ranking": ranking,
+
             "minimum_final": round(
                 minimum_final,
                 2
             ),
+
             "overpay_final": round(
                 overpay_final,
                 2
             ),
+
             "invest_final": round(
                 invest_final,
                 2
