@@ -230,11 +230,11 @@ export default function App() {
           </h2>
 
           <div style={muted}>
-            We started with calculators.
+            We started with calculators
             <br />
             We are now building something better:
             decision tools that help people know
-            what to do next.
+            what to do next
           </div>
         </div>
 
