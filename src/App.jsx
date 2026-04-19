@@ -1,5 +1,6 @@
 import { useState } from "react";
 import StudentLoanTool from "./StudentLoanTool";
+import { wayliMessages } from "./wayliMessages";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -26,6 +27,9 @@ export default function App() {
     lineHeight: 1.6
   };
 
+  // ---------------------------------
+  // TOOL PAGE
+  // ---------------------------------
   if (page === "student-loan") {
     return (
       <div
@@ -48,12 +52,46 @@ export default function App() {
             ← Back to Wayli
           </button>
 
+          {/* TRUST BANNER */}
+          <div
+            style={{
+              ...cardStyle,
+              marginBottom: 18,
+              background: "#ecfdf5",
+              border: "1px solid #bbf7d0"
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 700,
+                color: "#065f46",
+                marginBottom: 8
+              }}
+            >
+              Before you begin
+            </div>
+
+            <div
+              style={{
+                color: "#065f46",
+                lineHeight: 1.7
+              }}
+            >
+              {wayliMessages.education.assumptions}
+              <br />
+              {wayliMessages.education.notAdvice}
+            </div>
+          </div>
+
           <StudentLoanTool />
         </div>
       </div>
     );
   }
 
+  // ---------------------------------
+  // HOME PAGE
+  // ---------------------------------
   return (
     <div
       style={{
@@ -105,11 +143,11 @@ export default function App() {
               lineHeight: 1.7
             }}
           >
-            Start with our Student Loan Tool — compare overpaying,
-            investing, or paying the minimum.
+            Start with our Student Loan Tool — compare
+            overpaying, investing, or paying the minimum.
             <br />
-            More practical decision tools for mortgages, cars and
-            other major money choices coming soon.
+            More practical decision tools for mortgages,
+            cars and other major money choices coming soon.
           </div>
 
           {/* CTA */}
@@ -188,10 +226,20 @@ export default function App() {
           </h2>
 
           <div style={muted}>
-            Should you overpay your student loan, invest instead,
-            or keep paying the minimum?
+            Should you overpay your student loan,
+            invest instead, or keep paying the minimum?
             <br />
             Compare long-term outcomes in minutes.
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              color: "#64748b",
+              lineHeight: 1.7
+            }}
+          >
+            {wayliMessages.education.taxLike}
           </div>
 
           <button
@@ -218,24 +266,80 @@ export default function App() {
           }}
         >
           <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>Compare Options</h3>
+            <h3 style={{ marginTop: 0 }}>
+              Compare Options
+            </h3>
+
             <div style={muted}>
-              See different routes side by side instead of relying
-              on guesswork.
+              See different routes side by side
+              instead of relying on guesswork.
             </div>
           </div>
 
           <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>Understand Trade-Offs</h3>
+            <h3 style={{ marginTop: 0 }}>
+              Understand Trade-Offs
+            </h3>
+
             <div style={muted}>
               See what may change outcomes over time.
             </div>
           </div>
 
           <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>Decide Clearly</h3>
+            <h3 style={{ marginTop: 0 }}>
+              Decide Clearly
+            </h3>
+
             <div style={muted}>
-              Practical outputs in plain English.
+              Plain-English outputs built for real life.
+            </div>
+          </div>
+        </div>
+
+        {/* INSIGHTS */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: 18,
+            marginBottom: 18
+          }}
+        >
+          <div style={cardStyle}>
+            <h3 style={{ marginTop: 0 }}>
+              Typical Insights
+            </h3>
+
+            <div style={muted}>
+              • Salary where repayment becomes more likely
+              <br />
+              • Years earlier debt could clear
+              <br />
+              • Growth potential of investing instead
+            </div>
+          </div>
+
+          <div style={cardStyle}>
+            <h3 style={{ marginTop: 0 }}>
+              What Matters Most
+            </h3>
+
+            <div style={muted}>
+              Best maths outcome and best personal
+              choice are not always the same thing.
+            </div>
+          </div>
+
+          <div style={cardStyle}>
+            <h3 style={{ marginTop: 0 }}>
+              Stress Test Choices
+            </h3>
+
+            <div style={muted}>
+              Try higher salary, lower returns,
+              bigger overpayments or later ages.
             </div>
           </div>
         </div>
@@ -251,9 +355,13 @@ export default function App() {
           }}
         >
           <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>🏠 Mortgage Tool</h3>
+            <h3 style={{ marginTop: 0 }}>
+              🏠 Mortgage Tool
+            </h3>
+
             <div style={muted}>
-              Should you overpay your mortgage or invest instead?
+              Should you overpay your mortgage
+              or invest instead?
             </div>
 
             <div
@@ -268,9 +376,13 @@ export default function App() {
           </div>
 
           <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>🚗 Car Decision Tool</h3>
+            <h3 style={{ marginTop: 0 }}>
+              🚗 Car Decision Tool
+            </h3>
+
             <div style={muted}>
-              Should you repair or replace your car?
+              Should you repair or replace
+              your car?
             </div>
 
             <div
@@ -285,10 +397,13 @@ export default function App() {
           </div>
 
           <div style={cardStyle}>
-            <h3 style={{ marginTop: 0 }}>🏡 More Tools</h3>
+            <h3 style={{ marginTop: 0 }}>
+              🏡 More Tools
+            </h3>
+
             <div style={muted}>
-              Rent vs buy, retirement choices, savings decisions
-              and more.
+              Rent vs buy, retirement choices,
+              savings decisions and more.
             </div>
 
             <div
@@ -303,9 +418,11 @@ export default function App() {
           </div>
         </div>
 
-        {/* GUIDES / SEO SECTION */}
+        {/* GUIDES */}
         <div style={{ ...cardStyle, marginBottom: 18 }}>
-          <h3 style={{ marginTop: 0 }}>Popular Guides</h3>
+          <h3 style={{ marginTop: 0 }}>
+            Popular Guides
+          </h3>
 
           <div style={muted}>
             • Should I overpay my student loan in the UK?
@@ -324,8 +441,8 @@ export default function App() {
           }}
         >
           <div style={muted}>
-            Wayli helps UK households make clearer money decisions
-            through practical tools.
+            Wayli helps UK households make clearer
+            money decisions through practical tools.
           </div>
 
           <div
@@ -338,7 +455,12 @@ export default function App() {
             Questions or feedback?
           </div>
 
-          <div style={{ marginTop: 6, color: "#475569" }}>
+          <div
+            style={{
+              marginTop: 6,
+              color: "#475569"
+            }}
+          >
             wayliteam@gmail.com
           </div>
         </div>
