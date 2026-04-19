@@ -261,11 +261,11 @@ export default function App() {
           </h3>
 
           <div style={muted}>
-            Most money sites give numbers.
+            Most money sites give number
             <br />
-            Wayli aims to help make things clearer.
+            Wayli aims to help make things clearer
             <br />
-            Calm thinking for real life.
+            Calm thinking for real life
           </div>
         </div>
 
