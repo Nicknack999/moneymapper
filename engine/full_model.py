@@ -22,23 +22,14 @@ def label(key):
 
 
 def winner_label(key):
-    """
-    Preferred frontend wording.
-    """
     labels = {
         "minimum":
-            "Minimum repayments only "
-            "(best financial outcome in this model)",
-
+            "Minimum repayments only (best financial outcome in this model)",
         "overpay":
-            "Overpay monthly "
-            "(best financial outcome in this model)",
-
+            "Overpay monthly (best financial outcome in this model)",
         "invest":
-            "Invest monthly "
-            "(best financial outcome in this model)",
+            "Invest monthly (best financial outcome in this model)",
     }
-
     return labels.get(key, key)
 
 
@@ -59,14 +50,18 @@ def classify_repayment(
 
 
 # -------------------------------------------------
-# SAFE SCORE NUDGES ONLY
+# SMARTER SCORING ENGINE
+# Uses REAL outputs + modest behaviour nudges
 # -------------------------------------------------
 def adjusted_scores(
     minimum_final,
     overpay_final,
     invest_final,
     repayment_type,
-    salary
+    salary,
+    loan_interest,
+    return_rate,
+    loan_balance
 ):
     scores = {
         "minimum": minimum_final,
@@ -74,17 +69,52 @@ def adjusted_scores(
         "invest": invest_final,
     }
 
+    # --------------------------------
+    # If likely full repay:
+    # overpay becomes more attractive
+    # --------------------------------
     if repayment_type == "full_repay":
-        scores["overpay"] *= 1.06
+        scores["overpay"] += min(
+            25000,
+            loan_balance * 0.25
+        )
 
         if salary >= 60000:
-            scores["overpay"] *= 1.03
+            scores["overpay"] += 10000
 
+    # --------------------------------
+    # If likely write-off:
+    # investing stronger
+    # --------------------------------
     elif repayment_type == "write_off":
-        scores["invest"] *= 1.03
+        scores["invest"] += min(
+            20000,
+            loan_balance * 0.20
+        )
 
+    # --------------------------------
+    # Borderline:
+    # small overpay edge
+    # --------------------------------
     else:
-        scores["overpay"] *= 1.02
+        scores["overpay"] += min(
+            12000,
+            loan_balance * 0.12
+        )
+
+    # --------------------------------
+    # If loan interest beats returns,
+    # debt reduction more attractive
+    # --------------------------------
+    if loan_interest > return_rate:
+        scores["overpay"] += 10000
+
+    # --------------------------------
+    # If returns much stronger,
+    # investing gets lift
+    # --------------------------------
+    if return_rate > loan_interest + 0.02:
+        scores["invest"] += 10000
 
     return scores
 
@@ -95,29 +125,29 @@ def explanation_text(
 ):
     if repayment_type == "full_repay":
 
-        if winner_key == "invest":
-            return (
-                "Investing looks strongest mathematically here, "
-                "but overpaying could still reduce interest and "
-                "clear the balance sooner."
-            )
-
         if winner_key == "overpay":
             return (
-                "Because full repayment looks likely, reducing the "
-                "balance sooner may save interest and remove future "
-                "repayments earlier."
+                "Because full repayment looks likely, "
+                "clearing the balance sooner may reduce "
+                "interest and end deductions earlier."
+            )
+
+        if winner_key == "invest":
+            return (
+                "Investing still looks strongest financially "
+                "here, although overpaying may still appeal "
+                "for certainty and faster clearance."
             )
 
     if repayment_type == "write_off":
         return (
-            "This looks more like a case where the loan may not be "
-            "fully repaid before write-off, so investing extra money "
-            "can sometimes come out stronger."
+            "This looks more like a case where the loan may "
+            "not be fully repaid before write-off, so sending "
+            "extra money elsewhere can sometimes work better."
         )
 
     return (
-        "This looks close. Small changes to earnings, "
+        "This looks fairly close. Small changes to earnings, "
         "returns or timing could change the result."
     )
 
@@ -128,19 +158,20 @@ def create_trigger_text(
 ):
     if trigger_salary is None:
         return (
-            "With your current balance and assumptions, full repayment "
-            "looks less likely within the selected period."
+            "With your current balance and assumptions, "
+            "full repayment looks less likely within "
+            "the selected period."
         )
 
     if current_salary >= trigger_salary:
         return (
-            "At your current income, full repayment already looks "
-            "more likely within the selected timeframe."
+            "At your current income, full repayment already "
+            "looks more likely within the selected timeframe."
         )
 
     return (
-        f"With your current balance and assumptions, full repayment "
-        f"may become more likely from around "
+        f"With your current balance and assumptions, "
+        f"full repayment may become more likely from around "
         f"£{trigger_salary:,.0f} salary upward."
     )
 
@@ -265,7 +296,7 @@ def run_full_model(data):
     )
 
     # --------------------------------
-    # RUN MODELS
+    # RUN SCENARIOS
     # --------------------------------
     minimum_raw = calculate_loan(
         {
@@ -319,6 +350,9 @@ def run_full_model(data):
         loan_balance
     )
 
+    # --------------------------------
+    # REAL VALUES
+    # --------------------------------
     minimum_final = minimum["net_position"]
     overpay_final = overpay_case["net_position"]
     invest_final = invest_case.get(
@@ -333,15 +367,17 @@ def run_full_model(data):
     )
 
     # --------------------------------
-    # ranking uses nudged scores
-    # display values use REAL values
+    # RANKING
     # --------------------------------
     scores = adjusted_scores(
         minimum_final,
         overpay_final,
         invest_final,
         repayment_type,
-        salary
+        salary,
+        loan_interest,
+        return_rate,
+        loan_balance
     )
 
     ordered = sorted(
@@ -351,22 +387,19 @@ def run_full_model(data):
     )
 
     ranking = [x[0] for x in ordered]
-
     winner_key = ranking[0]
 
-    # TRUST FIX:
-    # gap now based on real outputs,
-    # not adjusted scores.
+    # Use REAL values for displayed gap
     real_values = {
         "minimum": minimum_final,
         "overpay": overpay_final,
         "invest": invest_final,
     }
 
-    winner_real = real_values[ranking[0]]
-    second_real = real_values[ranking[1]]
-
-    winner_gap = winner_real - second_real
+    winner_gap = (
+        real_values[ranking[0]]
+        - real_values[ranking[1]]
+    )
 
     close_result = abs(winner_gap) < 10000
 
@@ -426,17 +459,14 @@ def run_full_model(data):
                 2
             ),
             "ranking": ranking,
-
             "minimum_final": round(
                 minimum_final,
                 2
             ),
-
             "overpay_final": round(
                 overpay_final,
                 2
             ),
-
             "invest_final": round(
                 invest_final,
                 2
