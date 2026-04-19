@@ -3,7 +3,7 @@ import StudentLoanTool from "./StudentLoanTool";
 import { wayliMessages } from "./wayliMessages";
 
 export default function App() {
-  const [page, setPage] = useState("home");
+  const [page] = useState("home");
 
   const buttonStyle = {
     padding: "14px 18px",
@@ -27,70 +27,6 @@ export default function App() {
     lineHeight: 1.7
   };
 
-  // ---------------------------------
-  // TOOL PAGE (TEMPORARY BETA ACCESS)
-  // ---------------------------------
-  if (page === "student-loan") {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#f8fafc",
-          padding: 20
-        }}
-      >
-        <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-          <button
-            onClick={() => setPage("home")}
-            style={{
-              ...buttonStyle,
-              background: "#0f172a",
-              color: "white",
-              marginBottom: 18
-            }}
-          >
-            ← Back to Wayli
-          </button>
-
-          <div
-            style={{
-              ...cardStyle,
-              marginBottom: 18,
-              background: "#ecfdf5",
-              border: "1px solid #bbf7d0"
-            }}
-          >
-            <div
-              style={{
-                fontWeight: 700,
-                color: "#065f46",
-                marginBottom: 8
-              }}
-            >
-              Beta preview
-            </div>
-
-            <div
-              style={{
-                color: "#065f46",
-                lineHeight: 1.7
-              }}
-            >
-              We are rebuilding Wayli into a clearer
-              decision platform. This tool remains
-              available while we improve the next version.
-            </div>
-          </div>
-
-          <StudentLoanTool />
-        </div>
-      </div>
-    );
-  }
-
-  // ---------------------------------
-  // HOME PAGE
-  // ---------------------------------
   return (
     <div
       style={{
@@ -105,8 +41,8 @@ export default function App() {
         <div
           style={{
             textAlign: "center",
-            paddingTop: 52,
-            paddingBottom: 52
+            paddingTop: 56,
+            paddingBottom: 56
           }}
         >
           <div
@@ -128,7 +64,7 @@ export default function App() {
               lineHeight: 1.2
             }}
           >
-            Smarter tools for life&apos;s money choices
+            Smarter tools for life's money choices
           </div>
 
           <div
@@ -142,10 +78,11 @@ export default function App() {
               lineHeight: 1.8
             }}
           >
-            We&apos;re rebuilding Wayli into a simpler,
-            more trusted decision platform for UK households.
+            We're building Wayli into a simpler,
+            clearer decision platform for UK households.
             <br />
-            Clear answers. Plain English. Real-life money choices.
+            Practical guidance for real money choices —
+            without the calculator clutter.
           </div>
 
           {/* CTA */}
@@ -159,14 +96,14 @@ export default function App() {
             }}
           >
             <button
-              onClick={() => setPage("student-loan")}
               style={{
                 ...buttonStyle,
                 background: "#10b981",
-                color: "white"
+                color: "white",
+                cursor: "default"
               }}
             >
-              Use Current Student Loan Beta
+              Coming Soon
             </button>
 
             <button
@@ -174,10 +111,11 @@ export default function App() {
                 ...buttonStyle,
                 background: "#ffffff",
                 color: "#0f172a",
-                border: "1px solid #cbd5e1"
+                border: "1px solid #cbd5e1",
+                cursor: "default"
               }}
             >
-              New Version Coming Soon
+              Free Tools In Development
             </button>
           </div>
 
@@ -193,8 +131,7 @@ export default function App() {
               flexWrap: "wrap"
             }}
           >
-            <span>✔ UK-focused</span>
-            <span>✔ Free to use</span>
+            
             <span>✔ Plain-English guidance</span>
             <span>✔ Built for real decisions</span>
           </div>
@@ -205,14 +142,15 @@ export default function App() {
           style={{
             ...cardStyle,
             marginBottom: 18,
-            background: "#f8fafc"
+            background: "#ecfdf5",
+            border: "1px solid #bbf7d0"
           }}
         >
           <div
             style={{
               fontSize: 13,
               fontWeight: 700,
-              color: "#10b981",
+              color: "#065f46",
               textTransform: "uppercase"
             }}
           >
@@ -223,73 +161,24 @@ export default function App() {
             style={{
               marginTop: 10,
               marginBottom: 10,
-              color: "#0f172a"
+              color: "#065f46"
             }}
           >
             Wayli is evolving
           </h2>
 
-          <div style={muted}>
-            We started with calculators
+          <div
+            style={{
+              color: "#065f46",
+              lineHeight: 1.8
+            }}
+          >
+            We started by testing calculator tools.
             <br />
             We are now building something better:
-            decision tools that help people know
-            what to do next
+            smart decision tools that help people know
+            what to do next.
           </div>
-        </div>
-
-        {/* CURRENT TOOL */}
-        <div style={{ ...cardStyle, marginBottom: 18 }}>
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "#10b981",
-              textTransform: "uppercase"
-            }}
-          >
-            Available Now
-          </div>
-
-          <h2
-            style={{
-              marginTop: 10,
-              marginBottom: 10,
-              color: "#0f172a"
-            }}
-          >
-            🎓 Student Loan Tool (Beta)
-          </h2>
-
-          <div style={muted}>
-            Compare whether overpaying,
-            investing or paying the minimum
-            may suit you best.
-          </div>
-
-          <div
-            style={{
-              marginTop: 14,
-              color: "#64748b",
-              lineHeight: 1.7
-            }}
-          >
-            {wayliMessages.education.assumptions}
-            <br />
-            {wayliMessages.education.notAdvice}
-          </div>
-
-          <button
-            onClick={() => setPage("student-loan")}
-            style={{
-              ...buttonStyle,
-              background: "#10b981",
-              color: "white",
-              marginTop: 18
-            }}
-          >
-            Try Beta Tool
-          </button>
         </div>
 
         {/* WHAT'S COMING */}
@@ -304,13 +193,22 @@ export default function App() {
         >
           <div style={cardStyle}>
             <h3 style={{ marginTop: 0 }}>
-              🎓 Student Loan V2
+              🎓 Student Loan Tool
             </h3>
 
             <div style={muted}>
-              Clearer recommendations,
-              simpler outputs,
-              smarter guidance.
+              Clearer answers on whether to
+              overpay, invest or keep it simple.
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                color: "#10b981",
+                fontWeight: 700
+              }}
+            >
+              Rebuilding now
             </div>
           </div>
 
@@ -320,8 +218,18 @@ export default function App() {
             </h3>
 
             <div style={muted}>
-              Should you overpay
-              your mortgage or invest instead?
+              Should you overpay your mortgage
+              or invest instead?
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                color: "#10b981",
+                fontWeight: 700
+              }}
+            >
+              Coming soon
             </div>
           </div>
 
@@ -331,8 +239,17 @@ export default function App() {
             </h3>
 
             <div style={muted}>
-              Repair, replace,
-              finance or keep driving?
+              Repair or replace?
+            </div>
+
+            <div
+              style={{
+                marginTop: 14,
+                color: "#10b981",
+                fontWeight: 700
+              }}
+            >
+              Coming soon
             </div>
           </div>
         </div>
@@ -346,9 +263,22 @@ export default function App() {
           <div style={muted}>
             Most money sites give numbers.
             <br />
-            Wayli aims to give decisions.
+            Wayli aims to help make things clearer.
             <br />
-            Clear thinking for real life.
+            Calm thinking for real life.
+          </div>
+        </div>
+
+        {/* EDUCATION / TRUST */}
+        <div style={{ ...cardStyle, marginBottom: 18 }}>
+          <h3 style={{ marginTop: 0 }}>
+            Our approach
+          </h3>
+
+          <div style={muted}>
+            {wayliMessages.education.assumptions}
+            <br />
+            {wayliMessages.education.notAdvice}
           </div>
         </div>
 
@@ -360,7 +290,7 @@ export default function App() {
           }}
         >
           <div style={muted}>
-            Wayli helps UK households make clearer
+            Wayli helps households make clearer
             money decisions through practical tools.
           </div>
 
