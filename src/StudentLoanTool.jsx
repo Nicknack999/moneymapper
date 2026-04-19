@@ -13,7 +13,7 @@ import {
 export default function StudentLoanTool() {
   const API_URL =
     import.meta.env.VITE_API_URL ||
-    "https://moneymapper-backend-018g.onrender.com";
+    "https://api.wayli.uk";
 
   // ---------------------------------
   // PLAN RULES
@@ -58,7 +58,7 @@ export default function StudentLoanTool() {
     if (n < -5000) {
       return `${moneyShort(
         Math.abs(n)
-      )} behind break-even`;
+      )} behind`;
     }
 
     return "Around break-even";
@@ -153,6 +153,7 @@ export default function StudentLoanTool() {
 
     try {
       const payload = {
+        plan,
         salary:
           Number(
             overrides.salary ??
@@ -232,7 +233,7 @@ export default function StudentLoanTool() {
   };
 
   // ---------------------------------
-  // AUTO SCENARIOS
+  // QUICK SCENARIOS
   // ---------------------------------
   const runScenario = (
     type
@@ -302,6 +303,7 @@ export default function StudentLoanTool() {
         };
 
         return {
+          key,
           label:
             labels[key],
           value:
@@ -342,40 +344,44 @@ export default function StudentLoanTool() {
       ?.salary_trigger_text || "";
 
   // ---------------------------------
-  // DYNAMIC EXPLANATION
+  // TEXT HELPERS
   // ---------------------------------
   const whyWinner = () => {
     if (
       repaymentType ===
       "full_repay"
     ) {
-      return "Your current income suggests the loan may already be repaid through normal payroll deductions over time. That can make investing extra monthly money more attractive than overpaying.";
+      return "You may repay the loan anyway through normal payroll deductions. That means investing extra money can sometimes come out strongest — but overpaying could still reduce interest and clear the balance sooner.";
     }
 
     if (
       repaymentType ===
       "write_off"
     ) {
-      return "If full repayment looks less likely before write-off, sending extra money to the loan can sometimes deliver less value than investing elsewhere.";
+      return "If full repayment looks less likely before write-off, paying extra into the loan may create less benefit than keeping that money elsewhere.";
     }
 
-    return "This one looks fairly close. Small changes to future earnings, returns or timing could change the ranking.";
+    return "This looks close. Small changes to earnings, returns or timing could change the result.";
   };
 
-  const whyOverpay = () => {
+  const routeExplain = (
+    item
+  ) => {
     if (
-      repaymentType ===
-      "full_repay"
+      item.key === "invest"
     ) {
-      return "Overpaying could clear the balance sooner, reduce interest paid and remove deductions earlier — which some people prefer.";
+      return `This assumes you invest £${monthlyAmount} each month instead of overpaying your loan. The figure shown is what you may be ahead or behind by age ${compareAge}.`;
     }
 
-    return "Some people still prefer reducing the balance for certainty or peace of mind.";
+    if (
+      item.key === "minimum"
+    ) {
+      return "This means paying only the normal required student loan deductions through payroll, with no extra monthly payments. It is compared with the other two routes.";
+    }
+
+    return `This assumes you overpay £${monthlyAmount} each month on top of normal deductions. It can help clear the balance earlier and reduce interest.`;
   };
 
-  // ---------------------------------
-  // TOOLTIP
-  // ---------------------------------
   const CustomTooltip = ({
     active,
     payload,
@@ -394,26 +400,12 @@ export default function StudentLoanTool() {
             border:
               "1px solid #e5e7eb",
             padding: 14,
-            borderRadius: 12,
-            maxWidth: 280
+            borderRadius: 12
           }}
         >
           <strong>
             Age {label}
           </strong>
-
-          <p
-            style={{
-              fontSize: 13,
-              color:
-                "#64748b",
-              marginTop: 6
-            }}
-          >
-            Money built up
-            compared with any
-            loan still left.
-          </p>
 
           {payload.map(
             (item) => (
@@ -425,17 +417,10 @@ export default function StudentLoanTool() {
                   marginTop: 8
                 }}
               >
-                <strong>
-                  {
-                    item.name
-                  }
-                </strong>
-                <br />
-                <span>
-                  {describeValue(
-                    item.value
-                  )}
-                </span>
+                {item.name}:{" "}
+                {moneyShort(
+                  item.value
+                )}
               </div>
             )
           )}
@@ -485,11 +470,15 @@ export default function StudentLoanTool() {
             lineHeight: 1.7
           }}
         >
-          See how paying the
-          minimum, overpaying,
-          or investing the same
-          money may play out
-          over time.
+          Compare three ways to
+          use the same monthly
+          money:
+          <br />
+          • Pay only normal loan deductions
+          <br />
+          • Overpay the loan
+          <br />
+          • Invest instead
         </p>
       </div>
 
@@ -513,6 +502,7 @@ export default function StudentLoanTool() {
             <label>
               Loan plan
             </label>
+
             <select
               value={plan}
               onChange={(e) =>
@@ -575,25 +565,19 @@ export default function StudentLoanTool() {
               setLoanInterest
             ]
           ].map(
-            ([
-              title,
-              value,
-              setter
-            ]) => (
-              <div
-                key={title}
-              >
+            ([a, b, c]) => (
+              <div key={a}>
                 <label>
-                  {title}
+                  {a}
                 </label>
 
                 <input
                   type="number"
-                  value={value}
+                  value={b}
                   onChange={(
                     e
                   ) =>
-                    setter(
+                    c(
                       parseNum(
                         e
                           .target
@@ -642,7 +626,7 @@ export default function StudentLoanTool() {
       {/* RESULTS */}
       {result && (
         <>
-          {/* HERO RESULT */}
+          {/* WINNER */}
           <div
             style={{
               ...card,
@@ -661,41 +645,22 @@ export default function StudentLoanTool() {
                   "#065f46"
               }}
             >
-              What looks strongest
-              right now
+              What looks strongest right now
             </div>
 
-            <h2>
-              {winner}
-            </h2>
+            <h2>{winner}</h2>
 
-            <p
-              style={{
-                color:
-                  "#065f46",
-                lineHeight: 1.7
-              }}
-            >
-              Based on what you
-              entered, this looks
-              ahead by{" "}
+            <p>
+              Based on what you entered,
+              this looks ahead by{" "}
               {money(
                 winnerGap
               )}{" "}
               by age{" "}
-              {
-                compareAge
-              }.
+              {compareAge}.
             </p>
 
-            <p
-              style={{
-                color:
-                  "#065f46",
-                lineHeight: 1.7,
-                marginTop: 12
-              }}
-            >
+            <p>
               {whyWinner()}
             </p>
 
@@ -716,10 +681,7 @@ export default function StudentLoanTool() {
                 <p
                   style={{
                     marginTop: 8,
-                    marginBottom: 0,
-                    lineHeight: 1.7,
-                    color:
-                      "#334155"
+                    marginBottom: 0
                   }}
                 >
                   {
@@ -738,9 +700,7 @@ export default function StudentLoanTool() {
             }}
           >
             <h3>
-              What each route may
-              look like by age{" "}
-              {compareAge}
+              What each route may look like
             </h3>
 
             {ranking.map(
@@ -784,23 +744,15 @@ export default function StudentLoanTool() {
 
                   <div
                     style={{
-                      marginTop: 6,
+                      marginTop: 8,
                       color:
                         "#475569",
-                      lineHeight: 1.6
+                      lineHeight: 1.7
                     }}
                   >
-                    {item.label ===
-                      "Invest monthly" &&
-                      "This looks stronger here because the same monthly amount has more time to grow."}
-
-                    {item.label ===
-                      "Minimum repayments only" &&
-                      "You may keep more monthly flexibility, but build less extra value in this example."}
-
-                    {item.label ===
-                      "Overpay monthly" &&
-                      whyOverpay()}
+                    {routeExplain(
+                      item
+                    )}
                   </div>
                 </div>
               )
@@ -815,8 +767,7 @@ export default function StudentLoanTool() {
             }}
           >
             <h3>
-              How things may
-              change over time
+              How things may change over time
             </h3>
 
             <p
@@ -825,10 +776,7 @@ export default function StudentLoanTool() {
                   "#475569"
               }}
             >
-              We compare money
-              built up against any
-              student loan still
-              remaining.
+              Higher lines are generally better.
             </p>
 
             <ResponsiveContainer
@@ -841,27 +789,22 @@ export default function StudentLoanTool() {
                 }
               >
                 <CartesianGrid strokeDasharray="3 3" />
+
                 <XAxis dataKey="age" />
+
                 <YAxis
                   tickFormatter={
                     moneyShort
                   }
                 />
+
                 <Tooltip
                   content={
                     <CustomTooltip />
                   }
                 />
-                <Legend />
 
-                <Line
-                  type="monotone"
-                  dataKey="invest"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  dot={false}
-                  name="Invest monthly"
-                />
+                <Legend />
 
                 <Line
                   type="monotone"
@@ -880,11 +823,20 @@ export default function StudentLoanTool() {
                   dot={false}
                   name="Overpay monthly"
                 />
+
+                <Line
+                  type="monotone"
+                  dataKey="invest"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  dot={false}
+                  name="Invest monthly"
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
 
-          {/* AUTO SCENARIOS */}
+          {/* SCENARIOS */}
           <div
             style={{
               ...card,
@@ -892,8 +844,7 @@ export default function StudentLoanTool() {
             }}
           >
             <h3>
-              Try another version
-              of the future
+              Try another version of the future
             </h3>
 
             <div
@@ -907,9 +858,7 @@ export default function StudentLoanTool() {
               }}
             >
               <button
-                style={
-                  chip
-                }
+                style={chip}
                 onClick={() =>
                   runScenario(
                     "salary50"
@@ -920,9 +869,7 @@ export default function StudentLoanTool() {
               </button>
 
               <button
-                style={
-                  chip
-                }
+                style={chip}
                 onClick={() =>
                   runScenario(
                     "returns3"
@@ -933,22 +880,18 @@ export default function StudentLoanTool() {
               </button>
 
               <button
-                style={
-                  chip
-                }
+                style={chip}
                 onClick={() =>
                   runScenario(
                     "pay150"
                   )
                 }
               >
-                Pay £150/mo
+                £150 monthly
               </button>
 
               <button
-                style={
-                  chip
-                }
+                style={chip}
                 onClick={() =>
                   runScenario(
                     "age67"
@@ -977,16 +920,12 @@ export default function StudentLoanTool() {
                 margin: 0
               }}
             >
-              This is an
-              educational
-              comparison using
-              simplified
-              assumptions. Real
-              outcomes depend on
+              Educational comparison only.
+              Real outcomes depend on
               future earnings,
-              rates, investment
-              performance and
-              policy changes.
+              policy changes,
+              investment returns
+              and personal priorities.
             </p>
           </div>
         </>
