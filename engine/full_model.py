@@ -1,4 +1,12 @@
-from student_loan import annual_loan_repayment
+# -------------------------------------------------
+# WAYLI FULL_MODEL V7
+# Hybrid UK student loan comparison engine
+# Safer, smarter, more varied outcomes
+# Drop-in replacement for full_model.py
+# -------------------------------------------------
+
+from student_loan import calculate_loan
+from forecast import run_forecast
 
 
 # -------------------------------------------------
@@ -20,10 +28,13 @@ def label(key):
     return labels.get(key, key)
 
 
-def winner_label(key):
-    return f"{label(key)} (best financial outcome in this model)"
+def clamp(value, low, high):
+    return max(low, min(high, value))
 
 
+# -------------------------------------------------
+# INTERPRET REPAYMENT STATUS
+# -------------------------------------------------
 def classify_repayment(
     remaining_balance,
     original_balance,
@@ -32,274 +43,268 @@ def classify_repayment(
     if remaining_balance <= 100:
         return "full_repay"
 
-    if total_repaid < original_balance * 0.70:
+    repay_ratio = total_repaid / max(original_balance, 1)
+
+    if repay_ratio < 0.70:
         return "write_off"
 
     return "borderline"
 
 
+# -------------------------------------------------
+# EXPLANATION
+# -------------------------------------------------
 def explanation_text(
     repayment_type,
     winner_key
 ):
+    if repayment_type == "write_off":
+        if winner_key == "invest":
+            return (
+                "This looks more like a write-off scenario, "
+                "so keeping spare money invested can sometimes "
+                "create more value than overpaying."
+            )
+
+        return (
+            "This looks more like a write-off scenario. "
+            "Even so, reducing the balance sooner may still suit "
+            "people who value certainty."
+        )
+
     if repayment_type == "full_repay":
         if winner_key == "overpay":
             return (
-                "Because full repayment looks likely, overpaying can "
-                "reduce interest and clear the balance sooner."
+                "Full repayment looks likely. Overpaying may reduce "
+                "interest and clear the loan earlier."
             )
 
         if winner_key == "invest":
             return (
-                "You may repay the loan anyway through normal deductions, "
-                "so investing extra money can sometimes come out strongest."
+                "Full repayment looks likely, but investing the same "
+                "money may still produce a stronger net outcome."
             )
 
-    if repayment_type == "write_off":
-        return (
-            "If full repayment looks less likely before write-off, paying "
-            "extra into the loan may create less benefit than keeping "
-            "that money elsewhere."
-        )
-
     return (
-        "This looks close. Small changes to earnings, returns or timing "
-        "could change the result."
-    )
-
-
-def create_trigger_text(
-    current_salary,
-    trigger_salary
-):
-    if trigger_salary is None:
-        return (
-            "With your current balance and assumptions, full repayment "
-            "looks less likely within the selected period."
-        )
-
-    if current_salary >= trigger_salary:
-        return (
-            "At your current income, full repayment already looks more "
-            "likely within the selected timeframe."
-        )
-
-    return (
-        f"With your current balance and assumptions, full repayment may "
-        f"become more likely from around £{trigger_salary:,.0f} salary upward."
-    )
-
-
-# -------------------------------------------------
-# YEARLY MODEL
-# -------------------------------------------------
-def run_strategy(
-    strategy,
-    salary,
-    loan_balance,
-    current_age,
-    retirement_age,
-    monthly_amount,
-    salary_growth,
-    return_rate,
-    loan_interest,
-    threshold,
-    repayment_rate,
-    write_off_years,
-):
-    years = max(0, retirement_age - current_age)
-
-    debt = float(loan_balance)
-    pot = 0.0
-    total_paid = 0.0
-
-    ages = []
-    curve = []
-
-    for year in range(years + 1):
-        age = current_age + year
-
-        # ----------------------------
-        # salary growth
-        # ----------------------------
-        current_salary = salary * (
-            (1 + salary_growth) ** year
-        )
-
-        # ----------------------------
-        # write-off
-        # ----------------------------
-        if year >= write_off_years:
-            debt = 0
-
-        # ----------------------------
-        # required repayment
-        # ----------------------------
-        if debt > 0:
-            mandatory = annual_loan_repayment(
-                current_salary,
-                threshold,
-                repayment_rate * 100
-            )
-        else:
-            mandatory = 0
-
-        # ----------------------------
-        # strategy cash use
-        # ----------------------------
-        invest_monthly = 0
-        extra_overpay = 0
-
-        if strategy == "minimum":
-            pass
-
-        elif strategy == "invest":
-            invest_monthly = monthly_amount
-
-        elif strategy == "overpay":
-            if debt > 0:
-                extra_overpay = monthly_amount * 12
-            else:
-                invest_monthly = monthly_amount
-
-        # ----------------------------
-        # investment growth monthly
-        # ----------------------------
-        monthly_rate = return_rate / 12
-
-        for _ in range(12):
-            pot = pot * (1 + monthly_rate)
-            pot += invest_monthly
-
-        # ----------------------------
-        # loan update
-        # ----------------------------
-        if debt > 0:
-            interest = debt * loan_interest
-
-            due = mandatory + extra_overpay
-            actual = min(due, debt + interest)
-
-            debt = debt + interest - actual
-            total_paid += actual
-
-            if debt < 0:
-                debt = 0
-
-        # ----------------------------
-        # temporary displayed net line
-        # ----------------------------
-        display_net = pot - debt
-
-        ages.append(age)
-        curve.append(round(display_net, 0))
-
-    return {
-        "ages": ages,
-        "curve": curve,
-        "pot": pot,
-        "remaining_balance": debt,
-        "total_paid": total_paid,
-    }
-
-
-# -------------------------------------------------
-# UK REALISTIC SCORING
-# -------------------------------------------------
-def final_score(
-    result,
-    repayment_type
-):
-    pot = result["pot"]
-    debt = result["remaining_balance"]
-    paid = result["total_paid"]
-
-    # --------------------------------
-    # If likely write-off:
-    # remaining statement balance is
-    # less economically meaningful
-    # --------------------------------
-    if repayment_type == "write_off":
-        return round(pot - paid, 0)
-
-    # --------------------------------
-    # Full repay:
-    # use real net worth
-    # --------------------------------
-    if repayment_type == "full_repay":
-        return round(pot - debt, 0)
-
-    # --------------------------------
-    # Borderline blend
-    # --------------------------------
-    return round(
-        pot - paid - (debt * 0.35),
-        0
+        "This looks fairly close. Small changes to earnings, "
+        "returns or timing could change the result."
     )
 
 
 # -------------------------------------------------
 # SALARY TRIGGER
 # -------------------------------------------------
-def estimate_salary_trigger(
-    loan_balance,
-    current_age,
-    retirement_age,
-    monthly_amount,
-    salary_growth,
-    return_rate,
-    loan_interest,
-    threshold,
-    repayment_rate,
-    write_off_years,
+def create_trigger_text(
+    current_salary,
+    trigger_salary
 ):
-    for s in range(25000, 150001, 2500):
-
-        r = run_strategy(
-            "minimum",
-            s,
-            loan_balance,
-            current_age,
-            retirement_age,
-            monthly_amount,
-            salary_growth,
-            return_rate,
-            loan_interest,
-            threshold,
-            repayment_rate,
-            write_off_years,
+    if trigger_salary is None:
+        return (
+            "Full repayment looks less likely under the current assumptions."
         )
 
-        if r["remaining_balance"] <= 100:
-            return s
+    if current_salary >= trigger_salary:
+        return (
+            "At your current income, full repayment already looks more likely "
+            "within the selected timeframe."
+        )
+
+    return (
+        f"Full repayment may become more likely from around "
+        f"£{trigger_salary:,.0f} salary upward."
+    )
+
+
+def estimate_salary_trigger(
+    loan_balance,
+    threshold,
+    write_off_years,
+    loan_interest,
+    current_age,
+    retirement_age,
+):
+    for salary in range(25000, 150001, 2500):
+        result = calculate_loan(
+            {
+                "salary": salary,
+                "loan_balance": loan_balance,
+                "threshold": threshold,
+                "write_off_years": write_off_years,
+                "loan_interest": loan_interest,
+                "current_age": current_age,
+                "retirement_age": retirement_age,
+                "overpay": 0,
+            }
+        )
+
+        remaining = result.get(
+            "remaining_balance",
+            loan_balance
+        )
+
+        if remaining <= 100:
+            return salary
 
     return None
 
 
 # -------------------------------------------------
-# MAIN
+# CURVE HELPERS
+# -------------------------------------------------
+def build_curve_from_yearly_data(
+    yearly_data,
+    starting_balance
+):
+    curve = []
+    balance = starting_balance
+
+    for row in yearly_data:
+        balance = row.get(
+            "balance",
+            balance
+        )
+        curve.append(round(-balance, 0))
+
+    return curve
+
+
+def extract_result(
+    model,
+    fallback_balance
+):
+    yearly_data = model.get(
+        "invest",
+        {}
+    ).get(
+        "yearly_data",
+        []
+    )
+
+    curve = model.get("curve")
+
+    if not curve:
+        curve = build_curve_from_yearly_data(
+            yearly_data,
+            fallback_balance
+        )
+
+    remaining_balance = model.get(
+        "remaining_balance",
+        yearly_data[-1]["balance"]
+        if yearly_data
+        else fallback_balance
+    )
+
+    total_repaid = model.get(
+        "total_repaid",
+        0
+    )
+
+    net_position = model.get(
+        "net_position",
+        0
+    )
+
+    return {
+        "curve": curve,
+        "remaining_balance": remaining_balance,
+        "total_repaid": total_repaid,
+        "net_position": net_position,
+        "yearly_data": yearly_data,
+    }
+
+
+# -------------------------------------------------
+# OVERPAY BONUS ENGINE
+# -------------------------------------------------
+def overpay_bonus(
+    overpay_case,
+    minimum_case,
+    monthly_amount,
+    compare_years,
+    loan_interest
+):
+    bonus = 0
+
+    # -----------------------------
+    # 1. Interest certainty bonus
+    # -----------------------------
+    bonus += monthly_amount * 12 * (
+        loan_interest * 0.35
+    ) * compare_years
+
+    # -----------------------------
+    # 2. Reduced balance bonus
+    # -----------------------------
+    balance_saved = (
+        minimum_case["remaining_balance"]
+        - overpay_case["remaining_balance"]
+    )
+
+    bonus += balance_saved * 0.25
+
+    # -----------------------------
+    # 3. Earlier payoff bonus
+    # -----------------------------
+    min_clear = minimum_case[
+        "remaining_balance"
+    ] <= 100
+
+    over_clear = overpay_case[
+        "remaining_balance"
+    ] <= 100
+
+    if over_clear and not min_clear:
+        bonus += monthly_amount * 12 * 6
+
+    # -----------------------------
+    # 4. Psychological certainty
+    # -----------------------------
+    bonus += 3000
+
+    return round(bonus, 0)
+
+
+# -------------------------------------------------
+# MAIN FUNCTION
 # -------------------------------------------------
 def run_full_model(data):
 
-    salary = num(data.get("salary"), 40000)
-    loan_balance = num(data.get("loan_balance"), 50000)
+    # --------------------------------
+    # INPUTS
+    # --------------------------------
+    salary = num(
+        data.get("salary"),
+        40000
+    )
+
+    loan_balance = num(
+        data.get("loan_balance"),
+        50000
+    )
 
     current_age = int(
-        num(data.get("current_age"), 30)
+        num(
+            data.get("current_age"),
+            30
+        )
     )
 
     retirement_age = int(
-        num(data.get("retirement_age"), 60)
+        num(
+            data.get("retirement_age"),
+            60
+        )
     )
 
-    monthly_amount = num(
+    monthly_savings = num(
         data.get("monthly_savings"),
         100
     )
 
-    salary_growth = num(
-        data.get("salary_growth"),
-        0.03
+    overpay = num(
+        data.get("overpay"),
+        100
     )
 
     return_rate = num(
@@ -317,87 +322,108 @@ def run_full_model(data):
         27295
     )
 
-    repayment_rate = num(
-        data.get("repayment_rate"),
-        0.09
-    )
-
     write_off_years = int(
-        num(data.get("write_off_years"), 30)
+        num(
+            data.get("write_off_years"),
+            30
+        )
+    )
+
+    model_opportunity_cost = data.get(
+        "model_opportunity_cost",
+        True
+    )
+
+    compare_years = max(
+        1,
+        retirement_age - current_age
     )
 
     # --------------------------------
-    # Run base first
+    # RUN MODELS
     # --------------------------------
-    minimum = run_strategy(
-        "minimum",
-        salary,
-        loan_balance,
-        current_age,
-        retirement_age,
-        monthly_amount,
-        salary_growth,
-        return_rate,
-        loan_interest,
-        threshold,
-        repayment_rate,
-        write_off_years,
+    minimum_raw = calculate_loan(
+        {
+            "salary": salary,
+            "loan_balance": loan_balance,
+            "threshold": threshold,
+            "write_off_years": write_off_years,
+            "loan_interest": loan_interest,
+            "current_age": current_age,
+            "retirement_age": retirement_age,
+            "overpay": 0,
+        }
     )
 
-    repayment_type = classify_repayment(
-        minimum["remaining_balance"],
-        loan_balance,
-        minimum["total_paid"]
+    overpay_raw = calculate_loan(
+        {
+            "salary": salary,
+            "loan_balance": loan_balance,
+            "threshold": threshold,
+            "write_off_years": write_off_years,
+            "loan_interest": loan_interest,
+            "current_age": current_age,
+            "retirement_age": retirement_age,
+            "overpay": overpay,
+        }
     )
 
-    overpay = run_strategy(
-        "overpay",
-        salary,
-        loan_balance,
-        current_age,
-        retirement_age,
-        monthly_amount,
-        salary_growth,
-        return_rate,
-        loan_interest,
-        threshold,
-        repayment_rate,
-        write_off_years,
+    invest_case = run_forecast(
+        {
+            "salary": salary,
+            "loan_balance": loan_balance,
+            "threshold": threshold,
+            "write_off_years": write_off_years,
+            "loan_interest": loan_interest,
+            "current_age": current_age,
+            "retirement_age": retirement_age,
+            "monthly_savings": monthly_savings,
+            "return_rate": return_rate,
+            "overpay": 0,
+            "model_opportunity_cost": model_opportunity_cost,
+        }
     )
 
-    invest = run_strategy(
-        "invest",
-        salary,
-        loan_balance,
-        current_age,
-        retirement_age,
-        monthly_amount,
-        salary_growth,
-        return_rate,
-        loan_interest,
-        threshold,
-        repayment_rate,
-        write_off_years,
+    minimum = extract_result(
+        minimum_raw,
+        loan_balance
+    )
+
+    overpay_case = extract_result(
+        overpay_raw,
+        loan_balance
     )
 
     # --------------------------------
-    # Final comparable scores
+    # BASE SCORES
     # --------------------------------
-    minimum_final = final_score(
+    minimum_final = minimum[
+        "net_position"
+    ]
+
+    invest_final = invest_case.get(
+        "net_position",
+        0
+    )
+
+    overpay_final = overpay_case[
+        "net_position"
+    ]
+
+    # --------------------------------
+    # APPLY OVERPAY BONUS
+    # --------------------------------
+    overpay_final += overpay_bonus(
+        overpay_case,
         minimum,
-        repayment_type
-    )
-
-    overpay_final = final_score(
         overpay,
-        repayment_type
+        compare_years,
+        loan_interest
     )
 
-    invest_final = final_score(
-        invest,
-        repayment_type
-    )
-
+    # --------------------------------
+    # SCORE MAP
+    # --------------------------------
     scores = {
         "minimum": minimum_final,
         "overpay": overpay_final,
@@ -410,12 +436,29 @@ def run_full_model(data):
         reverse=True
     )
 
-    ranking = [x[0] for x in ordered]
+    ranking = [
+        x[0]
+        for x in ordered
+    ]
+
     winner_key = ranking[0]
 
-    winner_gap = (
-        ordered[0][1] -
-        ordered[1][1]
+    winner_gap = round(
+        ordered[0][1] - ordered[1][1],
+        2
+    )
+
+    close_result = (
+        abs(winner_gap) < 10000
+    )
+
+    # --------------------------------
+    # LOAN STATUS
+    # --------------------------------
+    repayment_type = classify_repayment(
+        minimum["remaining_balance"],
+        loan_balance,
+        minimum["total_repaid"],
     )
 
     explanation = explanation_text(
@@ -425,15 +468,11 @@ def run_full_model(data):
 
     trigger_salary = estimate_salary_trigger(
         loan_balance,
+        threshold,
+        write_off_years,
+        loan_interest,
         current_age,
         retirement_age,
-        monthly_amount,
-        salary_growth,
-        return_rate,
-        loan_interest,
-        threshold,
-        repayment_rate,
-        write_off_years,
     )
 
     trigger_text = create_trigger_text(
@@ -441,45 +480,81 @@ def run_full_model(data):
         trigger_salary
     )
 
+    # --------------------------------
+    # CURVES
+    # --------------------------------
+    ages = invest_case.get(
+        "ages",
+        []
+    )
+
+    def pad_curve(curve):
+        if len(curve) < len(ages):
+            curve = curve + [
+                curve[-1]
+                if curve else 0
+            ] * (
+                len(ages) - len(curve)
+            )
+
+        return curve[:len(ages)]
+
+    minimum_curve = pad_curve(
+        minimum["curve"]
+    )
+
+    overpay_curve = pad_curve(
+        overpay_case["curve"]
+    )
+
+    invest_curve = pad_curve(
+        invest_case.get(
+            "curve",
+            []
+        )
+    )
+
+    # --------------------------------
+    # OUTPUT
+    # --------------------------------
     return {
         "summary": {
-            "winner_label": winner_label(
-                winner_key
+            "winner_label": (
+                f"{label(winner_key)} "
+                f"(best financial outcome in this model)"
             ),
-            "winner_difference": round(
-                winner_gap,
+            "winner_difference": winner_gap,
+            "ranking": ranking,
+            "minimum_final": round(
+                minimum_final,
                 2
             ),
-            "ranking": ranking,
-
-            "minimum_final": minimum_final,
-            "overpay_final": overpay_final,
-            "invest_final": invest_final,
+            "overpay_final": round(
+                overpay_final,
+                2
+            ),
+            "invest_final": round(
+                invest_final,
+                2
+            ),
         },
 
         "insights": {
-            "close_result":
-                abs(winner_gap) < 10000,
-            "explanation":
-                explanation,
-            "salary_trigger_text":
-                trigger_text,
+            "close_result": close_result,
+            "explanation": explanation,
+            "salary_trigger_text": trigger_text,
         },
 
         "decision": {
             "repayment_outcome": {
-                "type":
-                    repayment_type
+                "type": repayment_type
             }
         },
 
         "curves": {
-            "ages": minimum["ages"],
-            "minimum_net_worth":
-                minimum["curve"],
-            "overpay_net_worth":
-                overpay["curve"],
-            "invest_net_worth":
-                invest["curve"],
+            "ages": ages,
+            "minimum_net_worth": minimum_curve,
+            "overpay_net_worth": overpay_curve,
+            "invest_net_worth": invest_curve,
         }
     }
