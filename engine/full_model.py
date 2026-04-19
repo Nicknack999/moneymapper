@@ -1,9 +1,9 @@
 # full_model.py
 # -------------------------------------------------
-# WAYLI FULL_MODEL V12
-# Final balancing engine
-# Stronger debt drag on invest route
-# Better salary sensitivity
+# WAYLI FULL_MODEL V13
+# Trust-first engine
+# No artificial penalties
+# Pure cashflow comparison
 # -------------------------------------------------
 
 from student_loan import annual_loan_repayment
@@ -29,7 +29,7 @@ def label(key):
     return labels.get(key, key)
 
 
-def classify_repayment(
+def repayment_type(
     remaining_balance,
     original_balance
 ):
@@ -72,7 +72,7 @@ def simulate_strategy(
     ages = []
     curve = []
 
-    loan_cleared = False
+    cleared = False
 
     for year in range(years + 1):
 
@@ -91,7 +91,7 @@ def simulate_strategy(
         # -------------------------
         if year >= write_off_years:
             balance = 0
-            loan_cleared = True
+            cleared = True
 
         # -------------------------
         # REQUIRED REPAYMENT
@@ -104,10 +104,10 @@ def simulate_strategy(
             )
         else:
             required = 0
-            loan_cleared = True
+            cleared = True
 
         # -------------------------
-        # STRATEGY CASHFLOW
+        # ROUTE LOGIC
         # -------------------------
         invest_add = 0
         overpay_add = 0
@@ -115,18 +115,18 @@ def simulate_strategy(
         if strategy == "minimum":
             pass
 
+        elif strategy == "invest":
+            invest_add = annual_extra
+
         elif strategy == "overpay":
 
-            if not loan_cleared:
+            if not cleared:
                 overpay_add = annual_extra
             else:
                 invest_add = annual_extra
 
-        elif strategy == "invest":
-            invest_add = annual_extra
-
         # -------------------------
-        # INVESTMENT GROWTH
+        # INVESTMENT POT
         # -------------------------
         pot += invest_add
         pot *= (1 + return_rate)
@@ -136,7 +136,7 @@ def simulate_strategy(
         # -------------------------
         if balance > 0:
 
-            scheduled = (
+            payment = (
                 required +
                 overpay_add
             )
@@ -146,41 +146,30 @@ def simulate_strategy(
                 (1 + loan_interest)
             )
 
-            scheduled = min(
-                scheduled,
+            payment = min(
+                payment,
                 max_possible
             )
 
             balance, _, _ = apply_loan_year(
                 balance,
                 loan_interest * 100,
-                scheduled
+                payment
             )
 
             if balance <= 0:
                 balance = 0
-                loan_cleared = True
+                cleared = True
 
         # -------------------------
-        # DEBT DRAG
+        # NET POSITION
         # -------------------------
-        debt_drag = 0
-
-        if strategy == "invest":
-            # Carrying debt while investing
-            # should reduce advantage
-            debt_drag = balance * 0.15
-
-        elif strategy == "minimum":
-            debt_drag = balance * 0.05
-
-        # -------------------------
-        # FINAL NET
-        # -------------------------
-        net = pot - balance - debt_drag
+        net = pot - balance
 
         ages.append(age)
-        curve.append(round(net, 0))
+        curve.append(
+            round(net, 0)
+        )
 
     return {
         "ages": ages,
@@ -255,7 +244,7 @@ def run_full_model(data):
     )
 
     # -------------------------
-    # RUN ROUTES
+    # RUN MODELS
     # -------------------------
     minimum = simulate_strategy(
         salary,
@@ -328,7 +317,7 @@ def run_full_model(data):
         abs(winner_gap) < 10000
     )
 
-    repayment_type = classify_repayment(
+    status = repayment_type(
         minimum["remaining_balance"],
         loan_balance
     )
@@ -338,17 +327,33 @@ def run_full_model(data):
     # -------------------------
     if winner_key == "overpay":
         explanation = (
-            "Overpaying looks stronger here because clearing the debt sooner may outweigh investing first."
+            "Overpaying looks stronger here because clearing the balance sooner leaves more time to build wealth later."
         )
 
     elif winner_key == "invest":
         explanation = (
-            "Investing looks stronger here because long-term growth may outweigh faster loan reduction."
+            "Investing looks stronger here because long-term growth may outweigh faster loan repayment."
         )
 
     else:
         explanation = (
             "This looks relatively close under the current assumptions."
+        )
+
+    # -------------------------
+    # OPTIONAL INSIGHT
+    # -------------------------
+    if status == "write_off":
+        salary_text = (
+            "Under these assumptions, full repayment looks less likely before write-off."
+        )
+    elif status == "full_repay":
+        salary_text = (
+            "Full repayment looks more likely under these assumptions."
+        )
+    else:
+        salary_text = (
+            "Repayment looks finely balanced under these assumptions."
         )
 
     # -------------------------
@@ -370,12 +375,12 @@ def run_full_model(data):
         "insights": {
             "close_result": close_result,
             "explanation": explanation,
-            "salary_trigger_text": ""
+            "salary_trigger_text": salary_text
         },
 
         "decision": {
             "repayment_outcome": {
-                "type": repayment_type
+                "type": status
             }
         },
 
