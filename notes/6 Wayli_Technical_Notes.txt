@@ -1,7 +1,0 @@
-Wayli Technical Notes
-Stack
-React/Vite on Vercel. Python API on Render.
-Notes
-Frontend fast deploys. Backend free tier may cold start.
-Naming
-Public brand Wayli; internal filenames can remain stable for now.

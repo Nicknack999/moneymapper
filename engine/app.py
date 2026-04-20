@@ -3,9 +3,9 @@ from flask_cors import CORS
 import os
 import traceback
 
-from core.student_loan import calculate_loan
-from core.forecast import run_forecast
-from core.full_model import run_full_model
+from student_loan import calculate_loan
+from forecast import run_forecast
+from full_model import run_full_model
 
 # -------------------------------------------------
 # APP

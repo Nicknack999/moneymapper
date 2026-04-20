@@ -6,8 +6,8 @@
 # Pure cashflow comparison
 # -------------------------------------------------
 
-from core.student_loan import annual_loan_repayment
-from core.student_loan import apply_loan_year
+from student_loan import annual_loan_repayment
+from student_loan import apply_loan_year
 
 
 # -------------------------------------------------
