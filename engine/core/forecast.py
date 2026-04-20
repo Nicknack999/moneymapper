@@ -1,4 +1,4 @@
-from student_loan import annual_loan_repayment, apply_loan_year
+from core.student_loan import annual_loan_repayment, apply_loan_year
 
 
 def num(value, default=0):
