@@ -21,6 +21,9 @@ allowed_origins = [
     "https://wayli.app",
     "https://moneymapper-zeta.vercel.app",
     "http://localhost:5173",
+    "http://localhost:5175",
+    "http://192.168.0.39:5175",
+    "http://192.168.0.39:5173",
 ]
 
 frontend_url = os.getenv("FRONTEND_URL")

@@ -206,57 +206,24 @@ def classify_outcome(
     if score >= 3:
         return (
             "full_repay",
-            "Full repayment looks likely"
+            "Currently leans toward repayment"
         )
 
     if score <= -1:
         return (
             "write_off",
-            "Write-off looks likely"
+            "Currently leans away from full repayment"
         )
 
     return (
         "borderline",
-        "Finely balanced right now"
+        "Currently looks close"
     )
+
 
 # ----------------------------------
 # LEVEL 5: API WRAPPER
 # ----------------------------------
-def find_salary_needed(
-    loan_balance,
-    current_salary,
-    interest,
-    threshold,
-    rate,
-    years,
-    plan
-):
-    start_salary = max(
-        int(current_salary),
-        int(threshold)
-    )
-
-    max_salary = 200000
-
-    for salary in range(
-        start_salary,
-        max_salary + 1000,
-        1000
-    ):
-        total_repaid = simulate_loan(
-            loan_balance,
-            salary,
-            interest,
-            threshold,
-            rate,
-            years
-        )
-
-        if total_repaid >= loan_balance:
-            return salary
-
-    return None
 
 def calculate_loan(data):
 
@@ -303,7 +270,7 @@ def calculate_loan(data):
     annual_overpay = (
         monthly_overpay * 12
     )
-    
+
     # -----------------------------
     # Base scenario
     # -----------------------------
@@ -376,21 +343,9 @@ def calculate_loan(data):
         overpay_net_worth
     )
 
-
-    
     # -----------------------------
     # Outcome classification
     # -----------------------------
-    salary_needed = find_salary_needed(
-        loan_balance,
-        salary,
-        interest,
-        threshold,
-        rate,
-        years,
-        data.get("plan", "plan2")
-    )
-    
     (
         outcome_type,
         headline
@@ -424,19 +379,6 @@ def calculate_loan(data):
         "explanation": explanation
     }
 
-    print("------ DEBUG ------")
-    print("salary:", salary)
-    print("loan_balance:", loan_balance)
-    print("monthly_overpay:", monthly_overpay)
-    print("interest:", interest)
-    print("threshold:", threshold)
-    print("rate:", rate)
-    print("years:", years)
-    print("salary_needed:", salary_needed)
-    print("outcome_type:", outcome_type)
-    print("headline:", headline)
-    print("-------------------")
-    
     # -----------------------------
     # Decision object
     # -----------------------------
@@ -478,7 +420,6 @@ def calculate_loan(data):
     return {
         "decision": decision,
         "insights": insights,
-        "salary_needed": salary_needed,
         "total_repaid":
             round(
                 total_repaid, 0

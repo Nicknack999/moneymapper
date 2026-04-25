@@ -253,7 +253,21 @@ def find_salary_needed(
             years
         )
 
-        if total_repaid >= loan_balance:
+        remaining_balance = max(
+            0,
+            loan_balance - total_repaid
+        )
+
+        outcome_type, _ = classify_outcome(
+            loan_balance,
+            total_repaid,
+            remaining_balance,
+            salary,
+            threshold,
+            plan
+        )
+
+        if outcome_type == "full_repay":
             return salary
 
     return None
@@ -303,7 +317,7 @@ def calculate_loan(data):
     annual_overpay = (
         monthly_overpay * 12
     )
-    
+
     # -----------------------------
     # Base scenario
     # -----------------------------
@@ -424,19 +438,6 @@ def calculate_loan(data):
         "explanation": explanation
     }
 
-    print("------ DEBUG ------")
-    print("salary:", salary)
-    print("loan_balance:", loan_balance)
-    print("monthly_overpay:", monthly_overpay)
-    print("interest:", interest)
-    print("threshold:", threshold)
-    print("rate:", rate)
-    print("years:", years)
-    print("salary_needed:", salary_needed)
-    print("outcome_type:", outcome_type)
-    print("headline:", headline)
-    print("-------------------")
-    
     # -----------------------------
     # Decision object
     # -----------------------------

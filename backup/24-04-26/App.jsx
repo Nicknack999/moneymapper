@@ -10,14 +10,14 @@ export default function App() {
   const card = {
     background: "#ffffff",
     border: "1px solid #e5e7eb",
-    borderRadius: 24,
+    borderRadius: 20,
     padding: 28,
-    boxShadow: "0 14px 40px rgba(15,23,42,0.07)"
+    boxShadow: "0 14px 40px rgba(15,23,42,0.08)"
   };
 
   const primaryBtn = {
     padding: "14px 20px",
-    borderRadius: 14,
+    borderRadius: 12,
     border: "none",
     cursor: "pointer",
     fontWeight: 700,
@@ -49,18 +49,18 @@ export default function App() {
       style={{
         minHeight: "100vh",
         background:
-          "linear-gradient(180deg,#f8fafc 0%,#ffffff 50%,#ecfdf5 100%)"
+          "linear-gradient(180deg, #f8fafc 0%, #ffffff 52%, #ecfdf5 100%)"
       }}
     >
       {/* NAV */}
       <div
         style={{
+          borderBottom: "1px solid #e5e7eb",
+          background: "rgba(255,255,255,0.92)",
           position: "sticky",
           top: 0,
           zIndex: 20,
-          backdropFilter: "blur(10px)",
-          background: "rgba(255,255,255,0.92)",
-          borderBottom: "1px solid #e5e7eb"
+          backdropFilter: "blur(10px)"
         }}
       >
         <div
@@ -70,9 +70,7 @@ export default function App() {
             justifyContent: "space-between",
             alignItems: "center",
             paddingTop: 14,
-            paddingBottom: 14,
-            flexWrap: "wrap",
-            gap: 14
+            paddingBottom: 14
           }}
         >
           <div
@@ -112,8 +110,8 @@ export default function App() {
       <div
         style={{
           ...section,
-          paddingTop: 70,
-          paddingBottom: 54
+          paddingTop: 64,
+          paddingBottom: 48
         }}
       >
         <div style={{ textAlign: "center" }}>
@@ -128,29 +126,27 @@ export default function App() {
               fontSize: 14
             }}
           >
-            Free money decision tools
+            Free UK money decision tools
           </div>
 
           <h1
             style={{
               marginTop: 18,
-              marginBottom: 0,
-              fontSize: 48,
-              lineHeight: 1.12,
-              letterSpacing: "-0.03em",
+              fontSize: 44,
+              lineHeight: 1.18,
+              letterSpacing: "-0.02em",
               color: "#0f172a",
               maxWidth: 860,
               marginLeft: "auto",
               marginRight: "auto"
             }}
           >
-            Better money decisions start
-            with clearer answers
+            Smarter tools for life’s money choices
           </h1>
 
           <p
             style={{
-              marginTop: 20,
+              marginTop: 18,
               maxWidth: 760,
               marginLeft: "auto",
               marginRight: "auto",
@@ -159,9 +155,8 @@ export default function App() {
               color: "#475569"
             }}
           >
-            Wayli builds practical tools to help 
-            you make confident financial decisions
-            — starting with UK student loan plans.
+            Clearer answers for real UK money decisions —
+            starting with student loans.
           </p>
 
           <div
@@ -181,7 +176,7 @@ export default function App() {
 
             <a href="#guide">
               <button style={secondaryBtn}>
-                How it works
+                Should I overpay?
               </button>
             </a>
           </div>
@@ -193,7 +188,7 @@ export default function App() {
               fontSize: 15
             }}
           >
-            Plain English • UK-focused • More calculators on the way
+            UK-focused • Plain English • Free to use
           </div>
         </div>
       </div>
@@ -203,11 +198,11 @@ export default function App() {
         id="tool"
         style={{
           ...section,
-          paddingBottom: 54
+          paddingBottom: 46
         }}
       >
         <div style={card}>
-          <div style={{ marginBottom: 22 }}>
+          <div style={{ marginBottom: 18 }}>
             <div
               style={{
                 fontSize: 13,
@@ -224,25 +219,18 @@ export default function App() {
               style={{
                 marginTop: 8,
                 marginBottom: 8,
-                fontSize: 32,
-                lineHeight: 1.2,
+                fontSize: 30,
+                lineHeight: 1.25,
                 color: "#0f172a"
               }}
             >
-              Student Loan Overpayment Calculator
+              Student loan overpayment checker
             </h2>
 
-            <p
-              style={{
-                ...muted,
-                maxWidth: 760,
-                marginBottom: 0
-              }}
-            >
-              Enter your details to see whether
-              overpaying looks worthwhile, how salary can
-              change the picture, and other ways that money
-              could be used to improve your financial future. 
+            <p style={muted}>
+              Compare overpaying, saving or investing the
+              same monthly amount based on your UK loan
+              plan, salary and balance.
             </p>
           </div>
 
@@ -260,9 +248,9 @@ export default function App() {
               color: "#64748b"
             }}
           >
-            <span>Personalised estimates</span>
+            <span>Educational estimates</span>
             <span>UK student loan plans</span>
-            <span>Plain English explanations</span>
+            <span>Built to improve over time</span>
           </div>
         </div>
       </div>
@@ -272,7 +260,7 @@ export default function App() {
         id="guide"
         style={{
           ...section,
-          paddingBottom: 54
+          paddingBottom: 46
         }}
       >
         <div
@@ -291,94 +279,74 @@ export default function App() {
               letterSpacing: "0.06em"
             }}
           >
-            Why use this tool
+            Featured guide
           </div>
 
           <h2
             style={{
               marginTop: 10,
-              marginBottom: 0,
-              fontSize: 36,
-              lineHeight: 1.2,
+              fontSize: 34,
+              lineHeight: 1.22,
               color: "#0f172a"
             }}
           >
-            Student loan decisions are rarely
-            one-size-fits-all
+            Should I overpay my student loan?
           </h2>
 
           <p
             style={{
               ...muted,
-              marginTop: 14,
+              marginTop: 12,
               maxWidth: 860
             }}
           >
-            For some, overpaying can save
-            money and reduce the loan term. For others, it may make little
-            difference as student loans are more like a tax than other loans.
-            That means the right move often depends on earnings, loan plan, 
-            outstanding balance or how valuable any spare cash feels right now.
+            Overpaying can be worthwhile for some borrowers
+            and unnecessary for others. It often depends on
+            whether you are likely to clear the balance,
+            your loan plan, expected future income and how
+            much flexibility you want with cash.
           </p>
 
           <div
             style={{
-              marginTop: 22,
+              marginTop: 18,
               display: "grid",
               gridTemplateColumns:
-                "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: 18
+                "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 16
             }}
           >
             <div style={card}>
-              <h3
-                style={{
-                  marginTop: 0,
-                  color: "#0f172a"
-                }}
-              >
-                See your likely direction
-              </h3>
-
+              <h3>Often worth considering</h3>
               <p style={muted}>
-                Understand whether overpaying looks stronger than saving, or whether waiting and reviewing later may be the better move
+                If full repayment already looks realistic,
+                overpayments may reduce interest and shorten
+                the repayment term.
               </p>
             </div>
 
             <div style={card}>
-              <h3
-                style={{
-                  marginTop: 0,
-                  color: "#0f172a"
-                }}
-              >
-                Compare your options
-              </h3>
-
+              <h3>Often less urgent</h3>
               <p style={muted}>
-                Explore how the same monthly amount could work differently through overpaying, building savings, or investing for growth.
+                If full repayment looks unlikely, keeping
+                savings or using spare cash elsewhere may
+                be stronger.
               </p>
             </div>
 
             <div style={card}>
-              <h3
-                style={{
-                  marginTop: 0,
-                  color: "#0f172a"
-                }}
-              >
-                Plan with confidence
-              </h3>
-
+              <h3>What matters most</h3>
               <p style={muted}>
-                Get better clarity today, test different scenarios and feel more confident about your next move and financial future.
+                Your plan type, salary path, balance size
+                and how valuable cash flexibility feels to
+                you.
               </p>
             </div>
           </div>
 
           <div
             style={{
-              marginTop: 24,
+              marginTop: 22,
               display: "flex",
               gap: 12,
               flexWrap: "wrap"
@@ -386,34 +354,33 @@ export default function App() {
           >
             <a href="#tool">
               <button style={primaryBtn}>
-                Check Your Scenario
+                Check your scenario
               </button>
             </a>
 
             <button style={secondaryBtn}>
-              More guides coming soon
+              Full guide coming soon
             </button>
           </div>
         </div>
       </div>
 
-      {/* FUTURE */}
+      {/* FUTURE TOOLS */}
       <div
         id="future"
         style={{
           ...section,
-          paddingBottom: 54
+          paddingBottom: 46
         }}
       >
         <h2
           style={{
-            fontSize: 30,
-            marginTop: 0,
+            fontSize: 28,
             marginBottom: 18,
             color: "#0f172a"
           }}
         >
-          More decision tools coming soon
+          More tools coming soon
         </h2>
 
         <div
@@ -425,35 +392,18 @@ export default function App() {
           }}
         >
           <div style={card}>
-            <h3 style={{ marginTop: 0 }}>
-              Mortgage Overpayment Tool
-            </h3>
-
+            <h3>🏠 Mortgage tool</h3>
             <p style={muted}>
-              Should you overpay your mortgage, invest
-              instead, or keep cash flexible?
+              Should you overpay your mortgage or invest
+              instead?
             </p>
           </div>
 
           <div style={card}>
-            <h3 style={{ marginTop: 0 }}>
-              Car Replace vs Repair Tool
-            </h3>
-
+            <h3>🚗 Car decision tool</h3>
             <p style={muted}>
-              Compare likely costs, timing and trade-offs
-              before making a decision.
-            </p>
-          </div>
-
-          <div style={card}>
-            <h3 style={{ marginTop: 0 }}>
-              Emergency Fund Planner
-            </h3>
-
-            <p style={muted}>
-              Build a cash buffer based on your bills,
-              income and comfort level.
+              Repair or replace? Compare likely costs and
+              trade-offs.
             </p>
           </div>
         </div>
@@ -472,20 +422,14 @@ export default function App() {
             textAlign: "center"
           }}
         >
-          <p
-            style={{
-              ...muted,
-              marginTop: 0
-            }}
-          >
-            Wayli helps households make clearer
-            financial decisions through practical tools.
+          <p style={muted}>
+            Wayli helps UK households make clearer money
+            decisions through practical tools.
           </p>
 
           <p
             style={{
               marginTop: 12,
-              marginBottom: 8,
               fontWeight: 700,
               color: "#0f172a"
             }}
@@ -493,12 +437,7 @@ export default function App() {
             Questions or feedback?
           </p>
 
-          <p
-            style={{
-              color: "#475569",
-              margin: 0
-            }}
-          >
+          <p style={{ color: "#475569" }}>
             wayliteam@gmail.com
           </p>
         </div>

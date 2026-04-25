@@ -137,126 +137,49 @@ def future_value(
 
     return value
 
-
 def classify_outcome(
     loan_balance,
     total_repaid,
     remaining_balance,
     salary,
-    threshold,
-    plan
+    threshold
 ):
     earnings_gap = salary - threshold
-
-    # ----------------------------------
-    # Plan adjustments
-    # ----------------------------------
-    if plan == "plan1":
-        earnings_gap += 6000
-
-    elif plan == "pg":
-        earnings_gap += 8000
-
-    elif plan == "plan5":
-        earnings_gap -= 4000
 
     repaid_ratio = (
         total_repaid /
         max(loan_balance, 1)
     )
 
-    score = 0
-
-    # ----------------------------------
-    # Salary strength
-    # ----------------------------------
-    if earnings_gap >= 25000:
-        score += 2
-
-    elif earnings_gap >= 15000:
-        score += 1
-
-    else:
-        score -= 1
-
-    # ----------------------------------
-    # Repayment strength
-    # ----------------------------------
-    if repaid_ratio >= 1.10:
-        score += 2
-
-    elif repaid_ratio >= 0.95:
-        score += 1
-
-    else:
-        score -= 1
-
-    # ----------------------------------
-    # Balance sensitivity
-    # ----------------------------------
-    if loan_balance <= 25000:
-        score += 1
-
-    elif loan_balance >= 90000:
-        score -= 1
-
-    # ----------------------------------
-    # Final outcome
-    # ----------------------------------
-    if score >= 3:
-        return (
-            "full_repay",
-            "Full repayment looks likely"
-        )
-
-    if score <= -1:
+    # Strongly unlikely
+    if (
+        earnings_gap < 15000 and
+        repaid_ratio < 0.95
+    ):
         return (
             "write_off",
-            "Write-off looks likely"
+            "Currently leans away from full repayment"
         )
 
+    # Broad close-call zone
+    if (
+        earnings_gap <= 25000 or
+        repaid_ratio < 1.10
+    ):
+        return (
+            "borderline",
+            "Currently looks close"
+        )
+
+    # Strong likely
     return (
-        "borderline",
-        "Finely balanced right now"
+        "full_repay",
+        "Currently leans toward repayment"
     )
 
 # ----------------------------------
 # LEVEL 5: API WRAPPER
 # ----------------------------------
-def find_salary_needed(
-    loan_balance,
-    current_salary,
-    interest,
-    threshold,
-    rate,
-    years,
-    plan
-):
-    start_salary = max(
-        int(current_salary),
-        int(threshold)
-    )
-
-    max_salary = 200000
-
-    for salary in range(
-        start_salary,
-        max_salary + 1000,
-        1000
-    ):
-        total_repaid = simulate_loan(
-            loan_balance,
-            salary,
-            interest,
-            threshold,
-            rate,
-            years
-        )
-
-        if total_repaid >= loan_balance:
-            return salary
-
-    return None
 
 def calculate_loan(data):
 
@@ -303,7 +226,7 @@ def calculate_loan(data):
     annual_overpay = (
         monthly_overpay * 12
     )
-    
+
     # -----------------------------
     # Base scenario
     # -----------------------------
@@ -376,21 +299,9 @@ def calculate_loan(data):
         overpay_net_worth
     )
 
-
-    
     # -----------------------------
     # Outcome classification
     # -----------------------------
-    salary_needed = find_salary_needed(
-        loan_balance,
-        salary,
-        interest,
-        threshold,
-        rate,
-        years,
-        data.get("plan", "plan2")
-    )
-    
     (
         outcome_type,
         headline
@@ -399,14 +310,13 @@ def calculate_loan(data):
         total_repaid,
         remaining_balance,
         salary,
-        threshold,
-        data.get("plan", "plan2")
+        threshold
     )
 
     if outcome_type == "full_repay":
         explanation = (
-            "At your current income, full repayment looks more likely under these assumptions."
-        )
+        "At your current income, full repayment looks more likely under these assumptions."
+    )
 
     elif outcome_type == "borderline":
         explanation = (
@@ -422,21 +332,7 @@ def calculate_loan(data):
         "type": outcome_type,
         "headline": headline,
         "explanation": explanation
-    }
-
-    print("------ DEBUG ------")
-    print("salary:", salary)
-    print("loan_balance:", loan_balance)
-    print("monthly_overpay:", monthly_overpay)
-    print("interest:", interest)
-    print("threshold:", threshold)
-    print("rate:", rate)
-    print("years:", years)
-    print("salary_needed:", salary_needed)
-    print("outcome_type:", outcome_type)
-    print("headline:", headline)
-    print("-------------------")
-    
+}
     # -----------------------------
     # Decision object
     # -----------------------------
@@ -478,7 +374,6 @@ def calculate_loan(data):
     return {
         "decision": decision,
         "insights": insights,
-        "salary_needed": salary_needed,
         "total_repaid":
             round(
                 total_repaid, 0
