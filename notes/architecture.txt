@@ -1,150 +1,184 @@
-Where Wayli is going
-You want multiple decision engines:
-* Student loan 
-* Mortgage overpay vs invest 
-* Repair or replace car 
-* Rent vs buy 
-* EV switch tool 
-* Childcare hours tool 
-* Savings decisions 
-* Insurance trade-offs 
-That means you need to evolve into:
-shared platform architecture
+# Wayli architecture and roadmap
 
-The future Wayli model
-Instead of:
-One custom Python file per tool.
-Move toward:
-Decision Engine Framework
-Where each tool plugs into a common system.
+## Where Wayli is going
 
-Recommended architecture
-FRONTEND
-src/tools/
-  StudentLoanTool.jsx
-  MortgageTool.jsx
-  CarTool.jsx
-  RentBuyTool.jsx
-Each tool uses shared UI components:
-Card.jsx
-ResultBanner.jsx
-ScenarioChart.jsx
-InputGrid.jsx
-CompareButton.jsx
-EmailCapture.jsx
-That keeps premium consistency.
+Wayli is not intended to be a single calculator website.
 
-BACKEND
-Move from:
-full_model.py
-To:
-engine/tools/
-  student_loan.py
-  mortgage.py
-  car_replace.py
-  rent_buy.py
-And shared modules:
-engine/core/
-  scenario_runner.py
-  ranking.py
-  chart_formatter.py
-  explanations.py
-  assumptions.py
+The long-term opportunity is a **consumer decision platform** that helps UK households make better financial choices using practical tools, plain-English guidance and scenario comparisons.
 
+Current and future tools may include:
+
+- Student loan overpay vs invest
+- Mortgage overpay vs invest
+- Repair or replace car
+- Rent vs buy
+- EV switch tool
+- Childcare hours / affordability tool
+- Savings allocation decisions
+- Insurance excess vs premium trade-offs
+
+That means Wayli should be built as a **shared platform**, not as disconnected one-off tools.
+
+---
+
+# Core product principle
+
+Every Wayli tool should answer the same user question:
+
+> ‚ÄúWhat is likely to be the strongest decision for my situation?‚Äù
+
+Not generic education.  
+Not endless spreadsheets.  
+A clear, personalised comparison.
+
+---
+
+# The future Wayli model
+
+## Move away from:
+
+One custom Python file per tool  
+One-off front-end pages  
+Different layouts for every calculator
+
+## Move toward:
+
+A reusable **Decision Engine Framework**
+
+Where each tool plugs into common inputs, outputs, ranking logic and presentation.
+
+---
+
+# Recommended front-end architecture
+
+```text
+src/
+
+  components/
+    ui/
+      Card.jsx
+      ResultBanner.jsx
+      InputGrid.jsx
+      CompareButton.jsx
+      ScenarioChart.jsx
+      CTAButton.jsx
+
+    calculators/
+      StudentLoanTool.jsx
+      MortgageTool.jsx
+      CarDecisionTool.jsx
+
+  pages/
+    HomePage.jsx
+
+    calculators/
+      StudentLoanCalculatorPage.jsx
+      MortgageCalculatorPage.jsx
+      CarRepairReplacePage.jsx
+
+    guides/
+      student-loans/
+      mortgages/
+      cars/
+
+  content/
+    wayliMessages.js
+    studentLoanInsights.js
+    mortgageInsights.js
+
+
+    Recommended back-end architecture
+engine/
+
+  tools/
+    student_loan.py
+    mortgage.py
+    car_replace.py
+    rent_buy.py
+
+  core/
+    scenario_runner.py
+    ranking.py
+    chart_formatter.py
+    explanations.py
+    assumptions.py
+
+  app.py
 Why this matters
-Every Wayli tool shares common needs:
-Inputs
-salary, age, costs, rates
-Outputs
-ranking, winner, chart, explanation
-Logic
-compare 2ñ4 scenarios
-Messaging
-guidance, not advice
-So donít rebuild from scratch each time.
 
-Example future engine pattern
-Student Loan Tool
+Most tools need similar foundations:
+
+Inputs
+salary
+age
+costs
+rates
+balances
+monthly surplus
+Outputs
+strongest option
+ranking of scenarios
+chart data
+explanation text
+next-step guidance
+Logic
+
+Compare 2‚Äì4 scenarios over time.
+
+So avoid rebuilding the same foundations repeatedly.
+
+Example tool pattern
+Student loan tool
+
 Compare:
-* minimum 
-* overpay 
-* invest 
-Mortgage Tool
+
+minimum repayment
+overpay loan
+invest spare cash
+Mortgage tool
+
 Compare:
-* overpay mortgage 
-* invest ISA 
-* keep cash reserve 
-Car Tool
+
+overpay mortgage
+invest in ISA
+keep cash reserve
+Car tool
+
 Compare:
-* repair current car 
-* replace used car 
-* finance newer car 
-Same engine pattern:
+
+repair current car
+replace with used car
+finance newer car
+Same engine pattern each time
 Scenario A
 Scenario B
 Scenario C
 Rank outcomes
 Explain trade-offs
 Show chart
-That becomes your moat.
+
+This repeatable framework becomes the moat.
 
 Strategic shift
+
 Wayli is not a calculator site.
-Wayli becomes:
-Consumer decision engine company
-Huge difference.
 
-What Iíd do after 3 tools exist
-Create a reusable backend function:
-run_decision_engine(
-    scenarios,
-    compare_until_age,
-    explanation_rules
-)
-Then tools become faster to launch.
+Wayli should become:
 
-Frontend evolution
-Use one common results layout across all tools:
-Header answer
-Likely strongest outcome
-Ranking
-Chart
-What this means
-Try another scenario
-That consistency builds brand trust.
+Decision intelligence platform for UK households
 
-Commercial advantage
-If you structure it well now:
-New tool launch time falls from:
-2 weeks
-to
-2 days
-Thatís how platforms win.
+That is a much stronger long-term position.
 
-What NOT to do
-Avoid:
-One messy giant app.py with 14 calculators jammed in.
-Avoid:
-Each tool with random UI and different logic.
-That kills scalability.
+What to build first (next 6 months)
+Flagship tools
+Student Loan Strategy Tool
+Mortgage Overpay vs Invest Tool
+Repair or Replace Car Tool
 
-My recommendation for next 6 months
-Build 3 flagship tools:
-1. Student Loan Strategy 
-2. Mortgage Overpay vs Invest 
-3. Repair or Replace Car 
-Then refactor into platform modules.
+These three cover:
 
-What investors / acquirers would see later
-Not:
-small calculator website
-But:
-decision intelligence platform for UK households
-Much bigger value.
+younger professionals
+homeowners
+broad households
 
-Honest founder truth
-Your moat wonít be the first tool.
-It will be:
-repeatable engine + trust + SEO distribution
-
-
+Strong audience overlap.
