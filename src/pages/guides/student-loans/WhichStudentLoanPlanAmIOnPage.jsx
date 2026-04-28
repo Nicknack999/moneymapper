@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 
 import SiteHeader from "../../../components/SiteHeader";
 import SiteFooter from "../../../components/SiteFooter";
+import GuideCards from "../../../components/GuideCards";
+
+import { theme } from "../../../styles/wayliTheme";
+import { promoBlocks } from "../../../core/content/promoBlocks";
 
 export default function WhichStudentLoanPlanAmIOnPage() {
   const pageTitle =
@@ -36,62 +40,86 @@ export default function WhichStudentLoanPlanAmIOnPage() {
     },
     {
       q: "Why is money coming off my payslip?",
-      a: "Student loan deductions may begin when your income goes above the repayment threshold and your employer's payroll records show repayments are due. They often appear alongside tax and National Insurance outgoings."
+      a: "Student loan deductions may begin when your income goes above the repayment threshold and your employer's payroll records show repayments are due."
     },
     {
       q: "How do I make sure I am repaying the correct amount?",
-      a: "Keep your employment and contact details up to date with the relevant student loan organisation. If something looks wrong, raise it early."
-    },
-    {
-      q: "Do I need to update my employment details each year?",
-      a: "Yes, it is sensible to keep your details current whenever your job, income or circumstances change. Accurate records help repayments run more smoothly and avoid arrears."
+      a: "Keep your employment and contact details up to date with the relevant student loan organisation."
     },
     {
       q: "What if I change jobs?",
-      a: "Your new employer will usually handle deductions through their payroll once the correct information is in place. Checking your first few payslips after a move can be worthwhile."
+      a: "Your new employer will usually handle deductions through payroll once the correct information is in place."
     },
     {
       q: "What if I stop working or my income falls?",
-      a: "If earnings fall below the relevant threshold, deductions may reduce or stop. Student loan repayments often move with income rather than staying fixed like many normal debts."
+      a: "If earnings fall below the relevant threshold, deductions may reduce or stop."
     },
     {
       q: "I am self-employed. How does repayment usually work?",
-      a: "Repayments are often handled through Self Assessment rather than monthly PAYE deductions. Official guidance is the best source for your exact position."
+      a: "Repayments are often handled through Self Assessment rather than PAYE deductions."
     },
     {
-      q: "Can two people with student loans on the same salary repay different amounts?",
-      a: "Yes. Different plans can mean different thresholds and different deductions, even on similar earnings."
+      q: "Can two people on the same salary repay different amounts?",
+      a: "Yes. Different plans can mean different thresholds and deductions."
     },
     {
       q: "Should I overpay before I know my plan?",
       a: "Usually better to confirm your plan first, then make decisions with clearer numbers."
-    },
-    {
-      q: "Anything else I should know?",
-      a: "Maybe! There are lots of variables like if you've two jobs, go travelling for an extended period, that could affect your repayments. Check the Student Loans Company website if you really want the small print."
     }
   ];
 
-  const related = [
-    [
-      "Is overpaying worth it?",
-      "/guides/student-loans/is-overpaying-worth-it"
-    ],
-    [
-      "Should I overpay on £30k?",
-      "/guides/student-loans/student-loan-30k"
-    ],
-    [
-      "Why same salary can repay differently",
-      "/guides/student-loans/why-two-people-on-the-same-salary-repay-different-amounts"
-    ]
-  ];
+  const section = {
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: "0 20px"
+  };
+
+  const card = {
+    background: theme.colours.white,
+    border: `1px solid ${theme.colours.neutralBorder}`,
+    borderRadius: 24,
+    padding: 28,
+    boxShadow: theme.shadow.card
+  };
+
+  const muted = {
+    color: theme.colours.body,
+    lineHeight: 1.8
+  };
+
+  const primaryBtn = {
+    padding: "14px 20px",
+    borderRadius: 14,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: 16,
+    background: theme.colours.primary,
+    color: theme.colours.white,
+    textDecoration: "none",
+    display: "inline-block",
+    boxShadow: theme.shadow.button
+  };
+
+  const secondaryBtn = {
+    ...primaryBtn,
+    background: theme.colours.white,
+    color: theme.colours.heading,
+    border: `1px solid ${theme.colours.inputBorder}`,
+    boxShadow: "none"
+  };
 
   return (
     <>
       <SiteHeader />
 
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(180deg,#f8fafc 0%,#ffffff 60%,#ecfdf5 100%)"
+        }}
+      >
         <title>{pageTitle}</title>
 
         <meta
@@ -99,395 +127,350 @@ export default function WhichStudentLoanPlanAmIOnPage() {
           content={pageDescription}
         />
 
-        <div className="max-w-5xl mx-auto px-5 sm:px-6 py-10 sm:py-14 space-y-10">
-
+        <div
+          style={{
+            ...section,
+            paddingTop: 28,
+            paddingBottom: 60
+          }}
+        >
           {/* BREADCRUMBS */}
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <Link
-              to="/"
-              className="text-emerald-600 font-semibold hover:underline"
-            >
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              fontSize: 14,
+              color: theme.colours.muted,
+              marginBottom: 28
+            }}
+          >
+            <Link to="/" style={{ color: theme.colours.primary, textDecoration: "none", fontWeight: 600 }}>
               Home
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
-            <Link
-              to="/guides"
-              className="text-emerald-600 font-semibold hover:underline"
-            >
+            <Link to="/guides" style={{ color: theme.colours.primary, textDecoration: "none", fontWeight: 600 }}>
               Guides
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
-            <span className="text-slate-500">
-              Which student loan plan am I on?
-            </span>
+            <span>Which student loan plan am I on?</span>
           </div>
 
           {/* HERO */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <div className="inline-flex px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-sm font-semibold">
+          <div
+            style={{
+              ...card,
+              textAlign: "center",
+              padding: "42px 28px"
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: theme.colours.successBg,
+                color: theme.colours.successText,
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
               Wayli guide
             </div>
 
-            <h1 className="mt-5 text-4xl sm:text-6xl font-bold tracking-tight leading-tight">
+            <h1
+              style={{
+                marginTop: 18,
+                marginBottom: 0,
+                fontSize: 46,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
+                color: theme.colours.heading
+              }}
+            >
               Which student loan plan am I on?
             </h1>
 
-            <p className="mt-5 text-lg sm:text-xl text-slate-600 leading-8 max-w-3xl">
+            <p
+              style={{
+                marginTop: 22,
+                maxWidth: 760,
+                marginLeft: "auto",
+                marginRight: "auto",
+                fontSize: 19,
+                lineHeight: 1.8,
+                color: theme.colours.body
+              }}
+            >
               Not sure whether you are on Plan 1, Plan 2,
               Plan 4, Plan 5 or a postgraduate loan?
               You are not alone.
             </p>
 
-            <p className="mt-4 text-slate-600 leading-8 max-w-3xl">
-              Many people only ask when deductions
-              appear on a payslip or they begin
-              thinking about overpaying.
-            </p>
-
-            <p className="mt-4 text-slate-600 leading-8 max-w-3xl">
-              Your plan often depends on when and
-              where you lived and studied, so
-              checking official records is usually
-              the best place to start.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div
+              style={{
+                marginTop: 28,
+                display: "flex",
+                justifyContent: "center",
+                gap: 12,
+                flexWrap: "wrap"
+              }}
+            >
               <Link
                 to="/student-loan-calculator"
-                className="px-6 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition"
+                style={primaryBtn}
               >
                 Use calculator
               </Link>
 
-              <a
-                href="#plans"
-                className="px-6 py-4 rounded-2xl border border-slate-300 bg-white font-semibold"
-              >
+              <a href="#plans" style={secondaryBtn}>
                 Compare plans
               </a>
             </div>
-          </section>
+          </div>
 
-          {/* HOW REPAYMENTS WORK */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          {/* HOW IT WORKS */}
+          <div style={{ ...card, marginTop: 56 }}>
+            <h2 style={{ marginTop: 0, fontSize: 32, color: theme.colours.heading }}>
               How student loan repayments usually work
             </h2>
 
-            <div className="mt-5 space-y-5 text-slate-600 leading-8">
-              <p>
-                For many borrowers, repayments are
-                linked to income rather than manually
-                paying a monthly bill.
-              </p>
+            <p style={muted}>
+              For many borrowers, repayments are linked to income rather than manually paying a monthly bill.
+            </p>
 
-              <p>
-                If you are employed, deductions may
-                be taken through PAYE payroll once
-                earnings go above the relevant
-                threshold.
-              </p>
+            <p style={muted}>
+              If you are employed, deductions may be taken through PAYE payroll once earnings go above the threshold.
+            </p>
 
-              <p>
-                If earnings fall below that level,
-                deductions may reduce or stop.
-              </p>
-
-              <p>
-                If you are self-employed,
-                repayments are often handled
-                through Self Assessment instead.
-              </p>
-            </div>
-          </section>
+            <p style={muted}>
+              If you are self-employed, repayments are often handled through Self Assessment instead.
+            </p>
+          </div>
 
           {/* QUICK CARDS */}
-          <section className="grid md:grid-cols-2 gap-5">
+          <div
+            style={{
+              marginTop: 56,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: 18
+            }}
+          >
             {cards.map(([title, text]) => (
-              <div
-                key={title}
-                className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6"
-              >
-                <h3 className="text-xl font-bold">
+              <div key={title} style={card}>
+                <h3 style={{ marginTop: 0, fontSize: 22, color: theme.colours.heading }}>
                   {title}
                 </h3>
 
-                <p className="mt-3 text-slate-600 leading-8">
-                  {text}
-                </p>
+                <p style={muted}>{text}</p>
               </div>
             ))}
-          </section>
-
-          {/* WHY SO MANY */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Why are there so many student loan plans?
-            </h2>
-
-            <p className="mt-4 text-slate-600 leading-8">
-              Because student loans were introduced
-              at different times across the UK,
-              with different rules depending on
-              where you lived and studied.
-            </p>
-
-            <p className="mt-4 text-slate-600 leading-8">
-              That means borrowers can end up on
-              different plans with different
-              thresholds and repayment terms.
-            </p>
-
-            <p className="mt-4 text-slate-600 leading-8">
-              If you are unsure which applies to you,
-              official links are listed near the foot
-              of this page.
-            </p>
-          </section>
+          </div>
 
           {/* TABLE */}
-          <section
+          <div
             id="plans"
-            className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10"
+            style={{
+              ...card,
+              marginTop: 56
+            }}
           >
-            <h2 className="text-2xl sm:text-3xl font-bold">
+            <h2 style={{ marginTop: 0, fontSize: 32, color: theme.colours.heading }}>
               Student loan plans compared
             </h2>
 
-            <p className="mt-4 text-slate-600 leading-8 max-w-3xl">
-              Updated using official April 2026
-              thresholds. Interest rates and
-              thresholds can change over time.
+            <p style={muted}>
+              Updated using official April 2026 thresholds. Figures updated annually.
             </p>
 
-            <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200">
-              <table className="w-full min-w-[1120px] text-left border-collapse">
-                <thead className="bg-slate-50">
-                  <tr className="border-b border-slate-200">
-                    <th className="px-5 py-4 font-semibold">Plan</th>
-                    <th className="px-5 py-4 font-semibold">Repayment threshold</th>
-                    <th className="px-5 py-4 font-semibold">Repayment rate</th>
-                    <th className="px-5 py-4 font-semibold">Interest rate</th>
-                    <th className="px-5 py-4 font-semibold">Typical write-off</th>
-                    <th className="px-5 py-4 font-semibold">Often linked to</th>
+            <div
+              style={{
+                marginTop: 24,
+                overflowX: "auto",
+                border: `1px solid ${theme.colours.neutralBorder}`,
+                borderRadius: 18
+              }}
+            >
+              <table style={{ width: "100%", minWidth: 900, borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: theme.colours.pageBg }}>
+                    {[
+                      "Plan",
+                      "Threshold",
+                      "Rate",
+                      "Interest",
+                      "Write-off",
+                      "Often linked to"
+                    ].map((item) => (
+                      <th
+                        key={item}
+                        style={{
+                          textAlign: "left",
+                          padding: 16,
+                          borderBottom: `1px solid ${theme.colours.neutralBorder}`
+                        }}
+                      >
+                        {item}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
 
-                <tbody className="text-slate-700">
-                  <tr className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-5 py-4 font-semibold">Plan 1</td>
-                    <td className="px-5 py-4">£26,900</td>
-                    <td className="px-5 py-4">9% above threshold</td>
-                    <td className="px-5 py-4">3.2%</td>
-                    <td className="px-5 py-4">25 years / legacy rules</td>
-                    <td className="px-5 py-4">Older borrowers</td>
-                  </tr>
-
-                  <tr className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-5 py-4 font-semibold">Plan 2</td>
-                    <td className="px-5 py-4">£29,385</td>
-                    <td className="px-5 py-4">9% above threshold</td>
-                    <td className="px-5 py-4">3.2% to 6.2%*</td>
-                    <td className="px-5 py-4">30 years</td>
-                    <td className="px-5 py-4">Many England / Wales cohorts</td>
-                  </tr>
-
-                  <tr className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-5 py-4 font-semibold">Plan 4</td>
-                    <td className="px-5 py-4">£33,795</td>
-                    <td className="px-5 py-4">9% above threshold</td>
-                    <td className="px-5 py-4">3.2%</td>
-                    <td className="px-5 py-4">30 years / legacy rules</td>
-                    <td className="px-5 py-4">Scotland</td>
-                  </tr>
-
-                  <tr className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="px-5 py-4 font-semibold">Plan 5</td>
-                    <td className="px-5 py-4">£25,000</td>
-                    <td className="px-5 py-4">9% above threshold</td>
-                    <td className="px-5 py-4">3.2%</td>
-                    <td className="px-5 py-4">40 years</td>
-                    <td className="px-5 py-4">Newer England borrowers</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-50">
-                    <td className="px-5 py-4 font-semibold">Postgraduate</td>
-                    <td className="px-5 py-4">£21,000</td>
-                    <td className="px-5 py-4">6% above threshold</td>
-                    <td className="px-5 py-4">6.2%</td>
-                    <td className="px-5 py-4">30 years</td>
-                    <td className="px-5 py-4">Masters / Doctoral loans</td>
-                  </tr>
+                <tbody>
+                  {[
+                    ["Plan 1", "£26,900", "9%", "3.2%", "25 years", "Older borrowers"],
+                    ["Plan 2", "£29,385", "9%", "Variable", "30 years", "England / Wales"],
+                    ["Plan 4", "£33,795", "9%", "3.2%", "30 years", "Scotland"],
+                    ["Plan 5", "£25,000", "9%", "3.2%", "40 years", "Newer England borrowers"],
+                    ["Postgraduate", "£21,000", "6%", "6.2%", "30 years", "Masters / Doctoral"]
+                  ].map((row) => (
+                    <tr key={row[0]}>
+                      {row.map((cell) => (
+                        <td
+                          key={cell}
+                          style={{
+                            padding: 16,
+                            borderBottom: `1px solid ${theme.colours.neutralBorder}`
+                          }}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-
-            <div className="mt-6 space-y-3 text-sm text-slate-500 leading-7 max-w-4xl">
-              <p>
-                * <span className="font-semibold text-slate-700">Plan 2 interest:</span>{" "}
-                Variable Interest Rate (VIR). While studying, interest is typically
-                RPI plus 3% (currently 6.2%).
-              </p>
-
-              <p>
-                After leaving study, Plan 2 interest usually depends on income:
-                £29,385 or less = 3.2%; £29,386 to £52,884 = 3.2% plus up to 3%;
-                £52,885 or more = 6.2%.
-              </p>
-
-              <p>
-                Figures are simplified and may change. Check official sources for
-                current thresholds, rates and personal eligibility.
-              </p>
-            </div>
-          </section>
+          </div>
 
           {/* WHY IT MATTERS */}
-          <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
+            }}
+          >
+            <h2 style={{ marginTop: 0, fontSize: 32, color: theme.colours.heading }}>
               Why knowing your plan matters
             </h2>
 
-            <p className="mt-4 text-slate-700 leading-8">
-              Two people on the same salary can
-              repay different amounts simply
-              because they are on different plans.
+            <p style={muted}>
+              Two people on the same salary can repay different amounts simply because they are on different plans.
             </p>
 
-            <p className="mt-4 text-slate-700 leading-8">
-              They can also be affected by
-              different thresholds, deductions
-              and long-term outcomes.
+            <p style={muted}>
+              Thresholds, deductions and long-term outcomes can vary.
             </p>
-          </section>
+          </div>
 
           {/* CTA */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              textAlign: "center"
+            }}
+          >
+            <h2 style={{ marginTop: 0, fontSize: 32, color: theme.colours.heading }}>
               Once you know your plan, run your numbers
             </h2>
 
-            <p className="mt-5 text-slate-600 leading-8 max-w-2xl mx-auto">
-              Knowing the plan is step one.
-              The next question is what it
-              could mean for your money.
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
+              Knowing your plan is step one. It helps you understand what it could mean for your money.
             </p>
 
-            <p className="mt-4 text-slate-600 leading-8 max-w-2xl mx-auto">
-              Compare overpaying versus keeping
-              flexibility with the Wayli calculator.
-            </p>
-
-            <div className="mt-8">
+            <div style={{ marginTop: 22 }}>
               <Link
                 to="/student-loan-calculator"
-                className="inline-block px-7 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition"
+                style={primaryBtn}
               >
                 Use calculator
               </Link>
             </div>
-          </section>
+          </div>
 
           {/* FAQ */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div style={{ ...card, marginTop: 56 }}>
+            <h2 style={{ marginTop: 0, fontSize: 32, color: theme.colours.heading }}>
               Frequently asked questions
             </h2>
 
-            <div className="mt-6 space-y-6">
+            <div style={{ marginTop: 24 }}>
               {faqs.map((faq) => (
-                <div key={faq.q}>
-                  <h3 className="font-semibold text-lg">
+                <div
+                  key={faq.q}
+                  style={{
+                    paddingBottom: 20,
+                    marginBottom: 20,
+                    borderBottom: `1px solid ${theme.colours.neutralBorder}`
+                  }}
+                >
+                  <h3 style={{ marginTop: 0, marginBottom: 10, fontSize: 20 }}>
                     {faq.q}
                   </h3>
 
-                  <p className="mt-2 text-slate-600 leading-8">
+                  <p style={{ ...muted, margin: 0 }}>
                     {faq.a}
                   </p>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* RELATED GUIDES */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Related guides
+          {/* RELATED */}
+          <div style={{ marginTop: 56 }}>
+            <GuideCards
+              category="student-loans"
+              title="Related guides"
+              limit={3}
+              excludeUrl="/guides/student-loans/which-student-loan-plan-am-i-on"
+            />
+          </div>
+
+          {/* MORE TOOLS */}
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              textAlign: "center",
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
+              {promoBlocks.moreTools.title}
             </h2>
 
-            <div className="mt-6 grid md:grid-cols-3 gap-4">
-              {related.map(([title, url]) => (
-                <Link
-                  key={title}
-                  to={url}
-                  className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition block"
-                >
-                  <div className="font-semibold">
-                    {title}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* OFFICIAL LINKS */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Official links
-            </h2>
-
-            <div className="mt-6 grid sm:grid-cols-2 gap-4">
-              <a
-                href="https://www.gov.uk/repaying-your-student-loan/what-you-pay"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition"
-              >
-                Student Loans Company
-              </a>
-
-              <a
-                href="https://www.gov.uk/student-finance"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition"
-              >
-                Student Finance England
-              </a>
-
-              <a
-                href="https://www.saas.gov.uk/"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition"
-              >
-                SAAS (Scotland)
-              </a>
-
-              <a
-                href="https://www.studentfinancewales.co.uk/"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition"
-              >
-                Student Finance Wales
-              </a>
-
-              <a
-                href="https://www.studentfinanceni.co.uk/"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition"
-              >
-                Student Finance Northern Ireland
-              </a>
-            </div>
-          </section>
-
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
+              {promoBlocks.moreTools.text}
+            </p>
+          </div>
         </div>
       </div>
 

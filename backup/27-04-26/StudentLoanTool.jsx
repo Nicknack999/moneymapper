@@ -1,63 +1,37 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { studentLoanInsights } from "../core/content/studentLoanInsights";
-import { theme } from "../styles/wayliTheme";
-import GuideCards from "../components/GuideCards";
+import { wayliMessages } from "../core/content/wayliMessages";
 
 export default function StudentLoanTool() {
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://127.0.0.1:5000";
+  const API_URL =
+    import.meta.env.VITE_API_URL ||
+    "https://api.wayli.uk";
 
   // --------------------------------
   // PLAN RULES
   // --------------------------------
   const plans = {
-  plan1: {
-    code: "plan1",
-    name: "Plan 1",
-    threshold: 26065,
-    years: 25,
-    repaymentRate: 9,
-    interest: 4.5
-  },
-
-  plan2: {
-    code: "plan2",
-    name: "Plan 2",
-    threshold: 27295,
-    years: 30,
-    repaymentRate: 9,
-    interest: 6.0
-  },
-
-  plan4: {
-    code: "plan4",
-    name: "Plan 4",
-    threshold: 33795,
-    years: 30,
-    repaymentRate: 9,
-    interest: 3.2
-  },
-
-  plan5: {
-    code: "plan5",
-    name: "Plan 5",
-    threshold: 25000,
-    years: 40,
-    repaymentRate: 9,
-    interest: 6.0
-  },
-
-  pg: {
-    code: "pg",
-    name: "Postgraduate",
-    threshold: 21000,
-    years: 30,
-    repaymentRate: 6,
-    interest: 6.0
-  }
-};
+    plan1: {
+      name: "Plan 1",
+      threshold: 26065,
+      years: 25
+    },
+    plan2: {
+      name: "Plan 2",
+      threshold: 27295,
+      years: 30
+    },
+    plan5: {
+      name: "Plan 5",
+      threshold: 25000,
+      years: 40
+    },
+    pg: {
+      name: "Postgraduate",
+      threshold: 21000,
+      years: 30
+    }
+  };
 
   // --------------------------------
   // HELPERS
@@ -70,101 +44,80 @@ const API_URL =
   const parseNum = (v) =>
     v === "" ? "" : Number(v);
 
- // --------------------------------
-// STYLES
-// --------------------------------
-const page = {
-  maxWidth: 960,
-  margin: "0 auto",
-  padding: 16,
-  background: theme.colours.pageBg
+  // --------------------------------
+  // STYLES
+  // --------------------------------
+  const page = {
+    maxWidth: 960,
+    margin: "0 auto",
+    padding: 16,
+    background: "#f8fafc"
+  };
+
+  const card = {
+    background: "#ecfdf5",
+    borderRadius: 20,
+    padding: 24,
+    border: "1px solid #bbf7d0",
+    boxShadow:
+      "0 12px 28px rgba(16,185,129,0.08)"
+  };
+
+  const whiteCard = {
+    background: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
+    border: "1px solid #e5e7eb",
+    boxShadow:
+      "0 12px 28px rgba(15,23,42,0.04)"
+  };
+
+  const input = {
+    width: "100%",
+    maxWidth: "100%",
+    boxSizing: "border-box",
+    height: 52,
+    borderRadius: 14,
+    border: "1px solid #d1d5db",
+    padding: "0 14px",
+    marginTop: 6,
+    fontSize: 16
 };
 
-const card = {
-  background: theme.colours.successBg,
-  borderRadius: theme.radius.card,
-  padding: 24,
-  border: `1px solid ${theme.colours.successBorder}`,
-  boxShadow: theme.shadow.success
-};
+  const button = {
+    padding: "14px 18px",
+    border: "none",
+    borderRadius: 14,
+    background: "#10b981",
+    color: "white",
+    fontWeight: 700,
+    fontSize: 16,
+    cursor: "pointer",
+    width: "100%"
+  };
 
-const whiteCard = {
-  background: theme.colours.neutralBg,
-  borderRadius: theme.radius.card,
-  padding: 24,
-  border: `1px solid ${theme.colours.neutralBorder}`,
-  boxShadow: theme.shadow.card
-};
+  const quickBtn = (active) => ({
+    padding: "10px 14px",
+    borderRadius: 12,
+    border: active
+      ? "1px solid #10b981"
+      : "1px solid #d1d5db",
+    background: active
+      ? "#d1fae5"
+      : "white",
+    fontWeight: 700,
+    cursor: "pointer"
+  });
 
-const input = {
-  width: "100%",
-  maxWidth: "100%",
-  boxSizing: "border-box",
-  height: 52,
-  borderRadius: theme.radius.input,
-  border: `1px solid ${theme.colours.inputBorder}`,
-  padding: "0 14px",
-  marginTop: 6,
-  fontSize: 16,
-  background: theme.colours.white
-};
-
-const button = {
-  padding: "14px 18px",
-  border: "none",
-  borderRadius: theme.radius.input,
-  background: theme.colours.primary,
-  color: "white",
-  fontWeight: 700,
-  fontSize: 16,
-  cursor: "pointer",
-  width: "100%",
-  boxShadow: theme.shadow.button
-};
-
-const quickBtn = (active) => ({
-  padding: "14px 10px",
-  borderRadius: 12,
-  border: active
-    ? `1px solid ${theme.colours.primary}`
-    : `1px solid ${theme.colours.inputBorder}`,
-  background: active
-    ? theme.colours.successBorder
-    : theme.colours.white,
-  fontWeight: 700,
-  cursor: "pointer",
-  color: active
-    ? theme.colours.successText
-    : theme.colours.heading,
-  width: "100%",
-  fontSize: 18,
-  textAlign: "center"
-});
-
-const ghostBtn = {
-  padding: "12px 16px",
-  borderRadius: 12,
-  border: `1px solid ${theme.colours.inputBorder}`,
-  background: theme.colours.white,
-  cursor: "pointer",
-  width: "100%",
-  fontWeight: 600,
-  color: theme.colours.heading
-};
-
-  const bigHeading = {
-  fontSize: 24,
-  fontWeight: 800,
-  color: theme.colours.heading,
-  margin: "0 0 12px 0"
-};
-
-const smallHeading = {
-  fontSize: 18,
-  fontWeight: 700,
-  color: theme.colours.heading,
-  margin: "0 0 10px 0"
-};
+  const ghostBtn = {
+    padding: "12px 16px",
+    borderRadius: 12,
+    border: "1px solid #d1d5db",
+    background: "white",
+    cursor: "pointer",
+    width: "100%",
+    fontWeight: 600
+  };
 
   // --------------------------------
   // STATE
@@ -207,10 +160,6 @@ const smallHeading = {
   setError("");
 
   try {
-
-      console.log("plan state:", plan);
-      console.log("selectedPlan:", selectedPlan);
-
       const payload = {
         plan,
         salary: Number(salary),
@@ -222,10 +171,10 @@ const smallHeading = {
           Number(
             monthlyAmount
           ),
-        threshold: plans[plan].threshold,
-        write_off_years: plans[plan].years,
-        repayment_rate: plans[plan].repaymentRate,
-        loan_interest: plans[plan].interest / 100
+        threshold:
+          selectedPlan.threshold,
+        write_off_years:
+          selectedPlan.years
       };
 
       const res = await fetch(
@@ -331,11 +280,13 @@ const smallHeading = {
       insightPack.outlook,
 
     bg:
-      repaymentType === "full_repay"
-        ? theme.colours.successBg
-        : repaymentType === "borderline"
-        ? theme.colours.warningBg
-        : theme.colours.pageBg
+      repaymentType ===
+      "full_repay"
+        ? "#ecfdf5"
+        : repaymentType ===
+          "borderline"
+        ? "#f0fdf4"
+        : "#f8fafc"
   };
 
   const triggerInsight =
@@ -514,7 +465,7 @@ return (
         style={{
           fontSize: 13,
           fontWeight: 700,
-          color: theme.colours.primary,
+          color: "#10b981",
           textTransform:
             "uppercase"
         }}
@@ -536,7 +487,7 @@ return (
       <p
         style={{
           color:
-            theme.colours.body,
+            "#475569",
           lineHeight: 1.7,
           fontSize: 17
         }}
@@ -561,7 +512,7 @@ return (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gridTemplateColumns: "1fr",
             gap: 16
           }}
         >
@@ -585,9 +536,6 @@ return (
               </option>
               <option value="plan2">
                 Plan 2
-              </option>
-              <option value="plan4">
-                Plan 4
               </option>
               <option value="plan5">
                 Plan 5
@@ -666,9 +614,9 @@ return (
 
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: 10
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap"
             }}
           >
             {[
@@ -717,7 +665,8 @@ return (
         {error && (
           <p
             style={{
-              color: theme.colours.danger,
+              color:
+                "#dc2626",
               marginTop: 12
             }}
           >
@@ -736,13 +685,13 @@ return (
               marginTop: 18
             }}
           >
-            <h3 style={smallHeading}>
+            <h3>
               What income may shift the outcome?
             </h3>
 
             <p
               style={{
-                color: theme.colours.body,
+                color: "#475569",
                 lineHeight: 1.7,
                 marginBottom: 0
               }}
@@ -775,9 +724,9 @@ return (
                 borderRadius:
                   999,
                 background:
-                  theme.colours.successBorder,
+                  "#d1fae5",
                 color:
-                  theme.colours.successText,
+                  "#065f46",
                 fontSize: 12,
                 fontWeight: 800,
                 textTransform:
@@ -817,7 +766,7 @@ return (
               marginTop: 18
             }}
           >
-            <h3 style={bigHeading}>
+            <h3>
               Best fit today
             </h3>
 
@@ -835,7 +784,7 @@ return (
             <p
               style={{
                 color:
-                  theme.colours.body,
+                  "#475569",
                 lineHeight: 1.7,
                 marginBottom: 0
               }}
@@ -846,37 +795,6 @@ return (
             </p>
           </div>
 
-          <div
-            style={{
-              ...whiteCard,
-              marginTop: 18,
-              textAlign: "center"
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: theme.colours.body,
-                lineHeight: 1.7
-              }}
-            >
-              Want to know how we estimate this result?
-            </p>
-
-            <Link
-              to="/how-our-calculator-works"
-              style={{
-                display: "inline-block",
-                marginTop: 12,
-                color: theme.colours.primary,
-                fontWeight: 700,
-                textDecoration: "none"
-              }}
-            >
-    See how our calculator works →
-  </Link>
-</div>
-
           {/* TRIGGER INSIGHT */}
           <div
             style={{
@@ -884,14 +802,14 @@ return (
               marginTop: 18
             }}
           >
-            <h3 style={smallHeading}>
+            <h3>
               Worth knowing
             </h3>
 
             <p
               style={{
                 color:
-                  theme.colours.body,
+                  "#475569",
                 lineHeight: 1.7
               }}
             >
@@ -908,7 +826,7 @@ return (
               marginTop: 18
             }}
           >
-            <h3 style={smallHeading}>
+            <h3>
               Your numbers today
             </h3>
 
@@ -916,7 +834,7 @@ return (
               style={{
                 paddingLeft: 18,
                 color:
-                  theme.colours.body,
+                  "#475569",
                 lineHeight: 1.8,
                 marginBottom: 0
               }}
@@ -969,14 +887,14 @@ return (
                 marginTop: 18
               }}
             >
-              <h3 style={smallHeading}>
+              <h3>
                 Key drivers
               </h3>
 
               <ul
                 style={{
                   paddingLeft: 18,
-                  color: theme.colours.body,
+                  color: "#475569",
                   lineHeight: 1.8,
                   marginBottom: 0
                 }}
@@ -991,238 +909,257 @@ return (
               </ul>
             </div>
 
-{/* MINI SCENARIO */}
-<div
-  style={{
-    ...whiteCard,
-    marginTop: 18
-  }}
->
-  <h3 style={bigHeading}>
-    What {money(monthlyAmount)}/month could do instead
-  </h3>
+          {/* MINI SCENARIO */}
+          <div
+            style={{
+              ...whiteCard,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              What{" "}
+              {money(
+                monthlyAmount
+              )}
+              /month could do instead
+            </h3>
 
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-      gap: 14
-    }}
-  >
-    {/* OVERPAY */}
-   <div
-    style={{
-      border: `1px solid ${theme.colours.successBorder}`,
-      background: theme.colours.successBg,
-      borderRadius: 16,
-      padding: 16
-    }}
->
-      <div style={{ fontWeight: 800 }}>
-        Overpay loan
-      </div>
+            <div
+              style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: 16
+            }}
+            >
+              <div>
+            <strong>
+              Overpay loan
+            </strong>
 
-      <p
-        style={{
-          color: theme.colours.body,
-          lineHeight: 1.7,
-          marginBottom: 8
-        }}
-      >
-        {money(monthlyAmount)}/month adds{" "}
-        <strong>
-          {money(monthlyAmount * 12)}
-        </strong>{" "}
-        each year.
-      </p>
+            <p
+              style={{
+                color: "#475569",
+                lineHeight: 1.7
+              }}
+            >
+              {money(monthlyAmount)}/month adds{" "}
+              <strong>
+                {money(monthlyAmount * 12)}
+              </strong>{" "}
+              per year toward the loan.
 
-      <div
-        style={{
-          fontSize: 14,
-          color: theme.colours.successText,
-          fontWeight: 700
-        }}
-      >
-        Best for reducing balance sooner
-      </div>
-    </div>
+              {repaymentType === "full_repay"
+                ? ` This may help reduce total cost or shorten repayment.`
+                : repaymentType === "borderline"
+                ? ` This could help if you are near the repayment line.`
+                : ` Future earnings may still matter more than modest overpayments alone.`}
+            </p>
+          </div>
 
-    {/* SAVINGS */}
-    <div
-      style={{
-        border: `1px solid ${theme.colours.neutralBorder}`,
-        background: theme.colours.white,
-        borderRadius: 16,
-        padding: 16
-      }}
-    >
-      <div style={{ fontWeight: 800 }}>
-        Savings
-      </div>
+              <div>
+                <strong>
+                  Savings
+                </strong>
 
-      <p
-        style={{
-          color: theme.colours.body,
-          lineHeight: 1.7,
-          marginBottom: 8
-        }}
-      >
-        Around{" "}
-        <strong>
-          {money(savingsValue)}
-        </strong>{" "}
-        in 5 years.
-      </p>
+                <p
+                  style={{
+                    color:
+                      "#475569",
+                    lineHeight: 1.7
+                  }}
+                >
+                  Around{" "}
+                  <strong>
+                    {money(
+                      savingsValue
+                    )}
+                  </strong>{" "}
+                  in 5 years
+                  using a simple
+                  3% assumption.
+                </p>
+              </div>
 
-      <div
-        style={{
-          fontSize: 14,
-          color: theme.colours.muted,
-          fontWeight: 700
-        }}
-      >
-        Calmer, steadier, easier to access
-      </div>
-    </div>
+              <div>
+                <strong>
+                  Investing
+                </strong>
 
-    {/* INVESTING */}
-    <div
-      style={{
-        border: `1px solid ${theme.colours.growthBorder}`,
-        background: theme.colours.growthBg,
-        borderRadius: 16,
-        padding: 16
-      }}
-    >
-      <div style={{ fontWeight: 800 }}>
-        Investing
-      </div>
+                <p
+                  style={{
+                    color:
+                      "#475569",
+                    lineHeight: 1.7
+                  }}
+                >
+                  Around{" "}
+                  <strong>
+                    {money(
+                      investingValue
+                    )}
+                  </strong>{" "}
+                  in 5 years
+                  using a simple
+                  5% growth
+                  assumption.
+                </p>
+              </div>
+            </div>
 
-      <p
-        style={{
-          color: theme.colours.body,
-          lineHeight: 1.7,
-          marginBottom: 8
-        }}
-      >
-        Around{" "}
-        <strong>
-          {money(investingValue)}
-        </strong>{" "}
-        in 5 years.
-      </p>
+            <p
+              style={{
+                marginTop: 14,
+                fontSize: 14,
+                color:
+                  "#64748b",
+                lineHeight: 1.7
+              }}
+            >
+              Illustrative
+              examples only.
+              Real returns and
+              loan outcomes vary.
+            </p>
+          </div>
 
-      <div
-        style={{
-          fontSize: 14,
-          color: theme.colours.growthText,
-          fontWeight: 700
-        }}
-      >
-        Bumpier ride, stronger long-term potential
-      </div>
-    </div>
-  </div>
+          {/* HOW IT WORKS */}
+          <div
+            style={{
+              ...whiteCard,
+              marginTop: 18
+            }}
+          >
+            <h3>
+              How these estimates work            
+            </h3>
 
-  <p
-    style={{
-      marginTop: 14,
-      fontSize: 14,
-      color: theme.colours.muted,
-      lineHeight: 1.7
-    }}
-  >
-    Illustrative examples only.
-    Real returns and loan outcomes vary.
-  </p>
-  </div>   
+            <p
+              style={{
+                color:
+                  "#475569",
+                lineHeight: 1.8
+              }}
+            >
+              We use
+              simplified UK
+              student loan
+              rules including:
+              <br />
+              • your plan
+              threshold
+              <br />
+              • 9%
+              repayments
+              above threshold
+              <br />
+              • current
+              balance entered
+              <br />
+              • estimated
+              interest
+              <br />
+              • assumed
+              future earnings
+              growth
+              <br />
+              <br />
+              Real
+              repayments
+              depend on
+              changing
+              salary,
+              official
+              rates and
+              policy
+              updates.
+              <br />
+              <br />
+              For your
+              exact balance
+              or official
+              figures, check
+              the Student
+              Loans Company.
+            </p>
+          </div>
 
-  {/* HOW WE ESTIMATE THIS */}
-<div
-  style={{
-    ...whiteCard,
-    marginTop: 18
-  }}
->
-  <h3 style={smallHeading}>
-    How we estimate this
-  </h3>
+          {/* EXTRA */}
+          <div
+            style={{
+              ...whiteCard,
+              marginTop: 18
+            }}
+          >
+            <button
+              style={
+                ghostBtn
+              }
+              onClick={() =>
+                setShowMore(
+                  !showMore
+                )
+              }
+            >
+              {showMore
+                ? "Hide extra detail ▲"
+                : "More perspective ▼"}
+            </button>
 
-  <p
-    style={{
-      color: theme.colours.body,
-      lineHeight: 1.8,
-      marginBottom: 14
-    }}
-  >
-    These results are personalised estimates based on the details you entered and current UK student loan rules.
-    They are designed to help you think through your options, not predict the future exactly.
-  </p>
+            {showMore && (
+              <div
+                style={{
+                  marginTop: 16
+                }}
+              >
+                <p
+                  style={{
+                    color:
+                      "#475569",
+                    lineHeight: 1.7
+                  }}
+                >
+                  Revisiting this after salary changes can materially alter the picture.
+                </p>
 
-  <ul
-    style={{
-      paddingLeft: 18,
-      color: theme.colours.body,
-      lineHeight: 1.8,
-      marginBottom: 14
-    }}
-  >
-    <li>Your selected loan plan, threshold and write-off term</li>
-    <li>Your salary today and repayments above the threshold</li>
-    <li>Your current balance and estimated interest rate</li>
-    <li>Optional monthly overpayments</li>
-    <li>Example future salary growth scenarios</li>
-    <li>Savings and investing comparisons</li>
-  </ul>
+                <p
+                  style={{
+                    color:
+                      "#475569",
+                    lineHeight: 1.7
+                  }}
+                >
+                  For many users, keeping flexible cash can be as valuable as faster repayment.
+                </p>
+              </div>
+            )}
+          </div>
 
-  <p
-    style={{
-      color: theme.colours.body,
-      lineHeight: 1.8,
-      marginBottom: 14
-    }}
-  >
-    Real outcomes can change over time because earnings, interest rates and policy may move.
-    Revisiting this after salary changes can materially alter the picture.
-  </p>
-
-  <p
-    style={{
-      color: theme.colours.body,
-      lineHeight: 1.8,
-      marginBottom: 14
-    }}
-  >
-    For many borrowers, keeping flexible cash can be just as valuable as faster repayment.
-  </p>
-
-  <p
-    style={{
-      fontSize: 14,
-      color: theme.colours.muted,
-      marginBottom: 6
-    }}
-  >
-    Last updated: April 2026
-  </p>
-
-  <p
-    style={{
-      fontSize: 14,
-      color: theme.colours.muted,
-      margin: 0
-    }}
-  >
-    Educational guidance only — not personal financial advice.
-  </p>
-</div>
-
-<GuideCards
-  category="student-loans"
-  title="Helpful guides"
-  limit={3}
-/>
-
+          {/* FOOTER */}
+          <div
+            style={{
+              ...whiteCard,
+              marginTop: 18,
+              textAlign:
+                "center"
+            }}
+          >
+            <p
+              style={{
+                color:
+                  "#64748b",
+                lineHeight: 1.7,
+                margin: 0
+              }}
+            >
+              {
+                wayliMessages.education.assumptions
+              }
+              <br />
+              {
+                wayliMessages.education.notAdvice
+              }
+            </p>
+          </div>
         </>
       )}
     </div>

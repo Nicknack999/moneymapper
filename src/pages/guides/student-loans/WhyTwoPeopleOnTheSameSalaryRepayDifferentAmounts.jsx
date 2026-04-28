@@ -2,107 +2,206 @@ import { Link } from "react-router-dom";
 
 import SiteHeader from "../../../components/SiteHeader";
 import SiteFooter from "../../../components/SiteFooter";
+import GuideCards from "../../../components/GuideCards";
+
+import { theme } from "../../../styles/wayliTheme";
+import { promoBlocks } from "../../../core/content/promoBlocks";
 
 export default function WhyTwoPeopleSameSalaryRepayDifferentAmountsPage() {
   const pageTitle =
     "Why two people on the same salary can repay different student loan amounts | Wayli";
 
   const pageDescription =
-    "See why two people earning the same salary can repay different UK student loan amounts depending on Plan 1, Plan 2, Plan 4, Plan 5 or postgraduate loans. Compare thresholds, write-off dates and whether overpaying is worth it.";
+    "See why two people earning the same salary can repay different UK student loan amounts depending on Plan 1, Plan 2, Plan 4, Plan 5 or postgraduate loans.";
 
-  const related = [
-    [
-      "Which student loan plan am I on?",
-      "/guides/student-loans/which-student-loan-plan-am-i-on"
-    ],
-    [
-      "Is overpaying worth it?",
-      "/guides/student-loans/is-overpaying-worth-it"
-    ],
-    [
-      "Should I overpay on £30k?",
-      "/guides/student-loans/student-loan-30k"
-    ]
-  ];
+  const section = {
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: "0 20px"
+  };
+
+  const card = {
+    background: theme.colours.white,
+    border: `1px solid ${theme.colours.neutralBorder}`,
+    borderRadius: 24,
+    padding: 28,
+    boxShadow: theme.shadow.card
+  };
+
+  const muted = {
+    color: theme.colours.body,
+    lineHeight: 1.8
+  };
+
+  const primaryBtn = {
+    padding: "14px 20px",
+    borderRadius: 14,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: 16,
+    background: theme.colours.primary,
+    color: theme.colours.white,
+    textDecoration: "none",
+    display: "inline-block",
+    boxShadow: theme.shadow.button
+  };
+
+  const secondaryBtn = {
+    ...primaryBtn,
+    background: theme.colours.white,
+    color: theme.colours.heading,
+    border: `1px solid ${theme.colours.inputBorder}`,
+    boxShadow: "none"
+  };
 
   return (
     <>
       <SiteHeader />
 
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(180deg,#f8fafc 0%,#ffffff 60%,#ecfdf5 100%)"
+        }}
+      >
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
 
-        <div className="max-w-5xl mx-auto px-5 sm:px-6 py-10 sm:py-16 space-y-10">
-
+        <div
+          style={{
+            ...section,
+            paddingTop: 28,
+            paddingBottom: 60
+          }}
+        >
           {/* BREADCRUMBS */}
-          <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              fontSize: 14,
+              color: theme.colours.muted,
+              marginBottom: 28
+            }}
+          >
             <Link
               to="/"
-              className="text-emerald-600 font-semibold hover:underline"
+              style={{
+                color: theme.colours.primary,
+                textDecoration: "none",
+                fontWeight: 600
+              }}
             >
               Home
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
             <Link
               to="/guides"
-              className="text-emerald-600 font-semibold hover:underline"
+              style={{
+                color: theme.colours.primary,
+                textDecoration: "none",
+                fontWeight: 600
+              }}
             >
               Guides
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
-            <span className="text-slate-500">
-              Same salary, different repayments
-            </span>
+            <span>Same salary, different repayments</span>
           </div>
 
           {/* HERO */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <div className="inline-flex px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-sm font-semibold">
+          <div
+            style={{
+              ...card,
+              textAlign: "center",
+              padding: "42px 28px"
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: theme.colours.successBg,
+                color: theme.colours.successText,
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
               Wayli guide
             </div>
 
-            <h1 className="mt-5 text-3xl sm:text-5xl font-bold tracking-tight leading-tight text-slate-900 max-w-4xl">
-              Why two people on the same salary{" "}
-              <span className="block text-emerald-600">
-                can repay different amounts
-              </span>
+            <h1
+              style={{
+                marginTop: 18,
+                marginBottom: 0,
+                fontSize: 46,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
+                color: theme.colours.heading
+              }}
+            >
+              Why two people on the same salary can repay different amounts
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-slate-600 leading-8 max-w-3xl">
+            <p
+              style={{
+                marginTop: 22,
+                maxWidth: 760,
+                marginLeft: "auto",
+                marginRight: "auto",
+                fontSize: 19,
+                lineHeight: 1.8,
+                color: theme.colours.body
+              }}
+            >
               Two graduates can earn the same salary and still make different
-              student loan repayments. Your loan plan, repayment threshold,
-              interest rules and write-off timing often matter more than salary alone.
+              student loan repayments. Your loan plan, threshold, interest rules
+              and write-off timing often matter more than salary alone.
             </p>
 
-            <p className="mt-4 text-base sm:text-lg text-slate-600 leading-8 max-w-3xl">
-              If you are deciding whether to overpay, save or invest instead,
-              this is one of the most useful things to understand first.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <div
+              style={{
+                marginTop: 28,
+                display: "flex",
+                justifyContent: "center",
+                gap: 12,
+                flexWrap: "wrap"
+              }}
+            >
               <Link
                 to="/student-loan-calculator"
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-emerald-500 text-white font-semibold shadow-md shadow-emerald-200 hover:bg-emerald-600 transition text-center"
+                style={primaryBtn}
               >
                 Try the Wayli calculator
               </Link>
 
               <a
                 href="#example"
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-slate-300 bg-white font-semibold hover:bg-slate-50 transition text-center"
+                style={secondaryBtn}
               >
                 See example
               </a>
             </div>
-          </section>
+          </div>
 
           {/* QUICK CARDS */}
-          <section className="grid md:grid-cols-3 gap-4">
+          <div
+            style={{
+              marginTop: 56,
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: 18
+            }}
+          >
             {[
               [
                 "Thresholds matter",
@@ -117,188 +216,285 @@ export default function WhyTwoPeopleSameSalaryRepayDifferentAmountsPage() {
                 "Pay rises can change whether full repayment becomes likely."
               ]
             ].map(([title, text]) => (
-              <div
-                key={title}
-                className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm"
-              >
-                <h2 className="font-semibold text-lg text-slate-900">
+              <div key={title} style={card}>
+                <h3
+                  style={{
+                    marginTop: 0,
+                    fontSize: 22,
+                    color: theme.colours.heading
+                  }}
+                >
                   {title}
-                </h2>
+                </h3>
 
-                <p className="mt-3 text-slate-600 leading-7">
-                  {text}
-                </p>
+                <p style={muted}>{text}</p>
               </div>
             ))}
-          </section>
+          </div>
 
-          {/* WHY IT HAPPENS */}
-          <section className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          {/* WHY */}
+          <div
+            style={{
+              ...card,
+              marginTop: 56
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               Why does this happen?
             </h2>
 
-            <p className="mt-5 text-slate-600 leading-8 max-w-3xl">
-              UK student loans were introduced at different times with different
-              rules. That means borrowers can sit on different plans even when
-              earning the same amount today.
+            <p style={muted}>
+              UK student loans were introduced at different times with
+              different rules. That means borrowers can sit on different
+              plans even when earning the same amount today.
             </p>
 
-            <p className="mt-4 text-slate-600 leading-8 max-w-3xl">
-              Two people on £40k, £45k or £60k can therefore see different monthly
-              deductions simply because thresholds, interest rules or write-off
-              dates are not identical.
+            <p style={muted}>
+              Two people on £40k, £45k or £60k can therefore see different
+              deductions simply because thresholds, interest rules or
+              write-off dates are not identical.
             </p>
-          </section>
+          </div>
 
           {/* EXAMPLE */}
-          <section
+          <div
             id="example"
-            className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm"
+            style={{
+              ...card,
+              marginTop: 56
+            }}
           >
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               Example: two borrowers earning £45k
             </h2>
 
-            <p className="mt-5 text-slate-600 leading-8 max-w-3xl">
+            <p style={muted}>
               Imagine two people both earn £45,000 and both owe student loans.
               One is on Plan 1 and the other is on Plan 2.
             </p>
 
-            <p className="mt-4 text-slate-600 leading-8 max-w-3xl">
+            <p style={muted}>
               Their deductions can differ because each plan uses different
-              thresholds. One borrower may repay more each year, reduce the
-              balance faster, or become a stronger candidate for overpaying.
+              thresholds. One borrower may repay more each year or reduce the
+              balance faster.
             </p>
 
-            <div className="hidden sm:block mt-8 overflow-x-auto">
-              <table className="w-full text-left">
+            <div
+              style={{
+                marginTop: 24,
+                overflowX: "auto",
+                border: `1px solid ${theme.colours.neutralBorder}`,
+                borderRadius: 18
+              }}
+            >
+              <table
+                style={{
+                  width: "100%",
+                  minWidth: 700,
+                  borderCollapse: "collapse"
+                }}
+              >
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="py-4 pr-4">Plan</th>
-                    <th className="py-4 pr-4">Threshold</th>
-                    <th className="py-4 pr-4">Approx yearly repayment</th>
-                    <th className="py-4">Write-off</th>
+                  <tr style={{ background: theme.colours.pageBg }}>
+                    {[
+                      "Plan",
+                      "Threshold",
+                      "Approx yearly repayment",
+                      "Write-off"
+                    ].map((item) => (
+                      <th
+                        key={item}
+                        style={{
+                          textAlign: "left",
+                          padding: 16,
+                          borderBottom:
+                            `1px solid ${theme.colours.neutralBorder}`
+                        }}
+                      >
+                        {item}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
 
-                <tbody className="text-slate-700">
-                  <tr className="border-b border-slate-100">
-                    <td className="py-4">Plan 1</td>
-                    <td>£26,900</td>
-                    <td>Higher</td>
-                    <td>25 years / legacy</td>
-                  </tr>
-
-                  <tr className="border-b border-slate-100">
-                    <td className="py-4">Plan 2</td>
-                    <td>£29,385</td>
-                    <td>Lower</td>
-                    <td>30 years</td>
-                  </tr>
-
-                  <tr>
-                    <td className="py-4">Plan 5</td>
-                    <td>£25,000</td>
-                    <td>Higher</td>
-                    <td>40 years</td>
-                  </tr>
+                <tbody>
+                  {[
+                    ["Plan 1", "£26,900", "Higher", "25 years / legacy"],
+                    ["Plan 2", "£29,385", "Lower", "30 years"],
+                    ["Plan 5", "£25,000", "Higher", "40 years"]
+                  ].map((row) => (
+                    <tr key={row[0]}>
+                      {row.map((cell) => (
+                        <td
+                          key={cell}
+                          style={{
+                            padding: 16,
+                            borderBottom:
+                              `1px solid ${theme.colours.neutralBorder}`
+                          }}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-          </section>
+          </div>
 
           {/* OVERPAYING */}
-          <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               What this means for overpaying
             </h2>
 
-            <p className="mt-5 text-slate-700 leading-8 max-w-3xl">
-              Overpaying can be more useful if you are already likely to clear the
-              balance anyway. In those cases, extra payments may reduce interest
-              or help you finish sooner.
+            <p style={muted}>
+              Overpaying can be more useful if you are already likely to clear
+              the balance anyway. In those cases, extra payments may reduce
+              interest or help you finish sooner.
             </p>
 
-            <p className="mt-4 text-slate-700 leading-8 max-w-3xl">
-              For others, keeping flexibility, building savings or investing may
-              be stronger. The right answer often depends on your plan, balance
-              and future earnings path.
+            <p style={muted}>
+              For others, keeping flexibility, building savings or investing
+              may be stronger.
             </p>
-          </section>
+          </div>
 
           {/* FAQ */}
-          <section className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          <div
+            style={{
+              ...card,
+              marginTop: 56
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               Frequently asked questions
             </h2>
 
-            <div className="mt-8 space-y-7">
-              <div>
-                <h3 className="font-semibold text-lg">
-                  Does the same salary always mean the same repayment?
-                </h3>
+            <div style={{ marginTop: 24 }}>
+              {[
+                [
+                  "Does the same salary always mean the same repayment?",
+                  "No. Your student loan plan, threshold and write-off rules can all change what you repay."
+                ],
+                [
+                  "Should I overpay on £45k?",
+                  "Possibly. It depends on whether full repayment already looks realistic."
+                ],
+                [
+                  "How do I check my own situation?",
+                  "Use a calculator that compares your plan, salary, balance and overpayment options."
+                ]
+              ].map(([q, a]) => (
+                <div
+                  key={q}
+                  style={{
+                    paddingBottom: 20,
+                    marginBottom: 20,
+                    borderBottom:
+                      `1px solid ${theme.colours.neutralBorder}`
+                  }}
+                >
+                  <h3
+                    style={{
+                      marginTop: 0,
+                      marginBottom: 10,
+                      fontSize: 20
+                    }}
+                  >
+                    {q}
+                  </h3>
 
-                <p className="mt-2 text-slate-600 leading-7">
-                  No. Your student loan plan, threshold and write-off rules can
-                  all change what you repay.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-lg">
-                  Should I overpay on £45k?
-                </h3>
-
-                <p className="mt-2 text-slate-600 leading-7">
-                  Possibly. It depends on whether full repayment already looks
-                  realistic and whether spare cash could work harder elsewhere.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-lg">
-                  How do I check my own situation?
-                </h3>
-
-                <p className="mt-2 text-slate-600 leading-7">
-                  Use a calculator that compares your plan, salary, balance and
-                  overpayment options.
-                </p>
-              </div>
+                  <p style={{ ...muted, margin: 0 }}>
+                    {a}
+                  </p>
+                </div>
+              ))}
             </div>
 
-            <div className="mt-8">
+            <div style={{ marginTop: 10 }}>
               <Link
                 to="/student-loan-calculator"
-                className="inline-block px-6 py-4 rounded-2xl bg-emerald-500 text-white font-semibold shadow-md shadow-emerald-200 hover:bg-emerald-600 transition"
+                style={primaryBtn}
               >
                 Use calculator
               </Link>
             </div>
-          </section>
+          </div>
 
-          {/* RELATED GUIDES */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Related guides
+          {/* RELATED */}
+          <div style={{ marginTop: 56 }}>
+            <GuideCards
+              category="student-loans"
+              title="Related guides"
+              limit={3}
+              excludeUrl="/guides/student-loans/why-two-people-on-the-same-salary-repay-different-amounts"
+            />
+          </div>
+
+          {/* MORE TOOLS */}
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              textAlign: "center",
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
+              {promoBlocks.moreTools.title}
             </h2>
 
-            <div className="mt-6 grid md:grid-cols-3 gap-4">
-              {related.map(([title, url]) => (
-                <Link
-                  key={title}
-                  to={url}
-                  className="rounded-2xl border border-slate-200 p-5 hover:border-emerald-300 transition block"
-                >
-                  <div className="font-semibold">
-                    {title}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
+              {promoBlocks.moreTools.text}
+            </p>
+          </div>
         </div>
       </div>
 

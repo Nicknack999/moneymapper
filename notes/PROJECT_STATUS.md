@@ -14,7 +14,6 @@ python engine/app.py
 src/App.jsx  
 src/core/StudentLoanTool.jsx  
 src/core/content/studentLoanInsights.js  
-src/core/content/wayliMessages.js  
 src/pages/student-loans/WhySameSalaryDifferentRepayments.jsx
 
 ## Experimental Frontend

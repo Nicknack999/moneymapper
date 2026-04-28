@@ -34,9 +34,7 @@ if frontend_url:
 CORS(
     app,
     resources={r"/*": {"origins": allowed_origins}},
-    methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type"],
-    supports_credentials=False
+    supports_credentials=True
 )
 
 # -------------------------------------------------
@@ -187,8 +185,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
 
     app.run(
-    host="0.0.0.0",
-    port=port,
-    debug=True,
-    use_reloader=False
-)
+        host="0.0.0.0",
+        port=port,
+        debug=True
+    )

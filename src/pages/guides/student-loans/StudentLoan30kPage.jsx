@@ -2,6 +2,10 @@ import { Link } from "react-router-dom";
 
 import SiteHeader from "../../../components/SiteHeader";
 import SiteFooter from "../../../components/SiteFooter";
+import GuideCards from "../../../components/GuideCards";
+
+import { theme } from "../../../styles/wayliTheme";
+import { promoBlocks } from "../../../core/content/promoBlocks";
 
 export default function StudentLoan30kPage() {
   const pageTitle =
@@ -10,26 +14,58 @@ export default function StudentLoan30kPage() {
   const pageDescription =
     "Should you overpay your UK student loan on a £30,000 salary? Learn when it may help, when it may not, and compare overpaying vs saving with Wayli.";
 
-  const relatedGuides = [
-    [
-      "Is overpaying worth it?",
-      "/guides/student-loans/is-overpaying-worth-it"
-    ],
-    [
-      "Which student loan plan am I on?",
-      "/guides/student-loans/which-student-loan-plan-am-i-on"
-    ],
-    [
-      "Why same salary repayments differ",
-      "/guides/student-loans/why-two-people-on-the-same-salary-repay-different-amounts"
-    ]
-  ];
+  const section = {
+    maxWidth: 1100,
+    margin: "0 auto",
+    padding: "0 20px"
+  };
+
+  const card = {
+    background: theme.colours.white,
+    border: `1px solid ${theme.colours.neutralBorder}`,
+    borderRadius: 24,
+    padding: 28,
+    boxShadow: theme.shadow.card
+  };
+
+  const muted = {
+    color: theme.colours.body,
+    lineHeight: 1.8
+  };
+
+  const primaryBtn = {
+    padding: "14px 20px",
+    borderRadius: 14,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: 16,
+    background: theme.colours.primary,
+    color: theme.colours.white,
+    textDecoration: "none",
+    display: "inline-block",
+    boxShadow: theme.shadow.button
+  };
+
+  const secondaryBtn = {
+    ...primaryBtn,
+    background: theme.colours.white,
+    color: theme.colours.heading,
+    border: `1px solid ${theme.colours.inputBorder}`,
+    boxShadow: "none"
+  };
 
   return (
     <>
       <SiteHeader />
 
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(180deg,#f8fafc 0%,#ffffff 60%,#ecfdf5 100%)"
+        }}
+      >
         <title>{pageTitle}</title>
 
         <meta
@@ -37,82 +73,167 @@ export default function StudentLoan30kPage() {
           content={pageDescription}
         />
 
-        <div className="max-w-5xl mx-auto px-5 sm:px-6 py-10 sm:py-16 space-y-10">
-
+        <div
+          style={{
+            ...section,
+            paddingTop: 28,
+            paddingBottom: 60
+          }}
+        >
           {/* BREADCRUMBS */}
-          <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              fontSize: 14,
+              color: theme.colours.muted,
+              marginBottom: 28
+            }}
+          >
             <Link
               to="/"
-              className="text-emerald-600 font-semibold hover:underline"
+              style={{
+                color: theme.colours.primary,
+                textDecoration: "none",
+                fontWeight: 600
+              }}
             >
               Home
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
             <Link
               to="/guides"
-              className="text-emerald-600 font-semibold hover:underline"
+              style={{
+                color: theme.colours.primary,
+                textDecoration: "none",
+                fontWeight: 600
+              }}
             >
               Guides
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
-            <span className="text-slate-500">
-              Should I overpay on £30k?
-            </span>
+            <span>Should I overpay on £30k?</span>
           </div>
 
           {/* HERO */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <div className="inline-flex px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-sm font-semibold">
+          <div
+            style={{
+              ...card,
+              textAlign: "center",
+              padding: "42px 28px"
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: theme.colours.successBg,
+                color: theme.colours.successText,
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
               Wayli guide
             </div>
 
-            <h1 className="mt-5 text-3xl sm:text-5xl font-bold tracking-tight leading-tight max-w-4xl">
+            <h1
+              style={{
+                marginTop: 18,
+                marginBottom: 0,
+                fontSize: 46,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
+                color: theme.colours.heading,
+                maxWidth: 880,
+                marginLeft: "auto",
+                marginRight: "auto"
+              }}
+            >
               Should I overpay my student loan on £30k?
             </h1>
 
-            <p className="mt-6 text-lg sm:text-xl text-slate-600 leading-8 max-w-3xl">
+            <p
+              style={{
+                marginTop: 22,
+                maxWidth: 760,
+                marginLeft: "auto",
+                marginRight: "auto",
+                fontSize: 19,
+                lineHeight: 1.8,
+                color: theme.colours.body
+              }}
+            >
               If you earn £30,000 in the UK, overpaying your
               student loan may help in some cases — but it is
               far from automatic.
             </p>
 
-            <p className="mt-4 text-base sm:text-lg text-slate-600 leading-8 max-w-3xl">
+            <p
+              style={{
+                marginTop: 14,
+                maxWidth: 760,
+                marginLeft: "auto",
+                marginRight: "auto",
+                fontSize: 18,
+                lineHeight: 1.8,
+                color: theme.colours.body
+              }}
+            >
               For many borrowers, future salary growth,
               flexibility and other priorities matter more
               than modest extra payments today.
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <div
+              style={{
+                marginTop: 28,
+                display: "flex",
+                justifyContent: "center",
+                gap: 12,
+                flexWrap: "wrap"
+              }}
+            >
               <Link
                 to="/student-loan-calculator"
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition text-center"
+                style={primaryBtn}
               >
                 Use Student Loan Calculator UK
               </Link>
 
               <a
                 href="#decision"
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl border border-slate-300 bg-white font-semibold hover:bg-slate-50 transition text-center"
+                style={secondaryBtn}
               >
                 Read quick answer
               </a>
             </div>
-          </section>
+          </div>
 
           {/* QUICK ANSWER */}
-          <section
+          <div
             id="decision"
-            className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10"
+            style={{
+              ...card,
+              marginTop: 56
+            }}
           >
-            <h2 className="text-2xl sm:text-3xl font-bold">
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               The short-ish answer
             </h2>
 
-            <div className="mt-6 space-y-5 text-slate-600 leading-8">
+            <div style={muted}>
               <p>
                 On £30k, many borrowers are making
                 automatic repayments already.
@@ -130,10 +251,18 @@ export default function StudentLoan30kPage() {
                 signal.
               </p>
             </div>
-          </section>
+          </div>
 
           {/* KEY CARDS */}
-          <section className="grid md:grid-cols-3 gap-4">
+          <div
+            style={{
+              marginTop: 56,
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: 18
+            }}
+          >
             {[
               [
                 "Income is only one factor",
@@ -148,28 +277,40 @@ export default function StudentLoan30kPage() {
                 "Higher earnings later can change the repayment picture."
               ]
             ].map(([title, text]) => (
-              <div
-                key={title}
-                className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm"
-              >
-                <h3 className="font-semibold text-lg">
+              <div key={title} style={card}>
+                <h3
+                  style={{
+                    marginTop: 0,
+                    fontSize: 22,
+                    color: theme.colours.heading
+                  }}
+                >
                   {title}
                 </h3>
 
-                <p className="mt-3 text-slate-600 leading-7">
-                  {text}
-                </p>
+                <p style={muted}>{text}</p>
               </div>
             ))}
-          </section>
+          </div>
 
           {/* WHY 30K */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 56
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               Why £30k is a common decision point
             </h2>
 
-            <div className="mt-6 space-y-5 text-slate-600 leading-8">
+            <div style={muted}>
               <p>
                 At this salary, many borrowers notice their
                 repayments and start asking whether paying
@@ -188,15 +329,36 @@ export default function StudentLoan30kPage() {
                 whether overpaying looks strong or weak.
               </p>
             </div>
-          </section>
+          </div>
 
           {/* OPTIONS */}
-          <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               What £100 per month could do
             </h2>
 
-            <div className="mt-8 grid md:grid-cols-3 gap-4">
+            <div
+              style={{
+                marginTop: 24,
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 16
+              }}
+            >
               {[
                 [
                   "Overpay loan",
@@ -213,27 +375,53 @@ export default function StudentLoan30kPage() {
               ].map(([title, text]) => (
                 <div
                   key={title}
-                  className="bg-white rounded-2xl border border-emerald-100 p-5"
+                  style={{
+                    background: theme.colours.white,
+                    border: `1px solid ${theme.colours.successBorder}`,
+                    borderRadius: 18,
+                    padding: 18
+                  }}
                 >
-                  <h3 className="font-semibold">
+                  <h3
+                    style={{
+                      marginTop: 0,
+                      fontSize: 20,
+                      color: theme.colours.heading
+                    }}
+                  >
                     {title}
                   </h3>
 
-                  <p className="mt-3 text-slate-600 leading-7">
-                    {text}
-                  </p>
+                  <p style={muted}>{text}</p>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
           {/* QUESTIONS */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 56
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               Questions worth asking first
             </h2>
 
-            <div className="mt-6 space-y-4">
+            <div
+              style={{
+                marginTop: 24,
+                display: "grid",
+                gap: 14
+              }}
+            >
               {[
                 "Am I likely to repay the balance in full anyway?",
                 "Do I need easier access to this money?",
@@ -242,58 +430,101 @@ export default function StudentLoan30kPage() {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-2xl border border-slate-200 px-5 py-4 bg-slate-50"
+                  style={{
+                    border: `1px solid ${theme.colours.neutralBorder}`,
+                    borderRadius: 16,
+                    padding: 16,
+                    background: theme.colours.pageBg
+                  }}
                 >
                   {item}
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* RELATED GUIDES */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Related student loan guides
-            </h2>
-
-            <div className="mt-6 grid md:grid-cols-3 gap-4">
-              {relatedGuides.map(([title, href]) => (
-                <Link
-                  key={title}
-                  to={href}
-                  className="rounded-2xl border border-slate-200 p-5 bg-slate-50 hover:bg-white transition block"
-                >
-                  <div className="font-semibold">
-                    {title}
-                  </div>
-
-                  <div className="mt-2 text-sm text-emerald-600 font-medium">
-                    Read guide →
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
+          {/* RELATED */}
+          <div style={{ marginTop: 56 }}>
+            <GuideCards
+              category="student-loans"
+              title="Related guides"
+              limit={3}
+              excludeUrl="/guides/student-loans/student-loan-30k"
+            />
+          </div>
 
           {/* CTA */}
-          <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 sm:p-10 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              textAlign: "center",
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 32,
+                color: theme.colours.heading
+              }}
+            >
               Want a clearer answer for your numbers?
             </h2>
 
-            <p className="mt-5 text-slate-700 leading-8 max-w-2xl mx-auto">
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
               Salary alone does not decide this. Use your own
               plan, balance and overpayment amount.
             </p>
 
-            <Link
-              to="/student-loan-calculator"
-              className="inline-block mt-7 px-7 py-4 rounded-2xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition"
-            >
-              Use Student Loan Calculator UK
-            </Link>
-          </section>
+            <div style={{ marginTop: 22 }}>
+              <Link
+                to="/student-loan-calculator"
+                style={primaryBtn}
+              >
+                Use Student Loan Calculator UK
+              </Link>
+            </div>
+          </div>
 
+          {/* MORE TOOLS */}
+          <div
+            style={{
+              ...card,
+              marginTop: 56,
+              textAlign: "center",
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
+              {promoBlocks.moreTools.title}
+            </h2>
+
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
+              {promoBlocks.moreTools.text}
+            </p>
+          </div>
         </div>
       </div>
 

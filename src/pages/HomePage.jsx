@@ -3,6 +3,10 @@ import StudentLoanTool from "../calculators/StudentLoanTool";
 
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
+import GuideCards from "../components/GuideCards";
+
+import { theme } from "../styles/wayliTheme";
+import { promoBlocks } from "../core/content/promoBlocks";
 
 export default function HomePage() {
   const section = {
@@ -12,11 +16,11 @@ export default function HomePage() {
   };
 
   const card = {
-    background: "#ffffff",
-    border: "1px solid #e5e7eb",
+    background: theme.colours.white,
+    border: `1px solid ${theme.colours.neutralBorder}`,
     borderRadius: 24,
     padding: 28,
-    boxShadow: "0 14px 40px rgba(15,23,42,0.07)"
+    boxShadow: theme.shadow.card
   };
 
   const primaryBtn = {
@@ -26,33 +30,32 @@ export default function HomePage() {
     cursor: "pointer",
     fontWeight: 700,
     fontSize: 16,
-    background: "#10b981",
-    color: "#ffffff",
+    background: theme.colours.primary,
+    color: theme.colours.white,
     textDecoration: "none",
-    display: "inline-block"
+    display: "inline-block",
+    boxShadow: theme.shadow.button
   };
 
   const secondaryBtn = {
     ...primaryBtn,
-    background: "#ffffff",
-    color: "#0f172a",
-    border: "1px solid #cbd5e1"
+    background: theme.colours.white,
+    color: theme.colours.heading,
+    border: `1px solid ${theme.colours.inputBorder}`,
+    boxShadow: "none"
   };
 
   const muted = {
-    color: "#475569",
+    color: theme.colours.body,
     lineHeight: 1.75
   };
 
-  const navLink = {
-    textDecoration: "none",
-    color: "#475569",
-    fontWeight: 600
-  };
-
-  const guideCard = {
-    ...card,
-    padding: 22
+  const smallHeading = {
+    fontSize: 18,
+    fontWeight: 700,
+    color: theme.colours.heading,
+    marginTop: 0,
+    marginBottom: 10
   };
 
   return (
@@ -66,13 +69,12 @@ export default function HomePage() {
             "linear-gradient(180deg,#f8fafc 0%,#ffffff 55%,#ecfdf5 100%)"
         }}
       >
-        
         {/* HERO */}
         <div
           style={{
             ...section,
             paddingTop: 70,
-            paddingBottom: 50
+            paddingBottom: 56
           }}
         >
           <div style={{ textAlign: "center" }}>
@@ -81,8 +83,8 @@ export default function HomePage() {
                 display: "inline-block",
                 padding: "8px 14px",
                 borderRadius: 999,
-                background: "#ecfdf5",
-                color: "#047857",
+                background: theme.colours.successBg,
+                color: theme.colours.successText,
                 fontWeight: 700,
                 fontSize: 14
               }}
@@ -97,7 +99,7 @@ export default function HomePage() {
                 fontSize: 50,
                 lineHeight: 1.1,
                 letterSpacing: "-0.03em",
-                color: "#0f172a",
+                color: theme.colours.heading,
                 maxWidth: 880,
                 marginLeft: "auto",
                 marginRight: "auto"
@@ -114,7 +116,7 @@ export default function HomePage() {
                 marginRight: "auto",
                 fontSize: 19,
                 lineHeight: 1.8,
-                color: "#475569"
+                color: theme.colours.body
               }}
             >
               Wayli builds practical tools to help people make more confident
@@ -145,7 +147,7 @@ export default function HomePage() {
             <div
               style={{
                 marginTop: 18,
-                color: "#64748b",
+                color: theme.colours.muted,
                 fontSize: 15
               }}
             >
@@ -159,7 +161,7 @@ export default function HomePage() {
           id="tool"
           style={{
             ...section,
-            paddingBottom: 56
+            paddingBottom: 64
           }}
         >
           <div style={card}>
@@ -168,7 +170,7 @@ export default function HomePage() {
                 style={{
                   fontSize: 13,
                   fontWeight: 700,
-                  color: "#10b981",
+                  color: theme.colours.primary,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em"
                 }}
@@ -182,7 +184,7 @@ export default function HomePage() {
                   marginBottom: 8,
                   fontSize: 34,
                   lineHeight: 1.2,
-                  color: "#0f172a"
+                  color: theme.colours.heading
                 }}
               >
                 Student Loan Overpayment Calculator
@@ -205,12 +207,12 @@ export default function HomePage() {
               style={{
                 marginTop: 18,
                 paddingTop: 18,
-                borderTop: "1px solid #e5e7eb",
+                borderTop: `1px solid ${theme.colours.neutralBorder}`,
                 display: "flex",
                 gap: 18,
                 flexWrap: "wrap",
                 fontSize: 14,
-                color: "#64748b"
+                color: theme.colours.muted
               }}
             >
               <span>Personalised estimates</span>
@@ -225,90 +227,14 @@ export default function HomePage() {
           id="guides"
           style={{
             ...section,
-            paddingBottom: 56
+            paddingBottom: 64
           }}
         >
-          <div style={{ marginBottom: 22 }}>
-            <h2
-              style={{
-                fontSize: 34,
-                marginBottom: 10,
-                color: "#0f172a"
-              }}
-            >
-              Student loan guides
-            </h2>
-
-            <p style={muted}>
-              Clear practical explainers to help you understand how UK student
-              loans work.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: 18
-            }}
-          >
-            <Link
-              to="/guides/student-loans/is-overpaying-worth-it"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <div style={guideCard}>
-                <h3 style={{ marginTop: 0 }}>
-                  Is overpaying worth it?
-                </h3>
-                <p style={muted}>
-                  When overpaying can help — and when it may not.
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              to="/guides/student-loans/student-loan-30k"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <div style={guideCard}>
-                <h3 style={{ marginTop: 0 }}>
-                  £30k student loan explained
-                </h3>
-                <p style={muted}>
-                  What a £30k balance can mean in practice.
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              to="/guides/student-loans/which-student-loan-plan-am-i-on"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <div style={guideCard}>
-                <h3 style={{ marginTop: 0 }}>
-                  Which plan am I on?
-                </h3>
-                <p style={muted}>
-                  Understand Plan 1, Plan 2, Plan 5 and PG loans.
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              to="/guides/student-loans/why-two-people-on-the-same-salary-repay-different-amounts"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <div style={guideCard}>
-                <h3 style={{ marginTop: 0 }}>
-                  Same salary, different repayments
-                </h3>
-                <p style={muted}>
-                  Why two borrowers can repay very different amounts.
-                </p>
-              </div>
-            </Link>
-          </div>
+          <GuideCards
+            category="student-loans"
+            title="Explore guides"
+            limit={4}
+          />
         </div>
 
         {/* FUTURE */}
@@ -316,126 +242,151 @@ export default function HomePage() {
           id="future"
           style={{
             ...section,
-            paddingBottom: 56
+            paddingBottom: 64
           }}
         >
-          <h2
-            style={{
-              fontSize: 32,
-              marginBottom: 18,
-              color: "#0f172a"
-            }}
-          >
-            More tools coming soon
-          </h2>
-
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(260px, 1fr))",
-              gap: 18
+              ...card,
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)"
             }}
           >
-            {[
-              [
-                "Mortgage Overpayment Tool",
-                "Should you overpay, invest instead, or stay flexible?"
-              ],
-              [
-                "Car Replace vs Repair Tool",
-                "Compare costs before making a big decision."
-              ],
-              [
-                "Emergency Fund Planner",
-                "Build a buffer that fits your situation."
-              ]
-            ].map(([title, text]) => (
-              <div key={title} style={card}>
-                <h3 style={{ marginTop: 0 }}>{title}</h3>
-                <p style={muted}>{text}</p>
-              </div>
-            ))}
+            <h2
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
+              {promoBlocks.moreTools.title}
+            </h2>
+
+            <p
+              style={{
+                ...muted,
+                marginBottom: 24
+              }}
+            >
+              {promoBlocks.moreTools.text}
+            </p>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(260px, 1fr))",
+                gap: 18
+              }}
+            >
+              {[
+                [
+                  "Mortgage Overpayment Tool",
+                  "Should you overpay, invest instead, or stay flexible?"
+                ],
+                [
+                  "Car Replace vs Repair Tool",
+                  "Compare costs before making a big decision."
+                ],
+                [
+                  "Emergency Fund Planner",
+                  "Build a buffer that fits your situation."
+                ]
+              ].map(([title, text]) => (
+                <div
+                  key={title}
+                  style={{
+                    background: theme.colours.white,
+                    border: `1px solid ${theme.colours.neutralBorder}`,
+                    borderRadius: 18,
+                    padding: 22
+                  }}
+                >
+                  <h3 style={smallHeading}>{title}</h3>
+                  <p style={muted}>{text}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-              {/* CONTACT CTA */}
-<div
-  style={{
-    ...section,
-    paddingBottom: 60
-  }}
->
-  <div
-    style={{
-      ...card,
-      textAlign: "center",
-      background:
-        "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
-    }}
-  >
-    <p
-      style={{
-        ...muted,
-        marginTop: 0,
-        fontSize: 18
-      }}
-    >
-      Wayli helps households make clearer financial decisions through
-      practical tools.
-    </p>
+        {/* CONTACT CTA */}
+        <div
+          style={{
+            ...section,
+            paddingBottom: 60
+          }}
+        >
+          <div
+            style={{
+              ...card,
+              textAlign: "center",
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
+            }}
+          >
+            <p
+              style={{
+                ...muted,
+                marginTop: 0,
+                fontSize: 18
+              }}
+            >
+              Wayli helps households make clearer financial decisions through
+              practical tools.
+            </p>
 
-    <h2
-      style={{
-        marginTop: 10,
-        marginBottom: 8,
-        fontSize: 30,
-        color: "#0f172a"
-      }}
-    >
-      Questions, ideas or feedback?
-    </h2>
+            <h2
+              style={{
+                marginTop: 10,
+                marginBottom: 8,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
+              Questions, ideas or feedback?
+            </h2>
 
-    <p
-      style={{
-        ...muted,
-        maxWidth: 700,
-        margin: "0 auto"
-      }}
-    >
-      We’d love to hear from you — whether it’s a suggestion for a new
-      calculator, feedback on a tool, or a partnership idea.
-    </p>
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
+              We’d love to hear from you — whether it’s a suggestion for a new
+              calculator, feedback on a tool, or a partnership idea.
+            </p>
 
-    <div
-      style={{
-        marginTop: 24,
-        display: "flex",
-        justifyContent: "center",
-        gap: 12,
-        flexWrap: "wrap"
-      }}
-    >
-      <Link
-        to="/contact"
-        style={primaryBtn}
-      >
-        Contact Wayli
-      </Link>
+            <div
+              style={{
+                marginTop: 24,
+                display: "flex",
+                justifyContent: "center",
+                gap: 12,
+                flexWrap: "wrap"
+              }}
+            >
+              <Link
+                to="/contact"
+                style={primaryBtn}
+              >
+                Contact Wayli
+              </Link>
 
-      <Link
-        to="/guides"
-        style={secondaryBtn}
-      >
-        Browse Guides
-      </Link>
-    </div>
-  </div>
-</div>
+              <Link
+                to="/guides"
+                style={secondaryBtn}
+              >
+                Browse Guides
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
-</div>
-
-<SiteFooter />
-</>
-);
+      <SiteFooter />
+    </>
+  );
 }

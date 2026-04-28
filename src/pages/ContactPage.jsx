@@ -3,91 +3,202 @@ import { Link } from "react-router-dom";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 
+import { theme } from "../styles/wayliTheme";
+import { promoBlocks } from "../core/content/promoBlocks";
+
 export default function ContactPage() {
+  const section = {
+    maxWidth: 900,
+    margin: "0 auto",
+    padding: "0 20px"
+  };
+
+  const card = {
+    background: theme.colours.white,
+    border: `1px solid ${theme.colours.neutralBorder}`,
+    borderRadius: 24,
+    padding: 28,
+    boxShadow: theme.shadow.card
+  };
+
+  const muted = {
+    color: theme.colours.body,
+    lineHeight: 1.75
+  };
+
+  const primaryBtn = {
+    padding: "14px 20px",
+    borderRadius: 14,
+    border: "none",
+    cursor: "pointer",
+    fontWeight: 700,
+    fontSize: 16,
+    background: theme.colours.primary,
+    color: theme.colours.white,
+    textDecoration: "none",
+    display: "inline-block",
+    boxShadow: theme.shadow.button
+  };
+
+  const secondaryBtn = {
+    ...primaryBtn,
+    background: theme.colours.white,
+    color: theme.colours.heading,
+    border: `1px solid ${theme.colours.inputBorder}`,
+    boxShadow: "none"
+  };
+
+  const input = {
+    width: "100%",
+    borderRadius: 16,
+    border: `1px solid ${theme.colours.inputBorder}`,
+    padding: "14px 16px",
+    fontSize: 16,
+    boxSizing: "border-box",
+    outline: "none"
+  };
+
+  const label = {
+    display: "block",
+    fontWeight: 700,
+    marginBottom: 8,
+    color: theme.colours.heading
+  };
+
   return (
     <>
       <SiteHeader />
 
-      <div className="min-h-screen bg-slate-50 text-slate-900">
-        <title>Contact Wayli | Feedback, Support & Ideas</title>
-
-        <meta
-          name="description"
-          content="Contact Wayli with feedback, support requests, partnership ideas or suggestions for new money tools."
-        />
-
-        <div className="max-w-3xl mx-auto px-5 sm:px-6 py-10 sm:py-16 space-y-8">
-
+      <div
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(180deg,#f8fafc 0%,#ffffff 60%,#ecfdf5 100%)"
+        }}
+      >
+        <div
+          style={{
+            ...section,
+            paddingTop: 28,
+            paddingBottom: 60
+          }}
+        >
           {/* BREADCRUMBS */}
-          <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              fontSize: 14,
+              color: theme.colours.muted,
+              marginBottom: 28
+            }}
+          >
             <Link
               to="/"
-              className="text-emerald-600 font-semibold hover:underline"
+              style={{
+                color: theme.colours.primary,
+                textDecoration: "none",
+                fontWeight: 600
+              }}
             >
               Home
             </Link>
 
-            <span className="text-slate-300">/</span>
+            <span>/</span>
 
-            <Link
-              to="/guides"
-              className="text-emerald-600 font-semibold hover:underline"
-            >
-              Guides
-            </Link>
-
-            <span className="text-slate-300">/</span>
-
-            <Link
-              to="/student-loan-calculator"
-              className="text-emerald-600 font-semibold hover:underline"
-            >
-              Tools
-            </Link>
-
-            <span className="text-slate-300">/</span>
-
-            <span className="text-slate-500">
-              Contact
-            </span>
+            <span>Contact</span>
           </div>
 
           {/* HERO */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <div className="inline-flex px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 text-sm font-semibold">
+          <div
+            style={{
+              ...card,
+              textAlign: "center",
+              padding: "42px 28px"
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: theme.colours.successBg,
+                color: theme.colours.successText,
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
               Contact Wayli
             </div>
 
-            <h1 className="mt-5 text-4xl sm:text-5xl font-bold tracking-tight">
+            <h1
+              style={{
+                marginTop: 18,
+                marginBottom: 0,
+                fontSize: 46,
+                lineHeight: 1.1,
+                letterSpacing: "-0.03em",
+                color: theme.colours.heading
+              }}
+            >
               Get in touch
             </h1>
 
-            <p className="mt-5 text-lg text-slate-600 leading-8 max-w-2xl">
+            <p
+              style={{
+                ...muted,
+                fontSize: 19,
+                maxWidth: 720,
+                margin: "22px auto 0 auto"
+              }}
+            >
               Questions, feedback, partnership ideas,
               calculator requests or bug reports —
               we’d love to hear from you.
             </p>
 
-            <p className="mt-4 text-slate-600 leading-8 max-w-2xl">
+            <p
+              style={{
+                ...muted,
+                maxWidth: 720,
+                margin: "14px auto 0 auto"
+              }}
+            >
               Wayli is building practical UK money tools
               that help people make clearer decisions.
             </p>
-          </section>
+          </div>
 
           {/* FORM */}
-          <section className="bg-white border border-slate-200 rounded-3xl shadow-sm p-6 sm:p-10">
-            <h2 className="text-2xl font-bold">
+          <div
+            style={{
+              ...card,
+              marginTop: 32
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
               Send a message
             </h2>
 
-            <p className="mt-3 text-slate-600">
+            <p style={muted}>
               Usually replies within 1–2 working days.
             </p>
 
             <form
               action="https://formspree.io/f/xpqkngvd"
               method="POST"
-              className="mt-8 space-y-5"
+              style={{
+                marginTop: 28,
+                display: "grid",
+                gap: 18
+              }}
             >
               <input
                 type="hidden"
@@ -98,13 +209,13 @@ export default function ContactPage() {
               <input
                 type="text"
                 name="_gotcha"
-                className="hidden"
                 tabIndex="-1"
                 autoComplete="off"
+                style={{ display: "none" }}
               />
 
               <div>
-                <label className="block font-semibold mb-2">
+                <label style={label}>
                   Name
                 </label>
 
@@ -112,13 +223,13 @@ export default function ContactPage() {
                   type="text"
                   name="name"
                   required
-                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   placeholder="Your name"
+                  style={input}
                 />
               </div>
 
               <div>
-                <label className="block font-semibold mb-2">
+                <label style={label}>
                   Email
                 </label>
 
@@ -126,30 +237,40 @@ export default function ContactPage() {
                   type="email"
                   name="email"
                   required
-                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   placeholder="you@example.com"
+                  style={input}
                 />
               </div>
 
               <div>
-                <label className="block font-semibold mb-2">
+                <label style={label}>
                   Topic
                 </label>
 
                 <select
                   name="topic"
-                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  style={input}
                 >
-                  <option>General feedback</option>
-                  <option>Bug report</option>
-                  <option>Calculator request</option>
-                  <option>Partnership</option>
-                  <option>Press / media</option>
+                  <option>
+                    General feedback
+                  </option>
+                  <option>
+                    Bug report
+                  </option>
+                  <option>
+                    Calculator request
+                  </option>
+                  <option>
+                    Partnership
+                  </option>
+                  <option>
+                    Press / media
+                  </option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-semibold mb-2">
+                <label style={label}>
                   Message
                 </label>
 
@@ -157,60 +278,127 @@ export default function ContactPage() {
                   name="message"
                   rows="7"
                   required
-                  className="w-full rounded-2xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   placeholder="How can we help?"
+                  style={{
+                    ...input,
+                    resize: "vertical"
+                  }}
                 />
               </div>
 
-              <button
-                type="submit"
-                className="px-6 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold transition"
-              >
-                Send Message
-              </button>
+              <div>
+                <button
+                  type="submit"
+                  style={primaryBtn}
+                >
+                  Send Message
+                </button>
+              </div>
             </form>
 
-            <p className="mt-6 text-sm text-slate-500">
+            <p
+              style={{
+                marginTop: 22,
+                fontSize: 14,
+                color: theme.colours.muted
+              }}
+            >
               Prefer email? Contact us directly at{" "}
               <a
                 href="mailto:wayliteam@gmail.com"
-                className="text-emerald-600 font-semibold hover:underline"
+                style={{
+                  color: theme.colours.primary,
+                  fontWeight: 700,
+                  textDecoration: "none"
+                }}
               >
                 wayliteam@gmail.com
               </a>
             </p>
-          </section>
+          </div>
 
-          {/* EXTRA LINKS */}
-          <section className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 sm:p-8">
-            <h2 className="text-2xl font-bold">
+          {/* USEFUL LINKS */}
+          <div
+            style={{
+              ...card,
+              marginTop: 32,
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                fontSize: 28,
+                color: theme.colours.heading
+              }}
+            >
               Useful links
             </h2>
 
-            <div className="mt-5 grid sm:grid-cols-3 gap-4">
+            <div
+              style={{
+                marginTop: 18,
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 16
+              }}
+            >
               <Link
                 to="/student-loan-calculator"
-                className="bg-white rounded-2xl border border-emerald-100 p-5 hover:border-emerald-300 transition block"
+                style={secondaryBtn}
               >
                 Student Loan Calculator UK
               </Link>
 
               <Link
                 to="/guides"
-                className="bg-white rounded-2xl border border-emerald-100 p-5 hover:border-emerald-300 transition block"
+                style={secondaryBtn}
               >
                 Browse Guides
               </Link>
 
               <Link
                 to="/"
-                className="bg-white rounded-2xl border border-emerald-100 p-5 hover:border-emerald-300 transition block"
+                style={secondaryBtn}
               >
                 Homepage
               </Link>
             </div>
-          </section>
+          </div>
 
+          {/* MORE TOOLS */}
+          <div
+            style={{
+              ...card,
+              marginTop: 32,
+              textAlign: "center",
+              background:
+                "linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)"
+            }}
+          >
+            <h2
+              style={{
+                marginTop: 0,
+                marginBottom: 10,
+                fontSize: 30,
+                color: theme.colours.heading
+              }}
+            >
+              {promoBlocks.moreTools.title}
+            </h2>
+
+            <p
+              style={{
+                ...muted,
+                maxWidth: 700,
+                margin: "0 auto"
+              }}
+            >
+              {promoBlocks.moreTools.text}
+            </p>
+          </div>
         </div>
       </div>
 

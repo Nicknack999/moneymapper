@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import GuidesPage from "./pages/GuidesPage";
 import ContactPage from "./pages/ContactPage";
+import AboutPage from "./pages/AboutPage";
 import StudentLoanCalculatorPage from "./pages/StudentLoanCalculatorPage";
+import HowCalculatorWorksPage from "./pages/HowCalculatorWorksPage";
 
 import IsOverpayingWorthItPage from "./pages/guides/student-loans/IsOverpayingWorthItPage";
 import StudentLoan30kPage from "./pages/guides/student-loans/StudentLoan30kPage";
@@ -54,6 +56,15 @@ export default function App() {
           } 
         />
         
+        {/* ABOUT */}
+        <Route path="/about" element={<AboutPage />} />
+
+        {/* HOW IT WORKS */}
+        <Route
+          path="/how-our-calculator-works"
+          element={<HowCalculatorWorksPage />}
+        />
+
         {/* 404 FALLBACK */}
         <Route
           path="*"

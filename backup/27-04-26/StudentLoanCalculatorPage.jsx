@@ -3,10 +3,6 @@ import StudentLoanTool from "../calculators/StudentLoanTool";
 
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
-import GuideCards from "../components/GuideCards";
-
-import { promoBlocks } from "../core/content/promoBlocks";
-import { theme } from "../styles/wayliTheme";
 
 export default function StudentLoanCalculatorPage() {
   const section = {
@@ -16,15 +12,15 @@ export default function StudentLoanCalculatorPage() {
   };
 
   const card = {
-    background: theme.colours.white,
-    border: `1px solid ${theme.colours.neutralBorder}`,
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
     borderRadius: 24,
     padding: 28,
-    boxShadow: theme.shadow.card
+    boxShadow: "0 14px 40px rgba(15,23,42,0.07)"
   };
 
   const muted = {
-    color: theme.colours.body,
+    color: "#475569",
     lineHeight: 1.75
   };
 
@@ -35,19 +31,17 @@ export default function StudentLoanCalculatorPage() {
     cursor: "pointer",
     fontWeight: 700,
     fontSize: 16,
-    background: theme.colours.primary,
-    color: theme.colours.white,
+    background: "#10b981",
+    color: "#ffffff",
     textDecoration: "none",
-    display: "inline-block",
-    boxShadow: theme.shadow.button
+    display: "inline-block"
   };
 
   const secondaryBtn = {
     ...primaryBtn,
-    background: theme.colours.white,
-    color: theme.colours.heading,
-    border: `1px solid ${theme.colours.inputBorder}`,
-    boxShadow: "none"
+    background: "#ffffff",
+    color: "#0f172a",
+    border: "1px solid #cbd5e1"
   };
 
   return (
@@ -68,7 +62,7 @@ export default function StudentLoanCalculatorPage() {
             paddingTop: 22,
             paddingBottom: 6,
             fontSize: 14,
-            color: theme.colours.muted
+            color: "#64748b"
           }}
         >
           <div
@@ -81,7 +75,7 @@ export default function StudentLoanCalculatorPage() {
             <Link
               to="/"
               style={{
-                color: theme.colours.primary,
+                color: "#10b981",
                 textDecoration: "none",
                 fontWeight: 600
               }}
@@ -90,8 +84,11 @@ export default function StudentLoanCalculatorPage() {
             </Link>
 
             <span>/</span>
+
             <span>Tools</span>
+
             <span>/</span>
+
             <span>Student Loan Calculator UK</span>
           </div>
         </div>
@@ -101,7 +98,7 @@ export default function StudentLoanCalculatorPage() {
           style={{
             ...section,
             paddingTop: 42,
-            paddingBottom: 56
+            paddingBottom: 40
           }}
         >
           <div style={{ textAlign: "center" }}>
@@ -110,8 +107,8 @@ export default function StudentLoanCalculatorPage() {
                 display: "inline-block",
                 padding: "8px 14px",
                 borderRadius: 999,
-                background: theme.colours.successBg,
-                color: theme.colours.successText,
+                background: "#ecfdf5",
+                color: "#047857",
                 fontWeight: 700,
                 fontSize: 14
               }}
@@ -126,7 +123,7 @@ export default function StudentLoanCalculatorPage() {
                 fontSize: 48,
                 lineHeight: 1.1,
                 letterSpacing: "-0.03em",
-                color: theme.colours.heading
+                color: "#0f172a"
               }}
             >
               Student Loan Calculator UK
@@ -140,7 +137,7 @@ export default function StudentLoanCalculatorPage() {
                 marginRight: "auto",
                 fontSize: 19,
                 lineHeight: 1.8,
-                color: theme.colours.body
+                color: "#475569"
               }}
             >
               Compare overpaying, saving or keeping flexibility using UK
@@ -154,15 +151,24 @@ export default function StudentLoanCalculatorPage() {
                 display: "flex",
                 justifyContent: "center",
                 gap: 12,
-                flexWrap: "wrap",
-                color: theme.colours.muted,
-                fontSize: 14
+                flexWrap: "wrap"
               }}
             >
-              <span>No signup</span>
-              <span>UK-focused</span>
-              <span>Plain English results</span>
-              <span>Free tool</span>
+              <span style={{ color: "#64748b", fontSize: 14 }}>
+                No signup
+              </span>
+
+              <span style={{ color: "#64748b", fontSize: 14 }}>
+                UK-focused
+              </span>
+
+              <span style={{ color: "#64748b", fontSize: 14 }}>
+                Plain English results
+              </span>
+
+              <span style={{ color: "#64748b", fontSize: 14 }}>
+                Free tool
+              </span>
             </div>
           </div>
         </div>
@@ -171,7 +177,7 @@ export default function StudentLoanCalculatorPage() {
         <div
           style={{
             ...section,
-            paddingBottom: 56
+            paddingBottom: 44
           }}
         >
           <div style={card}>
@@ -183,7 +189,7 @@ export default function StudentLoanCalculatorPage() {
         <div
           style={{
             ...section,
-            paddingBottom: 56
+            paddingBottom: 44
           }}
         >
           <div style={card}>
@@ -191,7 +197,7 @@ export default function StudentLoanCalculatorPage() {
               style={{
                 marginTop: 0,
                 fontSize: 32,
-                color: theme.colours.heading
+                color: "#0f172a"
               }}
             >
               Should you overpay your student loan?
@@ -238,17 +244,75 @@ export default function StudentLoanCalculatorPage() {
         <div
           style={{
             ...section,
-            paddingBottom: 56
+            paddingBottom: 44
           }}
         >
-          <GuideCards
-            category="student-loans"
-            title="Helpful guides"
-            limit={3}
-          />
+          <h2
+            style={{
+              fontSize: 30,
+              color: "#0f172a",
+              marginBottom: 18
+            }}
+          >
+            Helpful guides
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: 18
+            }}
+          >
+            <Link
+              to="/guides/student-loans/which-student-loan-plan-am-i-on"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div style={card}>
+                <h3 style={{ marginTop: 0 }}>
+                  Which student loan plan am I on?
+                </h3>
+
+                <p style={muted}>
+                  Understand Plan 1, Plan 2, Plan 5 and postgraduate loans.
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              to="/guides/student-loans/is-overpaying-worth-it"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div style={card}>
+                <h3 style={{ marginTop: 0 }}>
+                  Is overpaying worth it?
+                </h3>
+
+                <p style={muted}>
+                  Learn when overpaying can help and when it may not.
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              to="/guides/student-loans/why-two-people-on-the-same-salary-repay-different-amounts"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div style={card}>
+                <h3 style={{ marginTop: 0 }}>
+                  Same salary, different repayments
+                </h3>
+
+                <p style={muted}>
+                  Why similar earners can repay very different amounts.
+                </p>
+              </div>
+            </Link>
+          </div>
         </div>
 
-        {/* MORE TOOLS */}
+        {/* CTA */}
         <div
           style={{
             ...section,
@@ -260,31 +324,40 @@ export default function StudentLoanCalculatorPage() {
               ...card,
               textAlign: "center",
               background:
-                "linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)"
+                "linear-gradient(135deg,#ffffff 0%,#f0fdf4 100%)"
             }}
           >
             <h2
               style={{
                 marginTop: 0,
-                marginBottom: 10,
-                fontSize: 30,
-                color: theme.colours.heading
+                color: "#0f172a"
               }}
             >
-              {promoBlocks.moreTools.title}
+              Explore more tools soon
             </h2>
 
-            <p
-              style={{
-                ...muted,
-                maxWidth: 700,
-                margin: "0 auto"
-              }}
-            >
-              {promoBlocks.moreTools.text}
+            <p style={muted}>
+              Mortgage, savings, car ownership and more decision tools are in
+              development.
             </p>
 
-            
+            <div
+              style={{
+                marginTop: 18,
+                display: "flex",
+                justifyContent: "center",
+                gap: 12,
+                flexWrap: "wrap"
+              }}
+            >
+              <Link to="/" style={secondaryBtn}>
+                Back to Home
+              </Link>
+
+              <Link to="/guides" style={primaryBtn}>
+                Browse Guides
+              </Link>
+            </div>
           </div>
         </div>
       </div>
